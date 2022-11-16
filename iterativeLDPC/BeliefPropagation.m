@@ -26,6 +26,7 @@ classdef BeliefPropagation < handle
             % initial step - step #1
             vnodes = obj.graph.v_nodes.values;
             cnodes = obj.graph.c_nodes.values;
+
             for idx=1:obj.n
                 vnodes(idx).initialize(channel_word(idx));
             end
@@ -39,15 +40,12 @@ classdef BeliefPropagation < handle
 
             for j=1:obj.maxIter
                 % step 2
-                d=5;
+               
 %                 vnodes = sort(obj.graph.v_nodes.values);
                 for i=1:length(vnodes)
                     vnodes(i).receive_messages();
                 end
                 
-
-
-
                 % step 3
 %                 cnodes = obj.graph.c_nodes.values;
                 for i=1:length(cnodes)
