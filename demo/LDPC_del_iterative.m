@@ -1,9 +1,8 @@
-function [suc, result] = LDPC_del (H, vec)
+function [suc, vec] = LDPC_del_iterative (H, vec)
     arguments
         H (:,:) 
-        vec (:,1) 
+        vec (1,:) 
     end
-    result = vec;
     suc = false;
     openCBs = 1:size(H,1);
 
@@ -33,6 +32,7 @@ function [suc, result] = LDPC_del (H, vec)
         openCBs = openCBs(openCBs ~= 0);
         if isempty(openCBs)
             suc = true;
+            assert(all(mod(H * vec',2) == zeros([size(H,1),1])));
             return;
         end
 

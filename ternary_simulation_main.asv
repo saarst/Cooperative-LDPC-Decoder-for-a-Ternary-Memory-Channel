@@ -8,12 +8,13 @@ cd(filepath);
 
 %% User-defined parameters
 % encoder parameters
-n               = 256;
-rate_ind        = 0.4;
-rate_res        = 0.5;
+n               = 8;
+rate_ind        = 0.1;
+rate_res        = 0.1;
 % Simulation parameters
 num_iter_sim    = 2e3; % iterations in simulations
 p               = 0.001; % downward error probability, p
+q               = 3;
 q2              = 0.03/2; % upward error probability, q/2
 ChannelType     = "random"; % "random" / "upto"
 % Other parameters
@@ -85,6 +86,7 @@ for iter_sim = 1 : num_iter_sim
     % - % - % Encoding end % - % - % 
     
     % - % - % Channel (asymmetric one2all): % - % - % 
+    tUp = p
     ChannelOut = asymmchannel(CodewordComb,q,ChannelType,tUp,tDown);
     tUp_Actual = sum(ChannelOut>CodewordComb);
     tDown_Actual = sum(ChannelOut<CodewordComb);
