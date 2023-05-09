@@ -5,7 +5,7 @@ arguments
     num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 100
 end
 
-rng('shuffle');
+seed = rng('shuffle').Seed;
 filepath = cd(fileparts(mfilename('fullpath')));
 cd(filepath);
 
@@ -21,7 +21,7 @@ q               = 3;   % alphabet size
 q2              = p/2; % upward error probability, q/2
 ChannelType     = "random"; % "random" / "upto"
 % Other parameters
-nIterBetweenFileSave = 10;
+nIterBetweenFileSave = 50;
 
 %% Construct LDPC codes
 addpath(fullfile('.','gen_par_mats'));
@@ -69,7 +69,7 @@ H_sys_res = full(H);
 % dec_res = comm.LDPCDecoder('ParityCheckMatrix',Hnonsys); % hard-decision message-passing decoder
 rate_res_actual = (n-size(H_sys_res,1)) / n;
 
-rmpath('.\gen_par_mats');
+rmpath(fullfile('.','gen_par_mats'));
 
 
 %% Probability of correcting (p,q) errors with LDPC-LDPC code
@@ -84,8 +84,9 @@ tUpDown_Actual = zeros(1,num_iter_sim,2);
 % Save start time
 simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
-
-hwb = waitbar(0);
+if ispc
+    hwb = waitbar(0);
+end
 for iter_sim = 1 : num_iter_sim
     % - % - % Encoding: % - % - % 
     [CodewordComb,CodewordInd,CodewordRes,messageInd,messageRes] = ternary_enc_LDPCLDPC(gf(H_sys_ind,1),gf(H_sys_res,1));
@@ -118,8 +119,10 @@ for iter_sim = 1 : num_iter_sim
     % - % - % BEP end % - % - % 
     
     % advance waitbar
-    wbmsg = sprintf('LDPC(%d,%d): (p,q/2)=(%d,%d), iterSim=%d/%d',rate_ind_actual,rate_res_actual,p,q2,iter_sim,num_iter_sim);
-    waitbar(iter_sim/num_iter_sim, hwb, wbmsg);
+    if ispc
+        wbmsg = sprintf('LDPC(%d,%d): (p,q/2)=(%d,%d), iterSim=%d/%d',rate_ind_actual,rate_res_actual,p,q2,iter_sim,num_iter_sim);
+        waitbar(iter_sim/num_iter_sim, hwb, wbmsg);
+    end
     
     % save partial results
     if mod(iter_sim,nIterBetweenFileSave)
@@ -131,8 +134,9 @@ end
 
 fprintf('\tNaive BEP = %E, MsgPas BEP = %E\n',...
     mean(BEP_Naive),mean(BEP_MsgPas));
-
-delete(hwb);
+if ispc
+    delete(hwb);
+end
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
 % Save data to .mat file and delete partial results file
