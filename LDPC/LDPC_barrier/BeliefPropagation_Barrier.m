@@ -54,16 +54,12 @@ classdef BeliefPropagation_Barrier < handle
                 end
                 
                 % step 3
-                if j < 3*(obj.maxIter/4)
-                    for i=1:length(ind_nodes)
-                        ind_nodes(i).receive_messages();
-                    end
+                for i=1:length(ind_nodes)
+                    ind_nodes(i).receive_messages();
                 end
                 
-                if j >= obj.maxIter/4 && j <=5
-                    for i=1:length(res_nodes)
-                        res_nodes(i).receive_messages();
-                    end
+                for i=1:length(res_nodes)
+                    res_nodes(i).receive_messages();
                 end
 
                 % step 4
@@ -77,7 +73,7 @@ classdef BeliefPropagation_Barrier < handle
                 syndrome_ind = mod(obj.H_ind * estimated_ind',2);
                 syndrome_res = mod(obj.H_res * estimated_res',2);
                 suc = ~any([syndrome_ind, syndrome_res],'all');
-                if suc 
+                if suc && j >= 10
                     iter = j;
                     break
                 end
