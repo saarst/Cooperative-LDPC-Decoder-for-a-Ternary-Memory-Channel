@@ -8,6 +8,9 @@ end
 seed = rng('shuffle').Seed;
 filepath = cd(fileparts(mfilename('fullpath')));
 cd(filepath);
+if ~isfolder(fullfile(".","Results"))
+    mkdir(fullfile(".","Results"));
+end
 
 %% User-defined parameters
 % encoder parameters
@@ -140,9 +143,6 @@ end
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
 % Save data to .mat file and delete partial results file
-if ~isfolder(fullfile(".","Results"))
-    mkdir(fullfile(".","Results"));
-end
 save(sprintf('./Results/len%d_p%.5f_q%.5f_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s_Seed%.2f.mat',...
             n,p,2*q2,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime),seed));
 delete(sprintf('./Results/len%d_p%.5f_q%.5f_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s_Seed%.2f_partial.mat',...
