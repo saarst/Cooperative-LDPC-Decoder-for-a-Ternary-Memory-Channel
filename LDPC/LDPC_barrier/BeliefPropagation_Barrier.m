@@ -48,7 +48,6 @@ classdef BeliefPropagation_Barrier < handle
 
             for j=1:obj.maxIter
                 % step 2
-               
                 for i=1:length(vnodes)
                     vnodes(i).receive_res_messages();
                     vnodes(i).receive_ind_messages();
@@ -68,7 +67,6 @@ classdef BeliefPropagation_Barrier < handle
                 end
 
                 % step 4
-                
                 for i=1:length(vnodes)
                     prob(:,i) = vnodes(i).estimate();
                 end
@@ -79,7 +77,7 @@ classdef BeliefPropagation_Barrier < handle
                 syndrome_ind = mod(obj.H_ind * estimated_ind',2);
                 syndrome_res = mod(obj.H_res * estimated_res',2);
                 suc = ~any([syndrome_ind, syndrome_res],'all');
-                if suc && j > obj.maxIter/2
+                if suc 
                     iter = j;
                     break
                 end
