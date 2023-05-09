@@ -25,7 +25,7 @@ function [decCodewordRM_Naive, success] = NaiveDecoder(ChannelOut, H_sys_ind, H_
     end
 
     %% 5. build decCodewordRM_Naive
-    decCodewordRM_Naive = c_res_estimate+c_ind_estimate;
+    decCodewordRM_Naive = c_res_estimate + c_ind_estimate;
     success = true;
 end
 

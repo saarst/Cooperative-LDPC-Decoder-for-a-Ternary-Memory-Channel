@@ -8,7 +8,7 @@ cd(filepath);
 
 %% User-defined parameters
 % encoder parameters
-n               = 8;
+n               = 128;
 rate_ind        = 0.1;
 rate_res        = 0.1;
 % Simulation parameters
@@ -95,27 +95,29 @@ for iter_sim = 1 : num_iter_sim
     
     % - % - % Decoding: % - % - % 
     % TODO: 
-    [decCodewordRM_Naive, success]  = NaiveDecoder(ChannelOut, H_sys_ind, H_sys_res, p, 2*q2, []);
-    % [decCodewordRM_MsgPas, success] = MsgPasDecoder(ChannelOut, H_sys_ind, H_sys_res, p, 2*q2, MsgPasDecoderParams);
+    [decCodewordRM_Naive, success_naive]  = NaiveDecoder(ChannelOut, H_sys_ind, H_sys_res, p, 2*q2, []);
+    [decCodewordRM_MsgPas, probs, success, numIter] = MsgPasDecoder(ChannelOut, H_sys_ind, H_sys_res, p, 2*q2, 100);
     % - % - % Decoding end % - % - % 
-    
+    if isequal(decCodewordRM_Naive(:),CodewordComb(:)) && ~isequal(decCodewordRM_MsgPas(:),CodewordComb(:))
+        disp("MsgPas is Worse at some word!");
+    end
+
+    if ~isequal(decCodewordRM_Naive(:),CodewordComb(:)) && isequal(decCodewordRM_MsgPas(:),CodewordComb(:))
+        disp("MsgPas is Better at some word!");
+    end
     % - % - % BEP % - % - % 
     tUpDown_Actual(iter_sim,1) = tUp_Actual;
     tUpDown_Actual(iter_sim,2) = tDown_Actual;
     
-    if tUp_Actual>1 && tDown_Actual>1 && success==1
-        = [disp("It works")
-    end
-
 
     % 1. Standard 2-step decoder:
     if isequal(decCodewordRM_Naive(:),CodewordComb(:))
         BEP_Naive(iter_sim) = 0;
     end
     % 2. Interleaved iterations in message-passing:
-%     if isequal(decCodewordRM_MsgPas(:),CodewordComb(:))
-%         BEP_MsgPas(iter_sim) = 0;
-%     end
+    if isequal(decCodewordRM_MsgPas(:),CodewordComb(:))
+        BEP_MsgPas(iter_sim) = 0;
+    end
     % - % - % BEP end % - % - % 
     
     % advance waitbar

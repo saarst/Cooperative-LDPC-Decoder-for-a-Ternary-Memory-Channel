@@ -4,6 +4,7 @@ function g = from_biadjacency_matrix(H, channel_model)
     for i=1:n
         g.add_v_node(channel_model, i,  "v" + string(i));
     end
+    
     for j=1:m
         g.add_c_node(j, "c" + string(j));
         for i=1:n
