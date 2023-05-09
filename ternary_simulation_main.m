@@ -8,7 +8,7 @@ cd(filepath);
 
 %% User-defined parameters
 % encoder parameters
-n               = 128;
+n               = 8;
 rate_ind        = 0.1;
 rate_res        = 0.1;
 % Simulation parameters
@@ -21,7 +21,8 @@ ChannelType     = "random"; % "random" / "upto"
 nIterBetweenFileSave = 50;
 
 %% Construct LDPC codes
-addpath('.\gen_par_mats');
+addpath(fullfile('.','gen_par_mats'));
+addpath(genpath(fullfile('.','LDPC')));
 
 % construct indicator code
 filenameLDPC = sprintf('n%d_R0%.0f.mat',n,100*rate_ind);
