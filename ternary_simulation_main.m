@@ -1,4 +1,4 @@
-function ternary_simulation_main(n, p, num_iter_sim)
+function [BEP_Naive, BEP_MsgPas] = ternary_simulation_main(n, p, num_iter_sim)
 arguments
     n (1,1) {mustBeInteger,mustBePositive} = 8
     p (1,1) {mustBeLessThanOrEqual(p,1), mustBeGreaterThanOrEqual(p,0)} = 0.1
@@ -79,8 +79,8 @@ rmpath(fullfile('.','gen_par_mats'));
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
 % Initialize results arrays
-BEP_Naive = ones(1,num_iter_sim); % 
-BEP_MsgPas = ones(1,num_iter_sim); % 
+BEP_Naive_vec = ones(1,num_iter_sim); % 
+BEP_MsgPas_vec = ones(1,num_iter_sim); % 
 
 tUpDown_Actual = zeros(1,num_iter_sim,2);
 
@@ -113,11 +113,11 @@ for iter_sim = 1 : num_iter_sim
     
     % 1. Standard 2-step decoder:
     if isequal(decCodewordRM_Naive(:),CodewordComb(:))
-        BEP_Naive(iter_sim) = 0;
+        BEP_Naive_vec(iter_sim) = 0;
     end
     % 2. Interleaved iterations in message-passing:
     if isequal(decCodewordRM_MsgPas(:),CodewordComb(:))
-        BEP_MsgPas(iter_sim) = 0;
+        BEP_MsgPas_vec(iter_sim) = 0;
     end
     % - % - % BEP end % - % - % 
     
@@ -127,6 +127,10 @@ for iter_sim = 1 : num_iter_sim
         waitbar(iter_sim/num_iter_sim, hwb, wbmsg);
     end
     
+    % calc BEP
+    BEP_Naive = mean(BEP_Naive_vec);
+    BEP_MsgPas = mean(BEP_MsgPas_vec);
+
     % save partial results
     if mod(iter_sim,nIterBetweenFileSave)
         save(sprintf('./Results/len%d_p%.5f_q%.5f_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s_Seed%.2f_partial.mat',...
@@ -135,8 +139,8 @@ for iter_sim = 1 : num_iter_sim
 
 end
 
-fprintf('\tNaive BEP = %E, MsgPas BEP = %E\n',...
-    mean(BEP_Naive),mean(BEP_MsgPas));
+fprintf('\tNaive BEP = %E, MsgPas BEP = %E\n', BEP_Naive, BEP_MsgPas);
+
 if ispc
     delete(hwb);
 end
