@@ -1,7 +1,7 @@
-function [BEP_Naive, BEP_MsgPas] = ternary_simulation_main(n, p, R, num_iter_sim)
+function [BEP_Naive, BEP_MsgPas] = ternary_simulation_main(n, log_p, R, num_iter_sim)
 arguments
     n (1,1) {mustBeInteger,mustBePositive} = 8
-    p (1,1) {mustBeLessThanOrEqual(p,1), mustBeGreaterThanOrEqual(p,0)} = 0.1
+    log_p (1,1) {mustBeInteger,mustBeNegative} = -2
     R (1,1) {mustBeLessThanOrEqual(R,1), mustBeGreaterThanOrEqual(R,0)} = 0.1
     num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 100
 end
@@ -21,6 +21,7 @@ rate_res        = R;
 % Simulation parameters
 % num_iter_sim    = 100; % iterations in simulations
 % p               = 0.1; % downward error probability, p
+p = 10^(log_p);
 q               = 3;   % alphabet size
 q2              = p/2; % upward error probability, q/2
 ChannelType     = "random"; % "random" / "upto"
