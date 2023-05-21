@@ -91,9 +91,9 @@ tDown_Actual_total = zeros(1,num_iter_sim);
 % Save start time
 simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
-if ispc
-    hwb = waitbar(0);
-end
+% if ispc
+%     hwb = waitbar(0);
+% end
 parfor iter_sim = 1 : num_iter_sim
     % - % - % Encoding: % - % - % 
     [CodewordComb,CodewordInd,CodewordRes,messageInd,messageRes] = ternary_enc_LDPCLDPC(gf(H_sys_ind,1),gf(H_sys_res,1));
@@ -127,10 +127,10 @@ parfor iter_sim = 1 : num_iter_sim
     % - % - % BEP end % - % - % 
     
     % advance waitbar
-    if ispc
-        wbmsg = sprintf('LDPC(%d,%d): (p,q/2)=(%d,%d), iterSim=%d/%d',rate_ind_actual,rate_res_actual,p,q2,iter_sim,num_iter_sim);
-        waitbar(iter_sim/num_iter_sim, hwb, wbmsg);
-    end
+    % if ispc
+    %     wbmsg = sprintf('LDPC(%d,%d): (p,q/2)=(%d,%d), iterSim=%d/%d',rate_ind_actual,rate_res_actual,p,q2,iter_sim,num_iter_sim);
+    %     waitbar(iter_sim/num_iter_sim, hwb, wbmsg);
+    % end
     
     % % save partial results
     % if mod(iter_sim,nIterBetweenFileSave)
@@ -145,9 +145,9 @@ BEP_Naive = mean(BEP_Naive_vec);
 BEP_MsgPas = mean(BEP_MsgPas_vec);
 fprintf('\tNaive BEP = %E, MsgPas BEP = %E\n', BEP_Naive, BEP_MsgPas);
 
-if ispc
-    delete(hwb);
-end
+% if ispc
+%     delete(hwb);
+% end
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
 % Save data to .mat file and delete partial results file
