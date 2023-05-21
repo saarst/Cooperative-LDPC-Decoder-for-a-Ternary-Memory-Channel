@@ -6,11 +6,11 @@ function f = barrier_res_llr(p,q)
     
     function llr = res_channel(y,p,q)
         if y==0
-            llr = log2(p / (2*(1-q)));
+            llr = log2(1+2*(1-q)/p);
         elseif y==1 
-            llr = log2((1-p)/q);
+            llr = 2e31;
         elseif y==2
-            llr = -1e9;
+            llr = log2(q/(1-p));
         end
     end
     
