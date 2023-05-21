@@ -110,9 +110,13 @@ classdef VXNode < Node
         function prob = estimate(obj)
             x = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux;
             y =  obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux;
+            if 2^y == inf
+                Pr0 = 1;
+            else
+                Pr0 = 2^y / (1+2^y);
+            end
 
             Pr2 = 1 / (1+2^x);
-            Pr0 = 2^y / (1+2^y);
             Pr1 = 1 - Pr0 -Pr2;
             prob = [Pr0, Pr1, Pr2];
         end
