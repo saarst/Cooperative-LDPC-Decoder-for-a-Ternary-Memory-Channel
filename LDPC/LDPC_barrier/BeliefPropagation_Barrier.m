@@ -54,6 +54,23 @@ classdef BeliefPropagation_Barrier < handle
                 end
                 
                 % step 3
+                for i=1:length(vnodes)
+                    prob(:,i) = vnodes(i).estimate();
+                end
+
+                [~, estimated_trits] = max(prob);
+                estimate = estimated_trits-1;
+                estimated_res = estimate == 2;
+                estimated_ind = estimate ~= 0;
+                syndrome_ind = mod(obj.H_ind * estimated_ind',2);
+                syndrome_res = mod(obj.H_res * estimated_res',2);
+                suc = ~any([syndrome_ind, syndrome_res],'all');
+                if suc 
+                    iter = j;
+                    break
+                end
+
+                % step 4
                 for i=1:length(ind_nodes)
                     ind_nodes(i).receive_messages();
                 end
@@ -62,22 +79,10 @@ classdef BeliefPropagation_Barrier < handle
                     res_nodes(i).receive_messages();
                 end
 
-                % step 4
-                for i=1:length(vnodes)
-                    prob(:,i) = vnodes(i).estimate();
-                end
-                [~, estimated_trits] = max(prob);
-                estimate = estimated_trits-1;
-                estimated_res = estimate == 2;
-                estimated_ind = estimate ~= 0;
-                syndrome_ind = mod(obj.H_ind * estimated_ind',2);
-                syndrome_res = mod(obj.H_res * estimated_res',2);
-                suc = ~any([syndrome_ind, syndrome_res],'all');
-                if suc && j >= 10
-                    iter = j;
-                    break
-                end
+
             end
+
+
             if ~suc
                 iter = obj.maxIter;
             end
