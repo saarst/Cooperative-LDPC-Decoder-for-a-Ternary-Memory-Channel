@@ -6,6 +6,7 @@ classdef VNode < Node
         channel_model
         channel_symbol = [];
         channel_llr = [];
+        msg_sum = [];
     end
     
     methods
@@ -24,17 +25,26 @@ classdef VNode < Node
             %   Detailed explanation goes here
             obj.channel_symbol = channel_symbol;
             obj.channel_llr = obj.channel_model(channel_symbol);
+            obj.msg_sum = 0;
             obj.received_messages = dictionary(obj.neighbors.keys,zeros(size(obj.neighbors.keys)));
         end
         
         function msg = message(obj, requester_id)
+            requester_msg = obj.received_messages(requester_id);
+            msg = obj.channel_llr + obj.msg_sum - requester_msg;
+        end
+        
+        function receive_messages(obj)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
-            node_entries = entries(obj.received_messages);
-            node_entries(node_entries.Key == requester_id,:) = [];
-            r = node_entries.Value;
-            %%%%%%%%%%%%%%%% ask yuval about q=0 :
-            msg = obj.channel_llr + sum(r); % q msg
+            node_entries = entries(obj.neighbors);
+            for i=1:height(node_entries)
+                node_id = node_entries{i,1};
+                node = node_entries{i,2};
+                obj.received_messages(node_id) = node.message(obj.uid);
+            end
+            node_msgs = entries(obj.received_messages);
+            obj.msg_sum = sum(node_msgs.Value);
         end
 
         function bit = estimate(obj)

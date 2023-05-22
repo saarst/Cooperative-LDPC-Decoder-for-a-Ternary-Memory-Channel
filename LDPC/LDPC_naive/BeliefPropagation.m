@@ -20,10 +20,10 @@ classdef BeliefPropagation < handle
         end
         
         function [estimate, llr, suc] = decode(obj, channel_word)
+            % Initializations:
             estimate = [];
             llr = zeros(1,obj.n);
             assert(length(channel_word) == obj.n, "Incorrect block size");
-            % initial step - step #1
             vnodes = obj.graph.v_nodes.values;
             cnodes = obj.graph.c_nodes.values;
 
@@ -37,23 +37,9 @@ classdef BeliefPropagation < handle
             end
 
 
-
+            % Algorithm:
             for j=1:obj.maxIter
-                % step 2
-               
-%                 vnodes = sort(obj.graph.v_nodes.values);
-                for i=1:length(vnodes)
-                    vnodes(i).receive_messages();
-                end
-                
-                % step 3
-%                 cnodes = obj.graph.c_nodes.values;
-                for i=1:length(cnodes)
-                    cnodes(i).receive_messages();
-                end
-
-                % step 4
-%                 vnodes = sort(obj.graph.v_nodes.values);
+                % Estimate:
                 for i=1:length(vnodes)
                     llr(i) = vnodes(i).estimate();
                 end
@@ -63,6 +49,17 @@ classdef BeliefPropagation < handle
                 if suc
                     break
                 end
+               
+                % Vnodes receive messages:
+                for i=1:length(vnodes)
+                    vnodes(i).receive_messages();
+                end
+                
+                % Cnodes receive messages:
+                for i=1:length(cnodes)
+                    cnodes(i).receive_messages();
+                end
+
             end
 
         end

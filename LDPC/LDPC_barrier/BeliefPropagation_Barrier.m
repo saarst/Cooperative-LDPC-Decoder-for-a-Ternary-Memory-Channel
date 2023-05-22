@@ -12,8 +12,6 @@ classdef BeliefPropagation_Barrier < handle
     
     methods
         function obj = BeliefPropagation_Barrier(TannerGraph, H_ind, H_res, maxIter)
-            %BELIEFPROPAGATION Construct an instance of this class
-            %   Detailed explanation goes here
             obj.H_res = H_res;
             obj.H_ind = H_ind;
             obj.graph = TannerGraph;
@@ -22,10 +20,10 @@ classdef BeliefPropagation_Barrier < handle
         end
         
         function [estimate, prob, suc, iter] = decode(obj, channel_word)
+            % Initializations:
             estimate = [];
             prob = zeros(3,obj.n);
             assert(length(channel_word) == obj.n, "Incorrect block size");
-            % initial step - step #1
             vnodes = obj.graph.v_nodes.values;
             ind_nodes = obj.graph.ind_nodes.values;
             res_nodes = obj.graph.res_nodes.values;
@@ -44,16 +42,10 @@ classdef BeliefPropagation_Barrier < handle
                 res_nodes(idx).receive_messages();
             end
 
-
-
+            % Algorithm:
             for j=1:obj.maxIter
-                % step 2
-                for i=1:length(vnodes)
-                    vnodes(i).receive_res_messages();
-                    vnodes(i).receive_ind_messages();
-                end
-                
-                % step 3
+
+                % Estimate:
                 for i=1:length(vnodes)
                     prob(:,i) = vnodes(i).estimate();
                 end
@@ -70,18 +62,23 @@ classdef BeliefPropagation_Barrier < handle
                     break
                 end
 
-                % step 4
+                % Vnodes receive messages:
+                for i=1:length(vnodes)
+                    vnodes(i).receive_res_messages();
+                    vnodes(i).receive_ind_messages();
+                end
+
+                % indNodes receive messages:
                 for i=1:length(ind_nodes)
                     ind_nodes(i).receive_messages();
                 end
                 
+                % resNodes receive messages:
                 for i=1:length(res_nodes)
                     res_nodes(i).receive_messages();
                 end
 
-
             end
-
 
             if ~suc
                 iter = obj.maxIter;

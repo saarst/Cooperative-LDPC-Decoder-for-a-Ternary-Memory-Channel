@@ -55,16 +55,6 @@ classdef Node < handle
             obj.neighbors(neighbor.uid) = neighbor;
         end
 
-        function receive_messages(obj)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            node_entries = entries(obj.neighbors);
-            for i=1:height(node_entries)
-                node_id = node_entries{i,1};
-                node = node_entries{i,2};
-                obj.received_messages(node_id) = node.message(obj.uid);
-            end
-        end
     end
 
     methods (Abstract)

@@ -37,6 +37,10 @@ classdef VXNode < Node
             obj.channel_symbol = channel_symbol;
             obj.channel_llr_ind = obj.channel_model_ind(channel_symbol);
             obj.channel_llr_res = obj.channel_model_res(channel_symbol);
+            obj.msg_sum_ind = 0;
+            obj.msg_sum_ind_aux = 0;
+            obj.msg_sum_res = 0;
+            obj.msg_sum_res_aux = 0;
             obj.ind_received_messages = dictionary(obj.ind_neighbors.keys,zeros(size(obj.ind_neighbors.keys)));
             obj.res_received_messages = dictionary(obj.res_neighbors.keys,zeros(size(obj.res_neighbors.keys)));
         end
