@@ -1,7 +1,7 @@
 function [BEP_Naive, BEP_MsgPas] = ternary_simulation_main(n, log_p, R, num_iter_sim)
 arguments
     n (1,1) {mustBeInteger,mustBePositive} = 8
-    log_p (1,1) {mustBeInteger,mustBeNegative} = -2
+    log_p (1,1) {mustBeInteger,mustBeNegative} = -6
     R (1,1) {mustBeLessThanOrEqual(R,1), mustBeGreaterThanOrEqual(R,0)} = 0.1
     num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 100
 end
@@ -80,21 +80,23 @@ rmpath(fullfile('.','gen_par_mats'));
 %% Probability of correcting (p,q) errors with LDPC-LDPC code
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
+
 % Initialize results arrays
 BEP_Naive_vec = ones(1,num_iter_sim); % 
 BEP_MsgPas_vec = ones(1,num_iter_sim); % 
 
 tUp_Actual_total = zeros(1,num_iter_sim);
 tDown_Actual_total = zeros(1,num_iter_sim);
-
-
+% Initialize decoders:
+MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 100);
+NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, 100);
 % Save start time
 simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 % if ispc
 %     hwb = waitbar(0);
 % end
-parfor iter_sim = 1 : num_iter_sim
+for iter_sim = 1 : num_iter_sim
     % - % - % Encoding: % - % - % 
     [CodewordComb,CodewordInd,CodewordRes,messageInd,messageRes] = ternary_enc_LDPCLDPC(gf(H_sys_ind,1),gf(H_sys_res,1));
     % - % - % Encoding end % - % - % 
@@ -108,8 +110,8 @@ parfor iter_sim = 1 : num_iter_sim
     % - % - % Channel end % - % - % 
     
     % - % - % Decoding: % - % - % 
-    [decCodewordRM_Naive, success_naive]  = NaiveDecoder(ChannelOut, H_sys_ind, H_sys_res, p, 2*q2, []);
-    [decCodewordRM_MsgPas, probs, success, numIter] = MsgPasDecoder(ChannelOut, H_sys_ind, H_sys_res, p, 2*q2, 100);
+    [decCodewordRM_Naive, success_naive]  = NaiveDecoder(ChannelOut, NaiveIndDec, H_sys_res);
+    [decCodewordRM_MsgPas, probs, success, numIter] = MsgPasDec.decode(ChannelOut);
     % - % - % Decoding end % - % - % 
     % - % - % BEP % - % - % 
     tUp_Actual_total(iter_sim) = tUp_Actual;
@@ -137,7 +139,6 @@ parfor iter_sim = 1 : num_iter_sim
     %     save(sprintf('./Results/len%d_p%.5f_q%.5f_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s_Seed%.2f_partial.mat',...
     %         n,p,2*q2,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime),seed), '-regexp', '^(?!(hwb)$).');
     % end
-
 end
 
 % calc BEP

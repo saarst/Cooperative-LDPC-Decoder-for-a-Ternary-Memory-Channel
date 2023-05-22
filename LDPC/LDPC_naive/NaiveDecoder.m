@@ -1,13 +1,10 @@
-function [decCodewordRM_Naive, success] = NaiveDecoder(ChannelOut, H_sys_ind, H_sys_res, p, q, NaiveDecoderParams)
+function [decCodewordRM_Naive, success] = NaiveDecoder(ChannelOut, NaiveIndDec, H_sys_res)
     decCodewordRM_Naive = [];
     success = false;
     %% 1. build r_ind
     r_ind = ChannelOut > 0;
     %% 2. decode c_ind from r_ind
-    Channel_model = bac_llr(p,q);
-    tg = from_biadjacency_matrix(H_sys_ind, Channel_model);
-    bp = BeliefPropagation(tg, H_sys_ind, 100);
-    [c_ind_estimate, ~, ind_success] = bp.decode(r_ind);
+    [c_ind_estimate, ~, ind_success] = NaiveIndDec.decode(r_ind);
     if ~ind_success
         return
     end
