@@ -1,9 +1,9 @@
 function [BEP_Naive, BEP_MsgPas] = ternary_simulation_main(n, log_p, R, num_iter_sim)
 arguments
     n (1,1) {mustBeInteger,mustBePositive} = 8
-    log_p (1,1) {mustBeInteger,mustBeNegative} = -6
+    log_p (1,1) {mustBeInteger,mustBeNegative} = -1
     R (1,1) {mustBeLessThanOrEqual(R,1), mustBeGreaterThanOrEqual(R,0)} = 0.1
-    num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 100
+    num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
 end
 
 seed = rng('shuffle').Seed;
