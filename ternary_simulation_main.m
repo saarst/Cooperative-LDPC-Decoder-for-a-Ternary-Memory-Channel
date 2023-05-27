@@ -88,19 +88,20 @@ BEP_MsgPas_vec = ones(1,num_iter_sim); %
 tUp_Actual_total = zeros(1,num_iter_sim);
 tDown_Actual_total = zeros(1,num_iter_sim);
 % Initialize decoders:
-MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 100);
-NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, 100);
+% MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 100);
+% NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, 100);
 % Save start time
 simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 % if ispc
 %     hwb = waitbar(0);
 % end
-for iter_sim = 1 : num_iter_sim
+parfor iter_sim = 1 : num_iter_sim
     % - % - % Encoding: % - % - % 
     [CodewordComb,CodewordInd,CodewordRes,messageInd,messageRes] = ternary_enc_LDPCLDPC(gf(H_sys_ind,1),gf(H_sys_res,1));
     % - % - % Encoding end % - % - % 
-    
+    MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 20);
+    NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, 20);
     % - % - % Channel (asymmetric one2all): % - % - % 
     tUp = q2* 2;
     tDown = p;
