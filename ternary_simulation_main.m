@@ -22,7 +22,6 @@ end
 pool = gcp();
 numWorkers = pool.NumWorkers;
 disp(numWorkers)
-return
 
 %% User-defined parameters
 % encoder parameters
