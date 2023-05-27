@@ -13,6 +13,17 @@ if ~isfolder(fullfile(".","Results"))
     mkdir(fullfile(".","Results"));
 end
 
+% Check if parallel pool exists, and if not, create one
+if isempty(gcp('nocreate'))
+    parpool(); % Create a parallel pool with the default settings
+end
+
+% Get information about the parallel pool
+pool = gcp();
+numWorkers = pool.NumWorkers;
+disp(numWorkers)
+return
+
 %% User-defined parameters
 % encoder parameters
 % n               = 8;
