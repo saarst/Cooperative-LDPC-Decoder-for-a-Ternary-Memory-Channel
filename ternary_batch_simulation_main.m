@@ -127,10 +127,11 @@ delete(sprintf('./Results/len%d_p%.5f_q%.5f_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s
 end
 
 
-
 function [BEP_Naive, BEP_MsgPas] = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize)
     BEP_Naive_vec = ones(1,batchSize); % 
     BEP_MsgPas_vec = ones(1,batchSize); % 
+    MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 20);
+    NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, 20);
     for iter_sim = 1:batchSize
         % tic
         % - % - % Encoding: % - % - % 
@@ -143,8 +144,6 @@ function [BEP_Naive, BEP_MsgPas] = TernaryBatch(ChannelType, H_sys_ind, H_sys_re
         % - % - % Channel end % - % - % 
         
         % - % - % Decoding: % - % - % 
-        MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 20);
-        NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, 20);
         [decCodewordRM_Naive, success_naive]  = NaiveDecoder(ChannelOut, NaiveIndDec, H_sys_res);
         [decCodewordRM_MsgPas, probs, success, numIter] = MsgPasDec.decode(ChannelOut);
         % - % - % Decoding end % - % - % 
