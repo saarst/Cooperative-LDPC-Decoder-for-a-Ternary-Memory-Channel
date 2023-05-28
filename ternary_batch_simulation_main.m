@@ -89,15 +89,19 @@ fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
 % Initialize results arrays
 num_threads_sim = num_iter_sim / batchSize;
-BEP_Naive_batch = ones(1,num_threads_sim); % 
-BEP_MsgPas_batch = ones(1,num_threads_sim); % 
+BEP_Naive_batch = ones(1,num_threads_sim);  
+BEP_MsgPas_batch = ones(1,num_threads_sim); 
+maxTrueIterNaive = 0;
+maxTrueIterMsgPas = 0;
 
 % Save start time
 simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 
 parfor iter_thread = 1 : num_threads_sim
-    [BEP_Naive_batch(iter_thread), BEP_MsgPas_batch(iter_thread)] = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize);
+    [BEP_Naive_batch(iter_thread), BEP_MsgPas_batch(iter_thread), numIterNaive, numIterMsgPas] = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize);
+    maxTrueIterNaive = max(maxTrueIterNaive, numIterNaive);
+    maxTrueIterMsgPas = max(maxTrueIterMsgPas, numIterMsgPas);
 end
 
 % calc BEP
@@ -114,13 +118,14 @@ end
 %  ------------------------------------------------------------------------
 
 
-function [BEP_Naive, BEP_MsgPas] = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize)
+function [BEP_Naive, BEP_MsgPas, maxTrueIterNaive, maxTrueIterMsgPas] = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize)
     BEP_Naive_vec = ones(1,batchSize);  
     BEP_MsgPas_vec = ones(1,batchSize);  
     MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 20);
     NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, 20);
+    maxTrueIterNaive = 0;
+    maxTrueIterMsgPas = 0;
     for iter_sim = 1:batchSize
-        % tic
         % - % - % Encoding: % - % - % 
         [CodewordComb,CodewordInd,CodewordRes,messageInd,messageRes] = ternary_enc_LDPCLDPC(gf(H_sys_ind,1),gf(H_sys_res,1));
         % - % - % Encoding end % - % - % 
@@ -128,20 +133,24 @@ function [BEP_Naive, BEP_MsgPas] = TernaryBatch(ChannelType, H_sys_ind, H_sys_re
         tUp = q2* 2;
         tDown = p;
         ChannelOut = asymmchannel(CodewordComb, q, ChannelType, tUp, tDown);
+        tUp_Actual = sum(ChannelOut>CodewordComb);
+        tDown_Actual = sum(ChannelOut<CodewordComb);
         % - % - % Channel end % - % - % 
         
         % - % - % Decoding: % - % - % 
-        [decCodewordRM_Naive, success_naive]  = NaiveDecoder(ChannelOut, NaiveIndDec, H_sys_res);
-        [decCodewordRM_MsgPas, ~, success, numIter] = MsgPasDec.decode(ChannelOut);
+        [decCodewordRM_Naive, ~, numIterNaive]  = NaiveDecoder(ChannelOut, NaiveIndDec, H_sys_res, CodewordComb > 0);
+        [decCodewordRM_MsgPas, ~, ~, numIterMsgPas] = MsgPasDec.decode(ChannelOut);
         % - % - % Decoding end % - % - % 
         % - % - % BEP % - % - % 
      
         % 1. Standard 2-step decoder:
         if isequal(decCodewordRM_Naive(:),CodewordComb(:))
+            maxTrueIterNaive = max(maxTrueIterNaive, numIterNaive);
             BEP_Naive_vec(iter_sim) = 0;
         end
         % 2. Interleaved iterations in message-passing:
         if isequal(decCodewordRM_MsgPas(:),CodewordComb(:))
+            maxTrueIterMsgPas = max(maxTrueIterMsgPas, numIterMsgPas);
             BEP_MsgPas_vec(iter_sim) = 0;
         end
     end

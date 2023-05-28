@@ -19,9 +19,17 @@ classdef BeliefPropagation < handle
             obj.maxIter = maxIter;
         end
         
-        function [estimate, llr, suc] = decode(obj, channel_word)
-            % Initializations:
-            estimate = [];
+        function [estimate, llr, suc, iter] = decode(obj, channel_word)
+            % Initializations & check for 0 errors
+            iter = 0;
+            llr = [];
+            estimate = channel_word;
+            syndrome = mod(obj.H * estimate',2);
+            suc = ~any(syndrome);
+            if suc
+                    return
+            end
+            % continue Initializations
             llr = zeros(1,obj.n);
             assert(length(channel_word) == obj.n, "Incorrect block size");
             vnodes = obj.graph.v_nodes.values;
@@ -38,7 +46,7 @@ classdef BeliefPropagation < handle
 
 
             % Algorithm:
-            for j=1:obj.maxIter
+            for iter=1:obj.maxIter
                 % Estimate:
                 for i=1:length(vnodes)
                     llr(i) = vnodes(i).estimate();

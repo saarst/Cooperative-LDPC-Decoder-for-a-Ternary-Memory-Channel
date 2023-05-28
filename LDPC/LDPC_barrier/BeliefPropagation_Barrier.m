@@ -20,8 +20,20 @@ classdef BeliefPropagation_Barrier < handle
         end
         
         function [estimate, prob, suc, iter] = decode(obj, channel_word)
-            % Initializations:
-            estimate = [];
+            % Initializations & check for 0 errors
+            iter = 0;
+            prob = [];
+            estimate = channel_word;
+            estimated_res = estimate == 2;
+            estimated_ind = estimate ~= 0;
+            syndrome_ind = mod(obj.H_ind * estimated_ind',2);
+            syndrome_res = mod(obj.H_res * estimated_res',2);
+            suc = ~any([syndrome_ind, syndrome_res],'all');
+            if suc 
+                return
+            end
+
+            % continue Initializations
             prob = zeros(3,obj.n);
             assert(length(channel_word) == obj.n, "Incorrect block size");
             vnodes = obj.graph.v_nodes.values;
@@ -43,7 +55,7 @@ classdef BeliefPropagation_Barrier < handle
             end
 
             % Algorithm:
-            for j=1:obj.maxIter
+            for iter=1:obj.maxIter
 
                 % Estimate:
                 for i=1:length(vnodes)
@@ -58,7 +70,6 @@ classdef BeliefPropagation_Barrier < handle
                 syndrome_res = mod(obj.H_res * estimated_res',2);
                 suc = ~any([syndrome_ind, syndrome_res],'all');
                 if suc 
-                    iter = j;
                     break
                 end
 
@@ -78,10 +89,6 @@ classdef BeliefPropagation_Barrier < handle
                     res_nodes(i).receive_messages();
                 end
 
-            end
-
-            if ~suc
-                iter = obj.maxIter;
             end
         end
     end

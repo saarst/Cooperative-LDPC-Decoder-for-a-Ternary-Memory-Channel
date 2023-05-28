@@ -1,11 +1,11 @@
-function [decCodewordRM_Naive, success] = NaiveDecoder(ChannelOut, NaiveIndDec, H_sys_res)
+function [decCodewordRM_Naive, success, maxIter] = NaiveDecoder(ChannelOut, NaiveIndDec, H_sys_res, originalInd)
     decCodewordRM_Naive = [];
     success = false;
     %% 1. build r_ind
     r_ind = ChannelOut > 0;
     %% 2. decode c_ind from r_ind
-    [c_ind_estimate, ~, ind_success] = NaiveIndDec.decode(r_ind);
-    if ~ind_success
+    [c_ind_estimate, ~, ind_success, maxIter] = NaiveIndDec.decode(r_ind);
+    if ~ind_success || ~isequal(c_ind_estimate(:), originalInd(:))
         return
     end
 
