@@ -26,12 +26,9 @@ end
 
 %% User-defined parameters
 % encoder parameters
-% n               = 8;
 rate_ind        = R;
 rate_res        = R;
 % Simulation parameters
-% num_iter_sim    = 100; % iterations in simulations
-% p               = 0.1; % downward error probability, p
 p = 10^(log_p);
 q               = 3;   % alphabet size
 q2              = p/2; % upward error probability, q/2
@@ -106,21 +103,19 @@ end
 BEP_Naive = mean(BEP_Naive_batch);
 BEP_MsgPas = mean(BEP_MsgPas_batch);
 fprintf('\tNaive BEP = %E, MsgPas BEP = %E\n', BEP_Naive, BEP_MsgPas);
-
-
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
-% Save data to .mat file and delete partial results file
+% Save data to .mat file
 save(sprintf('./Results/len%d_p%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s_Seed%.2f.mat',...
             n,p,2*q2,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime),seed));
 
-%  ------------------------------------------------------------------------
 end
+%  ------------------------------------------------------------------------
 
 
 function [BEP_Naive, BEP_MsgPas] = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize)
-    BEP_Naive_vec = ones(1,batchSize); % 
-    BEP_MsgPas_vec = ones(1,batchSize); % 
+    BEP_Naive_vec = ones(1,batchSize);  
+    BEP_MsgPas_vec = ones(1,batchSize);  
     MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 20);
     NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, 20);
     for iter_sim = 1:batchSize
@@ -148,9 +143,8 @@ function [BEP_Naive, BEP_MsgPas] = TernaryBatch(ChannelType, H_sys_ind, H_sys_re
         if isequal(decCodewordRM_MsgPas(:),CodewordComb(:))
             BEP_MsgPas_vec(iter_sim) = 0;
         end
-        % - % - % BEP end % - % - % 
-        BEP_Naive = mean(BEP_Naive_vec);
-        BEP_MsgPas = mean(BEP_MsgPas_vec);
-
     end
+    % - % - % BEP end % - % - % 
+    BEP_Naive = mean(BEP_Naive_vec);
+    BEP_MsgPas = mean(BEP_MsgPas_vec);
 end

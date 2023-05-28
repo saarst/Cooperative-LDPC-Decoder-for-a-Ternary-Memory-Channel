@@ -9,8 +9,5 @@
 PBS_O_WORKDIR=$HOME/project_1/TriLDPC
 cd $PBS_O_WORKDIR
 
-n=256  # Replace with the desired value of n
-run_name="TriLDPC_n_${n}_p_1e${log_p}_R_05"
-
-"/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main(256, ${log_p}, 0.5, 50, 10)" > "${run_name}_output.log" 2>&1
+"/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main(256, ${log_p}, 0.5, 500, 50)"
     
