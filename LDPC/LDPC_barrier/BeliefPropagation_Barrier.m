@@ -45,12 +45,12 @@ classdef BeliefPropagation_Barrier < handle
             end
 
             for idx=1:length(ind_nodes)
-                ind_nodes(idx).initialize();
+                ind_nodes(idx).initialize(1,0);
                 ind_nodes(idx).receive_messages();
             end
 
             for idx=1:length(res_nodes)
-                res_nodes(idx).initialize();
+                res_nodes(idx).initialize(0,1);
                 res_nodes(idx).receive_messages();
             end
 

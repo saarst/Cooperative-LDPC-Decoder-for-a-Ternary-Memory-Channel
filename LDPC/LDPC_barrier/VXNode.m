@@ -60,54 +60,43 @@ classdef VXNode < Node
         function receive_res_messages(obj)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
-            node_entries = entries(obj.res_neighbors);
-            for i=1:height(node_entries)
-                node_id = node_entries{i,1};
-                node = node_entries{i,2};
+            node_ids = keys(obj.res_neighbors);
+            nodes = values(obj.res_neighbors);
+            for i=1:length(node_ids)
+                node_id = node_ids(i);
+                node = nodes(i);
                 obj.res_received_messages(node_id) = node.message(obj.uid);
             end
-            node_msgs = entries(obj.res_received_messages);
-            obj.msg_sum_res = sum(node_msgs.Value);
-            obj.msg_sum_res_aux = sum(-log2(1+2*2.^(-node_msgs.Value)));
+            node_msgs = values(obj.res_received_messages);
+            obj.msg_sum_res = sum(node_msgs);
+            obj.msg_sum_res_aux = sum(-log2(1+2*2.^(-node_msgs)));
         end
 
         function receive_ind_messages(obj)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
-            node_entries = entries(obj.ind_neighbors);
-            for i=1:height(node_entries)
-                node_id = node_entries{i,1};
-                node = node_entries{i,2};
+            node_ids = keys(obj.ind_neighbors);
+            nodes = values(obj.ind_neighbors);
+            for i=1:length(node_ids)
+                node_id = node_ids(i);
+                node = nodes(i);
                 obj.ind_received_messages(node_id) = node.message(obj.uid);
             end
-            node_msgs = entries(obj.ind_received_messages);
-            obj.msg_sum_ind = sum(node_msgs.Value);
-            obj.msg_sum_ind_aux = sum(log2(1+2*2.^node_msgs.Value));
+            node_msgs = values(obj.ind_received_messages);
+            obj.msg_sum_ind = sum(node_msgs);
+            obj.msg_sum_ind_aux = sum(log2(1+2*2.^node_msgs));
         end
 
         
-        function msg = message(obj, requester_id)
+        function msg = message(obj, requester_id, ind, res)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
-            if isKey(obj.res_neighbors,requester_id)
+            if res
                 requester_msg = obj.res_received_messages(requester_id);
-                % requester_msg_aux = log2(1+2*2^requester_msg);
-                requester_msg_aux = requester_msg;
-                if ~isnan(obj.msg_sum_res)
-                    msg = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux - requester_msg_aux;
-                else
-                    msg = obj.channel_llr_res;
-                end
-            elseif isKey(obj.ind_neighbors,requester_id)
+                msg = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux - requester_msg;
+            elseif ind
                 requester_msg = obj.ind_received_messages(requester_id);
-                % requester_msg_aux = -log2(1+2*2^(-requester_msg));
-                requester_msg_aux = requester_msg;
-                if ~isnan(obj.msg_sum_ind)
-                    msg = obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux - requester_msg_aux;
-                else 
-                    msg = obj.channel_llr_ind;
-                end
-
+                msg = obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux - requester_msg;
             end
         end
 

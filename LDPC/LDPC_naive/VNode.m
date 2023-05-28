@@ -37,14 +37,14 @@ classdef VNode < Node
         function receive_messages(obj)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
-            node_entries = entries(obj.neighbors);
-            for i=1:height(node_entries)
-                node_id = node_entries{i,1};
-                node = node_entries{i,2};
+            node_ids = keys(obj.neighbors);
+            nodes = values(obj.neighbors);
+            for i=1:length(node_ids)
+                node_id = node_ids(i);
+                node = nodes(i);
                 obj.received_messages(node_id) = node.message(obj.uid);
             end
-            node_msgs = entries(obj.received_messages);
-            obj.msg_sum = sum(node_msgs.Value);
+            obj.msg_sum = sum(values(obj.received_messages));
         end
 
         function bit = estimate(obj)

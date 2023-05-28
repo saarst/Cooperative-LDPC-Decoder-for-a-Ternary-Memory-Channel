@@ -5,15 +5,19 @@ classdef CNode < Node
     properties
         msg_sum_phi_abs
         msg_prod_sign
+        ind
+        res
     end
 
     methods
-        function initialize(obj)
+        function initialize(obj, ind, res)
             %CNODE Construct an instance of this class
             %   Detailed explanation goes here
             obj.received_messages = dictionary(obj.neighbors.keys,zeros(size(obj.neighbors.keys)));
             obj.msg_sum_phi_abs = 0;
             obj.msg_prod_sign = 0;
+            obj.ind = ind;
+            obj.res = res;
         end
         
         function msg = message(obj, requester_id)
@@ -26,17 +30,20 @@ classdef CNode < Node
         end
 
         function receive_messages(obj)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            node_entries = entries(obj.neighbors);
-            for i=1:height(node_entries)
-                node_id = node_entries{i,1};
-                node = node_entries{i,2};
-                obj.received_messages(node_id) = node.message(obj.uid);
+            node_ids = keys(obj.neighbors);
+            nodes = values(obj.neighbors);
+            for i=1:length(node_ids)
+                node_id = node_ids(i);
+                node = nodes(i);
+                if obj.ind || obj.res
+                    obj.received_messages(node_id) = node.message(obj.uid, obj.ind, obj.res);
+                else
+                    obj.received_messages(node_id) = node.message(obj.uid);
+                end
             end
-            node_msgs = entries(obj.received_messages);
-            obj.msg_sum_phi_abs  = sum(phi(abs(node_msgs.Value)));
-            obj.msg_prod_sign = prod(sign(node_msgs.Value));
+            node_msgs = values(obj.received_messages);
+            obj.msg_sum_phi_abs  = sum(phi(abs(node_msgs)));
+            obj.msg_prod_sign = prod(sign(node_msgs));
         end
     end
 end

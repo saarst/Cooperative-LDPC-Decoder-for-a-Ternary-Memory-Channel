@@ -40,7 +40,7 @@ classdef BeliefPropagation < handle
             end
 
             for idx=1:length(cnodes)
-                cnodes(idx).initialize();
+                cnodes(idx).initialize(0,0);
                 cnodes(idx).receive_messages();
             end
 
