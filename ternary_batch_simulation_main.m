@@ -36,8 +36,6 @@ p = 10^(log_p);
 q               = 3;   % alphabet size
 q2              = p/2; % upward error probability, q/2
 ChannelType     = "random"; % "random" / "upto"
-% Other parameters
-nIterBetweenFileSave = 50;
 
 %% Construct LDPC codes
 addpath(fullfile('.','gen_par_mats'));
@@ -92,17 +90,14 @@ rmpath(fullfile('.','gen_par_mats'));
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
 % Initialize results arrays
-BEP_Naive_batch = ones(1,batchSize); % 
-BEP_MsgPas_batch = ones(1,batchSize); % 
+num_threads_sim = num_iter_sim / batchSize;
+BEP_Naive_batch = ones(1,num_threads_sim); % 
+BEP_MsgPas_batch = ones(1,num_threads_sim); % 
 
-% Initialize decoders:
-% MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 20);
-% NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, 20);
 % Save start time
 simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 
-num_threads_sim = num_iter_sim / batchSize;
 parfor iter_thread = 1 : num_threads_sim
     [BEP_Naive_batch(iter_thread), BEP_MsgPas_batch(iter_thread)] = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize);
 end
@@ -112,15 +107,11 @@ BEP_Naive = mean(BEP_Naive_batch);
 BEP_MsgPas = mean(BEP_MsgPas_batch);
 fprintf('\tNaive BEP = %E, MsgPas BEP = %E\n', BEP_Naive, BEP_MsgPas);
 
-% if ispc
-%     delete(hwb);
-% end
+
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
 % Save data to .mat file and delete partial results file
-save(sprintf('./Results/len%d_p%.5f_q%.5f_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s_Seed%.2f.mat',...
-            n,p,2*q2,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime),seed));
-delete(sprintf('./Results/len%d_p%.5f_q%.5f_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s_Seed%.2f_partial.mat',...
+save(sprintf('./Results/len%d_p%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s_Seed%.2f.mat',...
             n,p,2*q2,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime),seed));
 
 %  ------------------------------------------------------------------------
@@ -145,7 +136,7 @@ function [BEP_Naive, BEP_MsgPas] = TernaryBatch(ChannelType, H_sys_ind, H_sys_re
         
         % - % - % Decoding: % - % - % 
         [decCodewordRM_Naive, success_naive]  = NaiveDecoder(ChannelOut, NaiveIndDec, H_sys_res);
-        [decCodewordRM_MsgPas, probs, success, numIter] = MsgPasDec.decode(ChannelOut);
+        [decCodewordRM_MsgPas, ~, success, numIter] = MsgPasDec.decode(ChannelOut);
         % - % - % Decoding end % - % - % 
         % - % - % BEP % - % - % 
      
