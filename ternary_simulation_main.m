@@ -144,7 +144,6 @@ for iter_sim = 1 : num_iter_sim
     %     wbmsg = sprintf('LDPC(%d,%d): (p,q/2)=(%d,%d), iterSim=%d/%d',rate_ind_actual,rate_res_actual,p,q2,iter_sim,num_iter_sim);
     %     waitbar(iter_sim/num_iter_sim, hwb, wbmsg);
     % end
-    fprintf('-- %d --\n', iter_sim);
     disp(iter_sim);
     
     % % save partial results
