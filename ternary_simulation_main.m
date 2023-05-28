@@ -13,15 +13,15 @@ if ~isfolder(fullfile(".","Results"))
     mkdir(fullfile(".","Results"));
 end
 
-% Check if parallel pool exists, and if not, create one
-if isempty(gcp('nocreate'))
-    parpool(); % Create a parallel pool with the default settings
-end
-
-% Get information about the parallel pool
-pool = gcp();
-numWorkers = pool.NumWorkers;
-disp(numWorkers)
+% % Check if parallel pool exists, and if not, create one
+% if isempty(gcp('nocreate'))
+%     parpool(); % Create a parallel pool with the default settings
+% end
+% 
+% % Get information about the parallel pool
+% pool = gcp();
+% numWorkers = pool.NumWorkers;
+% disp(numWorkers)
 
 %% User-defined parameters
 % encoder parameters
@@ -106,7 +106,7 @@ simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 % if ispc
 %     hwb = waitbar(0);
 % end
-parfor iter_sim = 1 : num_iter_sim
+for iter_sim = 1 : num_iter_sim
     % - % - % Encoding: % - % - % 
     [CodewordComb,CodewordInd,CodewordRes,messageInd,messageRes] = ternary_enc_LDPCLDPC(gf(H_sys_ind,1),gf(H_sys_res,1));
     % - % - % Encoding end % - % - % 
@@ -144,6 +144,7 @@ parfor iter_sim = 1 : num_iter_sim
     %     wbmsg = sprintf('LDPC(%d,%d): (p,q/2)=(%d,%d), iterSim=%d/%d',rate_ind_actual,rate_res_actual,p,q2,iter_sim,num_iter_sim);
     %     waitbar(iter_sim/num_iter_sim, hwb, wbmsg);
     % end
+    disp(iter_sim);
     
     % % save partial results
     % if mod(iter_sim,nIterBetweenFileSave)
