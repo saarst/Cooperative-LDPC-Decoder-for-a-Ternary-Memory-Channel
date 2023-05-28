@@ -7,7 +7,8 @@ arguments
     batchSize (1,1) {mustBeInteger, mustBePositive} = 1000;
 end
 
-seed = rng('shuffle').Seed;
+rng('shuffle');
+seed = rng;
 filepath = cd(fileparts(mfilename('fullpath')));
 cd(filepath);
 if ~isfolder(fullfile(".","Results"))
@@ -106,8 +107,8 @@ fprintf('\tNaive BEP = %E, MsgPas BEP = %E\n', BEP_Naive, BEP_MsgPas);
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
 % Save data to .mat file
-save(sprintf('./Results/len%d_p%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s_Seed%.2f.mat',...
-            n,p,2*q2,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime),seed));
+save(sprintf('./Results/len%d_p%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s.mat',...
+            n,p,2*q2,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime)));
 
 end
 %  ------------------------------------------------------------------------
