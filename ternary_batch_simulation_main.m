@@ -89,21 +89,22 @@ fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
 % Initialize results arrays
 num_threads_sim = num_iter_sim / batchSize;
-BEP_Naive_batch = ones(1,num_threads_sim);  
-BEP_MsgPas_batch = ones(1,num_threads_sim); 
-maxTrueIterNaive = 0;
-maxTrueIterMsgPas = 0;
+BEP_Naive_batch = zeros(1,num_threads_sim);  
+BEP_MsgPas_batch = zeros(1,num_threads_sim); 
+numIterNaive = zeros(1,num_threads_sim);
+numIterMsgPas = zeros(1,num_threads_sim);
 
 % Save start time
 simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 
 parfor iter_thread = 1 : num_threads_sim
-    [BEP_Naive_batch(iter_thread), BEP_MsgPas_batch(iter_thread), numIterNaive, numIterMsgPas] = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize);
-    maxTrueIterNaive = max(maxTrueIterNaive, numIterNaive);
-    maxTrueIterMsgPas = max(maxTrueIterMsgPas, numIterMsgPas);
+    [BEP_Naive_batch(iter_thread), BEP_MsgPas_batch(iter_thread), numIterNaive(iter_thread), numIterMsgPas(iter_thread)] = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize);
+
 end
 
+maxTrueIterNaive = max(numIterNaive);
+maxTrueIterMsgPas = max(numIterMsgPas);
 % calc BEP
 BEP_Naive = mean(BEP_Naive_batch);
 BEP_MsgPas = mean(BEP_MsgPas_batch);
