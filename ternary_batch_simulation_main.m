@@ -17,7 +17,7 @@ end
 
 % Check if parallel pool exists, and if not, create one
 if isempty(gcp('nocreate'))
-    parpool(); % Create a parallel pool with the default settings
+    parpool(24); % Create a parallel pool with the default settings
 end
 
 % Get information about the parallel pool
