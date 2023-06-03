@@ -18,4 +18,4 @@ if [ ! -d "$logs_dir" ]; then
   mkdir "$logs_dir"
 fi
 
-"/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main(256, ${log_p}, 0.5, 50, 10)" > "$output_file" 2> "$error_file"
+"/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main(256, ${log_p}, 0.5, 1000, 50)" > "$output_file" 2> "$error_file"

@@ -112,8 +112,8 @@ fprintf('\tNaive BEP = %E, MsgPas BEP = %E\n', BEP_Naive, BEP_MsgPas);
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
 % Save data to .mat file
-save(sprintf('./Results/len%d_p%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s.mat',...
-            n,p,2*q2,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime)));
+save(sprintf('./Results/len%d_logp%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s.mat',...
+            n,log_p,2*q2,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime)));
 
 end
 %  ------------------------------------------------------------------------
