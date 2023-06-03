@@ -9,5 +9,5 @@
 PBS_O_WORKDIR=$HOME/project_1/TriLDPC
 cd $PBS_O_WORKDIR
 
-"/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main(256, ${log_p}, 0.5, 1000, 50)"
+"/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main(256, ${log_p}, 0.5, 50, 10)"
     
