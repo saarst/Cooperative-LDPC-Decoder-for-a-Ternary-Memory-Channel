@@ -2,7 +2,7 @@
 #PBS -q zeus_all_q
 #PBS -m abe
 #PBS -M saar.stern@campus.technion.ac.il
-#PBS -l select=20:ncpus=20
+#PBS -l select=2:ncpus=12
 #PBS -l select=mem=20GB
 #PBS -l walltime=24:00:00
 

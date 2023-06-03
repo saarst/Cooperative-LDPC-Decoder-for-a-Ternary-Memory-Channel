@@ -1,7 +1,7 @@
 function [BEP_Naive, BEP_MsgPas] = ternary_batch_simulation_main(n, log_p, R, num_iter_sim, batchSize)
 arguments
     n (1,1) {mustBeInteger,mustBePositive} = 8
-    log_p (1,1) {mustBeInteger,mustBeNegative} = -1
+    log_p (1,1) {mustBeNegative} = -1
     R (1,1) {mustBeLessThanOrEqual(R,1), mustBeGreaterThanOrEqual(R,0)} = 0.1
     num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
     batchSize (1,1) {mustBeInteger, mustBePositive} = 1000;
@@ -15,15 +15,15 @@ if ~isfolder(fullfile(".","Results"))
     mkdir(fullfile(".","Results"));
 end
 
-% % Check if parallel pool exists, and if not, create one
-% if isempty(gcp('nocreate'))
-%     parpool(); % Create a parallel pool with the default settings
-% end
-% 
-% % Get information about the parallel pool
-% pool = gcp();
-% numWorkers = pool.NumWorkers;
-% disp(numWorkers)
+% Check if parallel pool exists, and if not, create one
+if isempty(gcp('nocreate'))
+    parpool(); % Create a parallel pool with the default settings
+end
+
+% Get information about the parallel pool
+pool = gcp();
+numWorkers = pool.NumWorkers;
+disp(numWorkers)
 
 %% User-defined parameters
 % encoder parameters
