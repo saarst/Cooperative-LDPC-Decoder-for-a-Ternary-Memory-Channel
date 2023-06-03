@@ -33,12 +33,10 @@ classdef CNode < Node
             node_ids = keys(obj.neighbors);
             nodes = values(obj.neighbors);
             for i=1:length(node_ids)
-                node_id = node_ids(i);
-                node = nodes(i);
                 if obj.ind || obj.res
-                    obj.received_messages(node_id) = node.message(obj.uid, obj.ind, obj.res);
+                    obj.received_messages(node_ids(i)) = nodes(i).message(obj.uid, obj.ind, obj.res);
                 else
-                    obj.received_messages(node_id) = node.message(obj.uid);
+                    obj.received_messages(node_ids(i)) = nodes(i).message(obj.uid);
                 end
             end
             node_msgs = values(obj.received_messages);

@@ -40,9 +40,7 @@ classdef VNode < Node
             node_ids = keys(obj.neighbors);
             nodes = values(obj.neighbors);
             for i=1:length(node_ids)
-                node_id = node_ids(i);
-                node = nodes(i);
-                obj.received_messages(node_id) = node.message(obj.uid);
+                obj.received_messages(node_ids(i)) = nodes(i).message(obj.uid, i);
             end
             obj.msg_sum = sum(values(obj.received_messages));
         end
