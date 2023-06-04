@@ -9,7 +9,7 @@ arguments
     sequenceRes = 2
     ResultsFolder = "./Results"
 end
-
+disp(ResultsFolder)
 rng('shuffle');
 seed = rng;
 filepath = cd(fileparts(mfilename('fullpath')));
