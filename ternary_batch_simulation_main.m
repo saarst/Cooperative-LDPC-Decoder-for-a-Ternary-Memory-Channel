@@ -17,6 +17,9 @@ cd(filepath);
 if ~isfolder(fullfile(".","Results"))
     mkdir(fullfile(".","Results"));
 end
+if ~isfolder(ResultsFolder)
+    mkdir(ResultsFolder);
+end
 
 % Check if parallel pool exists, and if not, create one
 if isempty(gcp('nocreate'))
