@@ -10,9 +10,17 @@ function RunPBS(experimentName, logps, sequenceInd, sequenceRes, n, R, numIter, 
         batchSize = 50  % Default value for batchSize
     end
     
-    for log_p = logps
+    for i = 1:length(logps)
+        log_p = logps(i);
+        if length(numIter) > 1
+            numIterCurr = numIter(i);
+        else
+            numIterCurr = numIter;
+        end
         % Format and execute the qsub command with all the parameters
-        system(sprintf("qsub -v log_p=%g,experimentName='%s',sequenceInd=%d, sequenceRes=%d,n=%d,R=%g,numIter=%g,batchSize=%d ./PBS_main.sh", log_p, experimentName, sequenceInd,sequenceRes, n, R, numIter(log_p - logps(1) + 1), batchSize));
+        system(sprintf("qsub -v log_p=%g,experimentName='%s',sequenceInd=%d, sequenceRes=%d,n=%d,R=%g,numIter=%g,batchSize=%d ./PBS_main.sh", log_p, experimentName, sequenceInd,sequenceRes, n, R, numIterCurr, batchSize));
     end
 
 end
+
+
