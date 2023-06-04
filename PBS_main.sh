@@ -20,4 +20,4 @@ if [ ! -d "$logs_dir" ]; then
   mkdir "$logs_dir"
 fi
 
-"/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main(${n}, ${log_p}, ${R}, ${numIter}, ${batchSize}, ${sequenceInd}, ${sequenceRes}, '${experimentName}' )" > "$output_file" 2> "$error_file"
+"/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main(${n}, ${log_p}, ${R}, ${numIter}, ${batchSize}, ${sequenceInd}, ${sequenceRes}, './Results/${experimentName}' )" > "$output_file" 2> "$error_file"
