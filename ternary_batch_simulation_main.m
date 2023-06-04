@@ -1,10 +1,13 @@
-function [BEP_Naive, BEP_MsgPas] = ternary_batch_simulation_main(n, log_p, R, num_iter_sim, batchSize)
+function [BEP_Naive, BEP_MsgPas] = ternary_batch_simulation_main(n, log_p, R, num_iter_sim, batchSize, sequenceInd, sequenceRes, ResultsFolder)
 arguments
     n (1,1) {mustBeInteger,mustBePositive} = 8
     log_p (1,1) {mustBeNegative} = -1
     R (1,1) {mustBeLessThanOrEqual(R,1), mustBeGreaterThanOrEqual(R,0)} = 0.1
     num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
     batchSize (1,1) {mustBeInteger, mustBePositive} = 1000;
+    sequenceInd = 2;
+    sequenceRes = 2
+    ResultsFolder = "./Results"
 end
 
 rng('shuffle');
@@ -15,15 +18,15 @@ if ~isfolder(fullfile(".","Results"))
     mkdir(fullfile(".","Results"));
 end
 
-% Check if parallel pool exists, and if not, create one
-if isempty(gcp('nocreate'))
-    parpool(24); % Create a parallel pool with the default settings
-end
-
-% Get information about the parallel pool
-pool = gcp();
-numWorkers = pool.NumWorkers;
-disp(numWorkers)
+% % Check if parallel pool exists, and if not, create one
+% if isempty(gcp('nocreate'))
+%     parpool(24); % Create a parallel pool with the default settings
+% end
+% 
+% % Get information about the parallel pool
+% pool = gcp();
+% numWorkers = pool.NumWorkers;
+% disp(numWorkers)
 
 %% User-defined parameters
 % encoder parameters
@@ -90,7 +93,9 @@ fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 % Initialize results arrays
 num_threads_sim = num_iter_sim / batchSize;
 BEP_Naive_batch = zeros(1,num_threads_sim);  
-BEP_MsgPas_batch = zeros(1,num_threads_sim); 
+BEP_MsgPas_batch = zeros(1,num_threads_sim);
+BEPind_Naive_batch = zeros(1,num_threads_sim);  
+BEPind_MsgPas_batch = zeros(1,num_threads_sim); 
 numIterNaive = zeros(1,num_threads_sim);
 numIterMsgPas = zeros(1,num_threads_sim);
 
@@ -99,7 +104,8 @@ simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 
 parfor iter_thread = 1 : num_threads_sim
-    [BEP_Naive_batch(iter_thread), BEP_MsgPas_batch(iter_thread), numIterNaive(iter_thread), numIterMsgPas(iter_thread)] = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize);
+    [BEP_Naive_batch(iter_thread), BEP_MsgPas_batch(iter_thread), numIterNaive(iter_thread), numIterMsgPas(iter_thread), BEPind_Naive_batch(iter_thread), BEPind_MsgPas_batch(iter_thread)] =  ...
+        TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize, sequenceInd, sequenceRes);
 
 end
 
@@ -108,21 +114,25 @@ maxTrueIterMsgPas = max(numIterMsgPas);
 % calc BEP
 BEP_Naive = mean(BEP_Naive_batch);
 BEP_MsgPas = mean(BEP_MsgPas_batch);
+BEPind_Naive = mean(BEPind_Naive_batch);
+BEPind_MsgPas = mean(BEPind_MsgPas_batch);
 fprintf('\tNaive BEP = %E, MsgPas BEP = %E\n', BEP_Naive, BEP_MsgPas);
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
 % Save data to .mat file
-save(sprintf('./Results/len%d_logp%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s.mat',...
-            n,log_p,2*q2,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime)));
+save(sprintf('%s/len%d_logp%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s.mat',...
+            ResultsFolder,n,log_p,2*q2,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime)));
 
 end
 %  ------------------------------------------------------------------------
 
 
-function [BEP_Naive, BEP_MsgPas, maxTrueIterNaive, maxTrueIterMsgPas] = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize)
-    BEP_Naive_vec = ones(1,batchSize);  
-    BEP_MsgPas_vec = ones(1,batchSize);  
-    MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 20);
+function [BEP_Naive, BEP_MsgPas, maxTrueIterNaive, maxTrueIterMsgPas, BEPind_Naive, BEPind_MsgPas] = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize, sequenceInd, sequenceRes)
+    BEP_Naive_vec = ones(1,batchSize);
+    BEPind_Naive_vec = ones(1,batchSize);
+    BEP_MsgPas_vec = ones(1,batchSize);
+    BEPind_MsgPas_vec = ones(1,batchSize);
+    MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 40, sequenceInd, sequenceRes);
     NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, 20);
     maxTrueIterNaive = 0;
     maxTrueIterMsgPas = 0;
@@ -145,11 +155,19 @@ function [BEP_Naive, BEP_MsgPas, maxTrueIterNaive, maxTrueIterMsgPas] = TernaryB
         % - % - % BEP % - % - % 
      
         % 1. Standard 2-step decoder:
+        if isequal(decCodewordRM_Naive(:) > 0,CodewordComb(:) > 0)
+            BEPind_Naive_vec(iter_sim) = 0;
+        end
+
         if isequal(decCodewordRM_Naive(:),CodewordComb(:))
             maxTrueIterNaive = max(maxTrueIterNaive, numIterNaive);
             BEP_Naive_vec(iter_sim) = 0;
         end
         % 2. Interleaved iterations in message-passing:
+        if isequal(decCodewordRM_MsgPas(:) > 0,CodewordComb(:) > 0)
+            BEPind_MsgPas_vec(iter_sim) = 0;
+        end   
+
         if isequal(decCodewordRM_MsgPas(:),CodewordComb(:))
             maxTrueIterMsgPas = max(maxTrueIterMsgPas, numIterMsgPas);
             BEP_MsgPas_vec(iter_sim) = 0;
@@ -158,4 +176,6 @@ function [BEP_Naive, BEP_MsgPas, maxTrueIterNaive, maxTrueIterMsgPas] = TernaryB
     % - % - % BEP end % - % - % 
     BEP_Naive = mean(BEP_Naive_vec);
     BEP_MsgPas = mean(BEP_MsgPas_vec);
+    BEPind_Naive = mean(BEPind_Naive_vec);
+    BEPind_MsgPas = mean(BEPind_MsgPas_vec);
 end

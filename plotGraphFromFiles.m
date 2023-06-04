@@ -38,9 +38,9 @@ function plotGraphFromFiles(folderPath)
     
     % Plot the graph
     figure(1);
-    plot(logPValues, BEP_Naive_Values, 'o');
+    semilogy(logPValues, BEP_Naive_Values, 'o');
     hold on
-    plot(logPValues, BEP_MsgPas_Values, 'o');
+    semilogy(logPValues, BEP_MsgPas_Values, 'o');
     xlabel('log_p');
     ylabel('BEP');
     title('BEP over log_p, n=256, R=0.5');

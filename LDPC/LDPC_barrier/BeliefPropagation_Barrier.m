@@ -8,15 +8,19 @@ classdef BeliefPropagation_Barrier < handle
         graph
         n
         maxIter
+        sequenceInd
+        sequenceRes
     end
     
     methods
-        function obj = BeliefPropagation_Barrier(TannerGraph, H_ind, H_res, maxIter)
+        function obj = BeliefPropagation_Barrier(TannerGraph, H_ind, H_res, maxIter, sequenceInd, sequenceRes)
             obj.H_res = H_res;
             obj.H_ind = H_ind;
             obj.graph = TannerGraph;
             obj.n =  numEntries(TannerGraph.v_nodes);
             obj.maxIter = maxIter;
+            obj.sequenceInd = sequenceInd;
+            obj.sequenceRes = sequenceRes;
         end
         
         function [estimate, prob, suc, iter] = decode(obj, channel_word)
@@ -53,10 +57,15 @@ classdef BeliefPropagation_Barrier < handle
                 res_nodes(idx).initialize(0,1);
                 res_nodes(idx).receive_messages();
             end
+            indCount = 0;
+            resCount = 0;
 
             % Algorithm:
             for iter=1:obj.maxIter
-
+                if indCount == 0 && resCount == 0
+                    indCount = obj.sequenceInd;
+                    resCount = obj.sequenceRes;
+                end
                 % Estimate:
                 for i=1:length(vnodes)
                     prob(:,i) = vnodes(i).estimate();
@@ -72,21 +81,25 @@ classdef BeliefPropagation_Barrier < handle
                 if suc 
                     break
                 end
-
+                
                 % Vnodes receive messages:
                 for i=1:length(vnodes)
                     vnodes(i).receive_res_messages();
                     vnodes(i).receive_ind_messages();
                 end
 
-                % indNodes receive messages:
-                for i=1:length(ind_nodes)
-                    ind_nodes(i).receive_messages();
-                end
-                
-                % resNodes receive messages:
-                for i=1:length(res_nodes)
-                    res_nodes(i).receive_messages();
+                if indCount > 0
+                    % indNodes receive messages:
+                    for i=1:length(ind_nodes)
+                        ind_nodes(i).receive_messages();
+                    end
+                    indCount = indCount - 1;
+                elseif resCount > 0
+                    % resNodes receive messages:
+                    for i=1:length(res_nodes)
+                        res_nodes(i).receive_messages();
+                    end
+                    resCount = resCount - 1;
                 end
 
             end
