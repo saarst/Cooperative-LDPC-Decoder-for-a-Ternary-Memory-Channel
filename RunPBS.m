@@ -11,7 +11,7 @@ function RunPBS(experimentName, logps, sequence, n, R, numIter, batchSize)
     
     for log_p = logps
         % Format and execute the qsub command with all the parameters
-        system(sprintf("qsub -v log_p=%g,experimentName='%s',sequence=[%s],n=%d,R=%g,numIter=%g,batchSize=%d ./PBS_main.sh", log_p, experimentName, strjoin(string(sequence), ','), n, R, numIter(log_p - logps(1) + 1), batchSize));
+        system(sprintf("qsub -V -v log_p=%g,experimentName='%s',sequence=[%s],n=%d,R=%g,numIter=%g,batchSize=%d ./PBS_main.sh", log_p, experimentName, strjoin(string(sequence), ','), n, R, numIter(log_p - logps(1) + 1), batchSize));
     end
 
 end
