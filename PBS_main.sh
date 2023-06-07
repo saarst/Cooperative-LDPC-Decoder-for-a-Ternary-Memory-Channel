@@ -11,7 +11,7 @@
 PBS_O_WORKDIR=$HOME/project_1/TriLDPC
 cd $PBS_O_WORKDIR
 
-logs_dir="./logs"
+logs_dir="./logs/${experimentName}"
 if [ ! -d "$logs_dir" ]; then
   mkdir "$logs_dir"
 fi
