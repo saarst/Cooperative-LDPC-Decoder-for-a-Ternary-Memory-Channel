@@ -5,15 +5,15 @@
 #PBS -l select=2:ncpus=16
 #PBS -l select=mem=20GB
 #PBS -l walltime=24:00:00
-#PBS -o "$HOME/project_1/TriLDPC/logs/${experimentName}/${PBS_JOBNAME}.o${PBS_JOBID}"
-#PBS -e "$HOME/project_1/TriLDPC/logs/${experimentName}/${PBS_JOBNAME}.e${PBS_JOBID}"
+#PBS -o "/$HOME/project_1/TriLDPC/logs/${experimentName}/${PBS_JOBNAME}.o${PBS_JOBID}"
+#PBS -e "/$HOME/project_1/TriLDPC/logs/${experimentName}/${PBS_JOBNAME}.e${PBS_JOBID}"
 
 PBS_O_WORKDIR=$HOME/project_1/TriLDPC
 cd $PBS_O_WORKDIR
 
 logs_dir="./logs/${experimentName}"
 if [ ! -d "$logs_dir" ]; then
-  mkdir "$logs_dir"
+  mkdir -p "$logs_dir"
 fi
 
 
