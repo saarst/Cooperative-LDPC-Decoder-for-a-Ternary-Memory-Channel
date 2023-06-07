@@ -1,6 +1,6 @@
 function RunPBS(experimentName, logps, sequenceInd, sequenceRes, n, R, numIter, batchSize)
     arguments
-        experimentName = "TriLDPC"  % Default experiment name
+        experimentName (1,1) string  = "TriLDPC_"  % Default experiment name
         logps = -5:-3  % Default range of log_p values
         sequenceInd = 2  % Default sequence array
         sequenceRes = 2
@@ -9,7 +9,11 @@ function RunPBS(experimentName, logps, sequenceInd, sequenceRes, n, R, numIter, 
         numIter = 10000  % Default numIter values based on logps
         batchSize = 500  % Default value for batchSize
     end
-    
+    pattern = '^[A-Za-z0-9_]+$';
+    if isempty(regexp(experimentName, pattern, 'once'));
+        disp('String is not valid');
+    end
+
     for i = 1:length(logps)
         log_p = logps(i);
         if length(numIter) > 1
