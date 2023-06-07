@@ -6,8 +6,8 @@ function RunPBS(experimentName, logps, sequenceInd, sequenceRes, n, R, numIter, 
         sequenceRes = 2
         n = 256  % Default value for n
         R = 0.5  % Default value for R
-        numIter = 10.^(-logps + 2)  % Default numIter values based on logps
-        batchSize = 50  % Default value for batchSize
+        numIter = 10000  % Default numIter values based on logps
+        batchSize = 500  % Default value for batchSize
     end
     
     for i = 1:length(logps)
