@@ -14,10 +14,13 @@ function plotGraphFromFiles(folderPath)
     % Initialize arrays to store (n, log_p) pairs
     BEP_Naive_Values = [];
     BEP_MsgPas_Values = [];
+    
+    BEPind_Naive_Values = [];
+    BEPind_MsgPas_Values = [];
     logPValues = [];
 
     % Variables to extract from the struct in the file
-    vars = {"BEP_MsgPas", "BEP_Naive", "log_p"};
+    vars = {"BEP_MsgPas", "BEP_Naive", "log_p", "BEPind_Naive", "BEPind_MsgPas"};
 
     % Iterate over each file in the folder
     for i = 1:numel(files)
@@ -29,20 +32,27 @@ function plotGraphFromFiles(folderPath)
         logP = data.log_p;
         BEP_Naive = data.BEP_Naive;
         BEP_MsgPas = data.BEP_MsgPas;
-        
+        BEPind_MsgPas = data.BEPind_MsgPas;
+        BEPind_Naive = data.BEPind_Naive;
         % Append the values to the arrays
         BEP_Naive_Values = [BEP_Naive_Values, BEP_Naive];
         BEP_MsgPas_Values = [BEP_MsgPas_Values, BEP_MsgPas];
+        BEPind_Naive_Values = [BEPind_Naive_Values, BEPind_Naive];
+        BEPind_MsgPas_Values = [BEPind_MsgPas_Values, BEPind_MsgPas];
         logPValues = [logPValues, logP];
     end
     
     % Plot the graph
     figure(1);
-    semilogy(logPValues, BEP_Naive_Values, 'o');
+    semilogy(logPValues, BEP_Naive_Values);
     hold on
-    semilogy(logPValues, BEP_MsgPas_Values, 'o');
+    semilogy(logPValues, BEPind_Naive_Values);
+    hold on
+    semilogy(logPValues, BEP_MsgPas_Values);
+    hold on
+    semilogy(logPValues, BEPind_MsgPas_Values);
     xlabel('log_p');
     ylabel('BEP');
     title('BEP over log_p, n=256, R=0.5');
-    legend('BEP Naive', 'BEP MsgPas', 'Location', 'northwest');
+    legend('BEP Naive', 'BEP MsgPas', 'BEP ind Naive', 'BEP ind MsgPas', 'Location', 'northwest');
 end
