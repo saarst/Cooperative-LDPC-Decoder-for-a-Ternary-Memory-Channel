@@ -1,8 +1,9 @@
 % Tests:
 
-ratios = [2, 4, 8];
-sequences = {[ 2 2], [4 2], [2 4]}; 
-T = combinations(ratios, sequences);
+% ratios = [2, 4, 8];
+% sequences = {[ 2 2], [4 2], [2 4]}; 
+% T = combinations(ratios, sequences);
+T = load("testArray.mat","T").T;
 date = string(datetime('now','TimeZone','local','Format','d_M'));
 
 for i=1:height(T)
