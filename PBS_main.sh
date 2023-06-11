@@ -16,4 +16,4 @@ fi
 
 
 # Run MATLAB command and redirect output to the output file
-"/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main(${n}, ${log_p}, ${R}, ${numIter}, ${batchSize}, ${sequenceInd}, ${sequenceRes}, './Results/${experimentName}' )" > "$logs_dir/${PBS_JOBNAME}.o${PBS_JOBID}" 2> "$logs_dir/${PBS_JOBNAME}.e${PBS_JOBID}"
+"/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main(${n}, ${log_p}, ${R}, ${numIter}, ${batchSize}, ${sequenceInd}, ${sequenceRes}, %{ratio}, './Results/${experimentName}' )" > "$logs_dir/${PBS_JOBNAME}.o${PBS_JOBID}" 2> "$logs_dir/${PBS_JOBNAME}.e${PBS_JOBID}"

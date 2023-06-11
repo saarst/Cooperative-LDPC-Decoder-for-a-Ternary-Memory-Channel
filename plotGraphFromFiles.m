@@ -20,7 +20,7 @@ function plotGraphFromFiles(folderPath)
     logPValues = [];
 
     % Variables to extract from the struct in the file
-    vars = {"BEP_MsgPas", "BEP_Naive", "log_p", "BEPind_Naive", "BEPind_MsgPas"};
+    vars = {"BEP_MsgPas", "BEP_Naive", "log_p", "BEPind_Naive", "BEPind_MsgPas", "maxTrueIterMsgPas", "maxTrueIterNaive"};
 
     % Iterate over each file in the folder
     for i = 1:numel(files)
@@ -34,6 +34,9 @@ function plotGraphFromFiles(folderPath)
         BEP_MsgPas = data.BEP_MsgPas;
         BEPind_MsgPas = data.BEPind_MsgPas;
         BEPind_Naive = data.BEPind_Naive;
+        maxTrueIterMsgPas = data.maxTrueIterMsgPas;
+        maxTrueIterNaive = data.maxTrueIterNaive;
+        disp("with" + logP  + ": maxIterMsgPas : " + maxTrueIterMsgPas + ". maxIterNaive : " + maxTrueIterNaive);
         % Append the values to the arrays
         BEP_Naive_Values = [BEP_Naive_Values, BEP_Naive];
         BEP_MsgPas_Values = [BEP_MsgPas_Values, BEP_MsgPas];
@@ -54,5 +57,5 @@ function plotGraphFromFiles(folderPath)
     xlabel('log_p');
     ylabel('BEP');
     title('BEP over log_p, n=256, R=0.5');
-    legend('BEP Naive', 'BEP MsgPas', 'BEP ind Naive', 'BEP ind MsgPas', 'Location', 'northwest');
+    legend('BEP Naive',  'BEP ind Naive', 'BEP MsgPas', 'BEP ind MsgPas', 'Location', 'northwest');
 end

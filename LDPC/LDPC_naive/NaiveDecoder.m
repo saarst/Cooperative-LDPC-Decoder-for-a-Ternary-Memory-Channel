@@ -18,6 +18,7 @@ function [decCodewordRM_Naive, success, maxIter] = NaiveDecoder(ChannelOut, Naiv
     %% 4. decode c_res from r_res
     [res_success, c_res_estimate] = LDPC_del_iterative(H_sys_res, r_res);
     if ~res_success
+        decCodewordRM_Naive = c_ind_estimate;
         return
     end
 

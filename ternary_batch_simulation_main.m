@@ -1,4 +1,4 @@
-function [BEP_Naive, BEP_MsgPas] = ternary_batch_simulation_main(n, log_p, R, num_iter_sim, batchSize, sequenceInd, sequenceRes, ResultsFolder)
+function [BEP_Naive, BEP_MsgPas] = ternary_batch_simulation_main(n, log_p, R, num_iter_sim, batchSize, sequenceInd, sequenceRes, ratio, ResultsFolder)
 arguments
     n (1,1) {mustBeInteger,mustBePositive} = 8
     log_p (1,1) {mustBeNegative} = -1
@@ -6,7 +6,8 @@ arguments
     num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
     batchSize (1,1) {mustBeInteger, mustBePositive} = 1000;
     sequenceInd = 2;
-    sequenceRes = 2
+    sequenceRes = 2;
+    ratio {mustBePositive} = 2; 
     ResultsFolder = "./Results"
 end
 disp(ResultsFolder)
@@ -38,7 +39,7 @@ rate_res        = R;
 % Simulation parameters
 p = 10^(log_p);
 q               = 3;   % alphabet size
-q2              = p/2; % upward error probability, q/2
+q2              = p/ratio; % upward error probability, q/2
 ChannelType     = "random"; % "random" / "upto"
 
 %% Construct LDPC codes
@@ -135,7 +136,7 @@ function [BEP_Naive, BEP_MsgPas, maxTrueIterNaive, maxTrueIterMsgPas, BEPind_Nai
     BEPind_Naive_vec = ones(1,batchSize);
     BEP_MsgPas_vec = ones(1,batchSize);
     BEPind_MsgPas_vec = ones(1,batchSize);
-    MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 40, sequenceInd, sequenceRes);
+    MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 45, sequenceInd, sequenceRes);
     NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, 20);
     maxTrueIterNaive = 0;
     maxTrueIterMsgPas = 0;
