@@ -15,8 +15,9 @@ function RunPBS(experimentName, logps, sequenceInd, sequenceRes, ratio, n, R, nu
         disp('String is not valid');
     end
 
-    if ~isfolder(fullfile(".","logs",experimentName))
-        mkdir(ResultsFolder);
+    logsDir = fullfile(".","logs",experimentName);
+    if ~isfolder(logsDir)
+        mkdir(logsDir);
     end
 
     for i = 1:length(logps)
@@ -27,7 +28,9 @@ function RunPBS(experimentName, logps, sequenceInd, sequenceRes, ratio, n, R, nu
             numIterCurr = numIter;
         end
         % Format and execute the qsub command with all the parameters
-        system(sprintf("qsub -N %s -v log_p=%g,experimentName=%s,sequenceInd=%d,sequenceRes=%d,ratio=%g,n=%d,R=%g,numIter=%g,batchSize=%d ./PBS_main.sh", experimentName, log_p, experimentName, sequenceInd,sequenceRes, ratio, n, R, numIterCurr, batchSize));
+        logFile = fullfile(logsDir,"e_logp" + log_p + ".txt");
+        outputeFile = fullfile(logsDir,"o_logp" + log_p + ".txt");
+        system(sprintf("qsub -N %s -o %s -e %s -v log_p=%g,experimentName=%s,sequenceInd=%d,sequenceRes=%d,ratio=%g,n=%d,R=%g,numIter=%g,batchSize=%d ./PBS_main.sh", experimentName, outputeFile, logFile, log_p, experimentName, sequenceInd,sequenceRes, ratio, n, R, numIterCurr, batchSize));
     end
 
 end
