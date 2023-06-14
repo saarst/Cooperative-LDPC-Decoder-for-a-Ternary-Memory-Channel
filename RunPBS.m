@@ -15,6 +15,10 @@ function RunPBS(experimentName, logps, sequenceInd, sequenceRes, ratio, n, R, nu
         disp('String is not valid');
     end
 
+    if ~isfolder(fullfile(".","logs",experimentName))
+        mkdir(ResultsFolder);
+    end
+
     for i = 1:length(logps)
         log_p = logps(i);
         if length(numIter) > 1
