@@ -46,7 +46,7 @@ function plotGraphFromFiles(folderPath)
     end
     
     % Plot the graph
-    figure(1);
+    figure;
     semilogy(logPValues, BEP_Naive_Values);
     hold on
     semilogy(logPValues, BEPind_Naive_Values);
@@ -56,6 +56,6 @@ function plotGraphFromFiles(folderPath)
     semilogy(logPValues, BEPind_MsgPas_Values);
     xlabel('log_p');
     ylabel('BEP');
-    title('BEP over log_p, n=256, R=0.5');
+    title(folderPath);
     legend('BEP Naive',  'BEP ind Naive', 'BEP MsgPas', 'BEP ind MsgPas', 'Location', 'northwest');
 end
