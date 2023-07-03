@@ -4,16 +4,21 @@ function RunPBS(experimentName, logps, sequenceInd, sequenceRes, ratio, n, R, nu
         logps = -5:-3  % Default range of log_p values
         sequenceInd = 2  % Default sequence array
         sequenceRes = 2
-        ratio {mustBePositive} = 2;
+        ratio (1,1) string = "u1";
         n = 256  % Default value for n
         R = 0.5  % Default value for R
         numIter = 10000  % Default numIter values based on logps
         batchSize = 500  % Default value for batchSize
     end
     pattern = '^[A-Za-z0-9_]+$';
-    if isempty(regexp(experimentName, pattern, 'once'))
-        disp('String is not valid');
+    assert(~isempty(regexp(experimentName, pattern, 'once')),"experimentName: " + experimentName + " is not valid")
+    UpDown = ratio{1}(1);
+    assert(any(strcmp(UpDown,["u", "d"])), "ratio needs to be either Up or Down");
+    ratio = str2double(extractAfter(ratio,1));
+    if strcmp(UpDown,"u")
+        ratio = 1/ ratio;
     end
+
 
     logsDir = fullfile(".","logs",experimentName);
     if ~isfolder(logsDir)
