@@ -40,6 +40,7 @@ rate_res        = R;
 p = 10^(log_p);
 q               = 3;   % alphabet size
 q2              = p/ratio; % upward error probability, q/2
+assert(q2 <= 0.5," q2 > 0.5");
 ChannelType     = "random"; % "random" / "upto"
 
 %% Construct LDPC codes

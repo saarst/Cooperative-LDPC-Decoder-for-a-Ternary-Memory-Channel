@@ -1,4 +1,18 @@
-function plotGraphFromFiles(folderPath)
+function plotGraphFromFiles()
+    addpath(genpath("./Results"));
+    files = dir("./Results");
+    
+    dirFlags = [files.isdir];
+    subDirs = files(dirFlags);
+    subDirsNames = {subDirs(3:end).name};
+    for i=1:length(subDirsNames)
+        subDir = subDirsNames{i};
+        plotGraphFromFilesAux(fullfile("./Results",subDir));
+    end
+end
+
+
+function plotGraphFromFilesAux(folderPath)
     % plotGraphFromFiles - Plot a graph of (n, log_p) pairs from files in a folder
     %   folderPath: string, optional, path to the folder containing the files (default: "./Results")
 
@@ -56,6 +70,13 @@ function plotGraphFromFiles(folderPath)
     semilogy(logPValues, BEPind_MsgPas_Values);
     xlabel('log_p');
     ylabel('BEP');
-    title(folderPath);
+    folderPath = "./Results/d14_6_TriLDPC_12e3_r8_s4_2";
+    [~,folderName,~] = fileparts(folderPath);
+    nameSplitted = strsplit(folderName,"_");
+    ratioString = nameSplitted(5); ratio = extractAfter(ratioString,1);
+    seq1String = nameSplitted(6); seq1 = extractAfter(seq1String,1);
+    seq2 = nameSplitted(7);
+    currTitle = "$Iter : " + nameSplitted(4) + ",  \frac{\mathrm{Up}}{\mathrm{Down}} = " + ratio +  ", sequence : [" + seq1 + "," + seq2 + "]$";
+    title(currTitle,'Interpreter', 'latex', 'FontSize', 22);
     legend('BEP Naive',  'BEP ind Naive', 'BEP MsgPas', 'BEP ind MsgPas', 'Location', 'northwest');
 end
