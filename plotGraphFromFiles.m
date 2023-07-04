@@ -67,13 +67,13 @@ function plotGraphFromFilesAux(folderPath)
     
     % Plot the graph
     figure;
-    semilogy(logPValues, BEP_Naive_Values);
+    semilogy(logPValues, max(eps,BEP_Naive_Values) );
     hold on
-    semilogy(logPValues, BEPind_Naive_Values);
+    semilogy(logPValues, max(eps,BEPind_Naive_Values) );
     hold on
-    semilogy(logPValues, BEP_MsgPas_Values);
+    semilogy(logPValues, max(eps,BEP_MsgPas_Values) );
     hold on
-    semilogy(logPValues, BEPind_MsgPas_Values);
+    semilogy(logPValues, max(eps,BEPind_MsgPas_Values) );
     xlabel('log_p');
     ylabel('BEP');
     [~,folderName,~] = fileparts(folderPath);
