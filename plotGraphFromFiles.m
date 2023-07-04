@@ -76,7 +76,6 @@ function plotGraphFromFilesAux(folderPath)
     semilogy(logPValues, BEPind_MsgPas_Values);
     xlabel('log_p');
     ylabel('BEP');
-    folderPath = "./Results/TriLDPC_d3_7_n12e3_ru10_si4_sr2";
     [~,folderName,~] = fileparts(folderPath);
     nameSplitted = strsplit(folderName,"_");
     numIter = nameSplitted(4).extractAfter(1);
