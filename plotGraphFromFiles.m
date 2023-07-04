@@ -1,10 +1,16 @@
-function plotGraphFromFiles()
+function plotGraphFromFiles(matchedString)
+    arguments
+        matchedString string = ""
+    end
     addpath(genpath("./Results"));
     files = dir("./Results");
     
     dirFlags = [files.isdir];
     subDirs = files(dirFlags);
     subDirsNames = {subDirs(3:end).name};
+    if ~strcmp(matchedString,"")
+        subDirsNames = subDirsNames(contains(subDirsNames, matchedString));
+    end
     for i=1:length(subDirsNames)
         subDir = subDirsNames{i};
         plotGraphFromFilesAux(fullfile("./Results",subDir));
@@ -70,13 +76,19 @@ function plotGraphFromFilesAux(folderPath)
     semilogy(logPValues, BEPind_MsgPas_Values);
     xlabel('log_p');
     ylabel('BEP');
-    folderPath = "./Results/d14_6_TriLDPC_12e3_r8_s4_2";
+    folderPath = "./Results/TriLDPC_d3_7_n12e3_ru10_si4_sr2";
     [~,folderName,~] = fileparts(folderPath);
     nameSplitted = strsplit(folderName,"_");
-    ratioString = nameSplitted(5); ratio = extractAfter(ratioString,1);
-    seq1String = nameSplitted(6); seq1 = extractAfter(seq1String,1);
-    seq2 = nameSplitted(7);
-    currTitle = "$Iter : " + nameSplitted(4) + ",  \frac{\mathrm{Up}}{\mathrm{Down}} = " + ratio +  ", sequence : [" + seq1 + "," + seq2 + "]$";
+    numIter = nameSplitted(4).extractAfter(1);
+    ratio = nameSplitted(5).extractAfter(2);
+    ratioUpDown = nameSplitted(5).extract(2);
+    assert(any(strcmp(ratioUpDown,["u", "d"])), "ratio needs to be either Up or Down");
+    if strcmp(ratioUpDown,"d")
+        ratio = 1 / ratio;
+    end
+    seq1 = nameSplitted(6).extractAfter(2);
+    seq2 = nameSplitted(7).extractAfter(2);
+    currTitle = "$Iter : " + numIter + ",  \frac{\mathrm{Up}}{\mathrm{Down}} = " + ratio +  ", sequence : [" + seq1 + "," + seq2 + "]$";
     title(currTitle,'Interpreter', 'latex', 'FontSize', 22);
     legend('BEP Naive',  'BEP ind Naive', 'BEP MsgPas', 'BEP ind MsgPas', 'Location', 'northwest');
 end
