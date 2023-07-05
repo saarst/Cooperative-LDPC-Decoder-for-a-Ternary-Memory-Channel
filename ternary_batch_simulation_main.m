@@ -108,7 +108,7 @@ end
 % Get information about the parallel pool
 pool = gcp();
 fprintf("num of workers = %g \n", pool.NumWorkers);
-save(ResultsFolder + "pool.mat","pool");
+save(fullfile(ResultsFolder, log_p + "_pool.mat"), "pool");
 
 % main run:
 parfor iter_thread = 1 : num_threads_sim
