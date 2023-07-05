@@ -15,7 +15,7 @@ clc
 disp("Ternary LDPC simulation begin");
 disp("Parameters:")
 fprintf("n = %d, log_p = %g, rate_ind = %f, rate_res = %f, num_iter_sim = %g, batchSize = %g, sequenceInd = %d, sequenceRes = %d, ratio = %g, resultsFolder = %s \n", ...
-             n,          log_p,         rate_ind,      rate_res,          num_iter_sim,   batchSize,        sequenceInd,      sequenceRes,                    ResultsFolder);
+             n,          log_p,         rate_ind,      rate_res,          num_iter_sim,   batchSize,        sequenceInd,      sequenceRes,ratio,              ResultsFolder);
 rng('shuffle');
 seed = rng;
 filepath = cd(fileparts(mfilename('fullpath')));
