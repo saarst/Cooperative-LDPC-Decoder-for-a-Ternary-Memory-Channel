@@ -36,7 +36,7 @@ function RunPBS(experimentName, logps, sequenceInd, sequenceRes, ratio, n, Rate_
         % Format and execute the qsub command with all the parameters
         errorFile = fullfile(logsDir,"e_logp" + log_p + ".txt");
         outputeFile = fullfile(logsDir,"o_logp" + log_p + ".txt");
-        % system(sprintf("qsub -N %s -o %s -e %s -v log_p=%g,experimentName=%s,sequenceInd=%d,sequenceRes=%d,ratio=%g,n=%d,RateInd=%g,RateRes=%g,numIter=%g,batchSize=%d ./PBS_main.sh", experimentName, outputeFile, errorFile, log_p, experimentName, sequenceInd,sequenceRes, ratio, n, Rate_ind, Rate_res, numIterCurr, batchSize));
+        system(sprintf("qsub -N %s -o %s -e %s -v log_p=%g,experimentName=%s,sequenceInd=%d,sequenceRes=%d,ratio=%g,n=%d,RateInd=%g,RateRes=%g,numIter=%g,batchSize=%d ./PBS_main.sh", experimentName, outputeFile, errorFile, log_p, experimentName, sequenceInd,sequenceRes, ratio, n, Rate_ind, Rate_res, numIterCurr, batchSize));
     end
 
 end
