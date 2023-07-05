@@ -27,15 +27,6 @@ if ~isfolder(ResultsFolder)
     mkdir(ResultsFolder);
 end
 
-% Check if parallel pool exists, and if not, create one
-if isempty(gcp('nocreate'))
-    parpool(24); % Create a parallel pool with the default settings
-end
-
-% Get information about the parallel pool
-pool = gcp();
-numWorkers = pool.NumWorkers;
-fprintf("num of workers = %g \n", numWorkers);
 %% User-defined parameters
 % Simulation parameters
 p = 10^(log_p);
@@ -108,6 +99,17 @@ numIterMsgPas = zeros(1,num_threads_sim);
 % Save start time
 simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
+
+% Check if parallel pool exists, and if not, create one
+if isempty(gcp('nocreate'))
+    parpool(24); % Create a parallel pool with the default settings
+end
+
+% Get information about the parallel pool
+pool = gcp();
+numWorkers = pool.NumWorkers;
+fprintf("num of workers = %g \n", numWorkers);
+
 
 parfor iter_thread = 1 : num_threads_sim
     [BEP_Naive_batch(iter_thread), BEP_MsgPas_batch(iter_thread), numIterNaive(iter_thread), numIterMsgPas(iter_thread), BEPind_Naive_batch(iter_thread), BEPind_MsgPas_batch(iter_thread)] =  ...
