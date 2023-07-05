@@ -37,6 +37,7 @@ function RunPBS(experimentName, logps, sequenceInd, sequenceRes, ratio, n, Rate_
         errorFile = fullfile(logsDir,"e_logp" + log_p + ".txt");
         outputeFile = fullfile(logsDir,"o_logp" + log_p + ".txt");
         system(sprintf("qsub -N %s -o %s -e %s -v log_p=%g,experimentName=%s,sequenceInd=%d,sequenceRes=%d,ratio=%g,n=%d,RateInd=%g,RateRes=%g,numIter=%g,batchSize=%d ./PBS_main.sh", experimentName, outputeFile, errorFile, log_p, experimentName, sequenceInd,sequenceRes, ratio, n, Rate_ind, Rate_res, numIterCurr, batchSize));
+        fprintf("%s has started with log_p = %g", experimentName, log_p);
     end
 
 end
