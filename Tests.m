@@ -4,7 +4,8 @@
 % rates = {[0.75, 0.5], [0.75, 0.1]}; % first is ind, second is res
 % T = combinations(ratios, sequences, rates);
 T = load("testArray2.mat","T").T;
-date = string(datetime('now','TimeZone','local','Format','ddMMHHmm'));
+date = char(datetime('now','TimeZone','local','Format','ddMMHHmm'));
+
 n = 128;
 numIter = "24e3";
 for i=1:height(T)

@@ -14,7 +14,7 @@ end
 clc
 disp("Ternary LDPC simulation begin");
 disp("Parameters:")
-fprintf("n = %d, log_p = %g, rate_ind = %f, rate_res = %f, num_iter_sim = %g, batchSize = %g, sequenceInd = %d, sequenceRes = %d, ratio = %g, resultsFolder = %s \n", ...
+fprintf("n = %d, log_p = %g, rate_ind = %f, rate_res = %f, num_iter_sim = %g, batchSize = %g, sequenceInd = %d, sequenceRes = %d, ratio = %g, resultsFolder = '%s' \n", ...
              n,          log_p,         rate_ind,      rate_res,          num_iter_sim,   batchSize,        sequenceInd,      sequenceRes,ratio,              ResultsFolder);
 rng('shuffle');
 seed = rng;
@@ -82,6 +82,7 @@ H_sys_res = full(H);
 rate_res_actual = (n-size(H_sys_res,1)) / n;
 
 rmpath(fullfile('.','gen_par_mats'));
+fprintf("Loading Files is complete\n");
 
 
 %% Probability of correcting (p,q) errors with LDPC-LDPC code
@@ -107,6 +108,7 @@ end
 % Get information about the parallel pool
 pool = gcp();
 fprintf("num of workers = %g \n", pool.NumWorkers);
+save(ResultsFolder + "pool.mat","pool");
 
 % main run:
 parfor iter_thread = 1 : num_threads_sim
