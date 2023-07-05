@@ -1,14 +1,14 @@
 function [BEP_Naive, BEP_MsgPas] = ternary_batch_simulation_main(n, log_p, rate_ind, rate_res, num_iter_sim, batchSize, sequenceInd, sequenceRes, ratio, ResultsFolder)
 arguments
-    n (1,1) {mustBeInteger,mustBePositive} = 8
-    log_p (1,1) {mustBeNegative} = -1
-    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.1
+    n (1,1) {mustBeInteger,mustBePositive} = 16
+    log_p (1,1) {mustBeNegative} = -5
+    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.25
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.1
     num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
     batchSize (1,1) {mustBeInteger, mustBePositive} = 1000;
-    sequenceInd = 2;
+    sequenceInd = 4;
     sequenceRes = 2;
-    ratio {mustBePositive} = 2; 
+    ratio {mustBePositive} = 0.5; 
     ResultsFolder = "./Results"
 end
 disp(ResultsFolder)

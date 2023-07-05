@@ -16,5 +16,5 @@ for i=1:height(T)
     experimentName = sprintf("TriLDPC_d%s_n%d_I%s_r%s_si%d_sr%d_Ri%s_Rr%s",date, n, numIter, ratio, sequence(1), sequence(2), rateIndStr, rateResStr);
     % d - date, I - num of Iterations, r - ratio, 
     % si - indicator part of sequence, sr - residual part of seuquence
-    RunPBS(experimentName, -7:-4, sequence(1), sequence(2), ratio, n, rate(1), rate(2), str2double(numIter), 500)
+    RunPBS(experimentName, -7:-4, sequence(1), sequence(2), ratio, n, rate(1), rate(2), str2double(numIter), 1000)
 end

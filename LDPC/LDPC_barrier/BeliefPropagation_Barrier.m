@@ -32,7 +32,7 @@ classdef BeliefPropagation_Barrier < handle
             estimated_ind = estimate ~= 0;
             syndrome_ind = mod(obj.H_ind * estimated_ind',2);
             syndrome_res = mod(obj.H_res * estimated_res',2);
-            suc = ~any([syndrome_ind, syndrome_res],'all');
+            suc = ~any([syndrome_ind; syndrome_res]);
             if suc 
                 return
             end
@@ -77,7 +77,7 @@ classdef BeliefPropagation_Barrier < handle
                 estimated_ind = estimate ~= 0;
                 syndrome_ind = mod(obj.H_ind * estimated_ind',2);
                 syndrome_res = mod(obj.H_res * estimated_res',2);
-                suc = ~any([syndrome_ind, syndrome_res],'all');
+                suc = ~any([syndrome_ind; syndrome_res]);
                 if suc 
                     break
                 end
