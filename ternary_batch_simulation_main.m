@@ -11,7 +11,11 @@ arguments
     ratio {mustBePositive} = 0.5; 
     ResultsFolder = "./Results"
 end
-disp(ResultsFolder)
+clc
+disp("Ternary LDPC simulation begin");
+disp("Parameters:")
+fprintf("n = %d, log_p = %g, rate_ind = %f, rate_res = %f, num_iter_sim = %g, batchSize = %g, sequenceInd = %d, sequenceRes = %d, ratio = %g, resultsFolder = %s \n", ...
+             n,          log_p,         rate_ind,      rate_res,          num_iter_sim,   batchSize,        sequenceInd,      sequenceRes,                    ResultsFolder);
 rng('shuffle');
 seed = rng;
 filepath = cd(fileparts(mfilename('fullpath')));
@@ -31,8 +35,7 @@ end
 % Get information about the parallel pool
 pool = gcp();
 numWorkers = pool.NumWorkers;
-disp(numWorkers)
-
+fprintf("num of workers = %g \n", numWorkers);
 %% User-defined parameters
 % Simulation parameters
 p = 10^(log_p);
@@ -121,6 +124,7 @@ BEPind_Naive = mean(BEPind_Naive_batch);
 BEPind_MsgPas = mean(BEPind_MsgPas_batch);
 fprintf('\tNaive BEP = %E, MsgPas BEP = %E\n', BEP_Naive, BEP_MsgPas);
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
+fprintf("End of simulation\n");
 
 % Save data to .mat file
 save(sprintf('%s/len%d_logp%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s.mat',...
