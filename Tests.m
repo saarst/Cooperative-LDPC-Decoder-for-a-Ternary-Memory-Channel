@@ -3,7 +3,7 @@
 % sequences = {[2 2], [4 2], [6 2]};
 % rates = {[0.75, 0.5], [0.75, 0.1]}; % first is ind, second is res
 % T = combinations(ratios, sequences, rates);
-T = load("testArrayDebug.mat","T").T;
+T = load("testArray2.mat","T").T;
 date = char(datetime('now','TimeZone','local','Format','ddMMHHmm'));
 
 n = 128;
