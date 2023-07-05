@@ -104,26 +104,25 @@ simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 if isempty(gcp('nocreate'))
     parpool(24); % Create a parallel pool with the default settings
 end
-
 % Get information about the parallel pool
 pool = gcp();
-numWorkers = pool.NumWorkers;
-fprintf("num of workers = %g \n", numWorkers);
+fprintf("num of workers = %g \n", pool.NumWorkers);
 
-
+% main run:
 parfor iter_thread = 1 : num_threads_sim
     [BEP_Naive_batch(iter_thread), BEP_MsgPas_batch(iter_thread), numIterNaive(iter_thread), numIterMsgPas(iter_thread), BEPind_Naive_batch(iter_thread), BEPind_MsgPas_batch(iter_thread)] =  ...
         TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize, sequenceInd, sequenceRes);
 
 end
-
+% statistics:
 maxTrueIterNaive = max(numIterNaive);
 maxTrueIterMsgPas = max(numIterMsgPas);
-% calc BEP
 BEP_Naive = mean(BEP_Naive_batch);
 BEP_MsgPas = mean(BEP_MsgPas_batch);
 BEPind_Naive = mean(BEPind_Naive_batch);
 BEPind_MsgPas = mean(BEPind_MsgPas_batch);
+
+% print BEP
 fprintf('\tNaive BEP = %E, MsgPas BEP = %E\n', BEP_Naive, BEP_MsgPas);
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 fprintf("End of simulation\n");
@@ -134,7 +133,7 @@ save(sprintf('%s/len%d_logp%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s.mat',...
 
 end
 %  ------------------------------------------------------------------------
-
+% internal functions:
 
 function [BEP_Naive, BEP_MsgPas, maxTrueIterNaive, maxTrueIterMsgPas, BEPind_Naive, BEPind_MsgPas] = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize, sequenceInd, sequenceRes)
     BEP_Naive_vec = ones(1,batchSize);
