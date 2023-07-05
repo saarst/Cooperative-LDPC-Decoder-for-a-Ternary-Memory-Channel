@@ -1,4 +1,4 @@
-function [BEP_Naive, BEP_MsgPas] = ternary_batch_simulation_main(n, log_p, rate_ind, rate_res, num_iter_sim, batchSize, sequenceInd, sequenceRes, ratio, ResultsFolder)
+function ternary_batch_simulation_main(n, log_p, rate_ind, rate_res, num_iter_sim, batchSize, sequenceInd, sequenceRes, ratio, ResultsFolder)
 arguments
     n (1,1) {mustBeInteger,mustBePositive} = 16
     log_p (1,1) {mustBeNegative} = -5
