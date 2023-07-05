@@ -1,4 +1,4 @@
-function RunPBS(experimentName, logps, sequenceInd, sequenceRes, ratio, n, R, numIter, batchSize)
+function RunPBS(experimentName, logps, sequenceInd, sequenceRes, ratio, n, Rate_ind, Rate_res, numIter, batchSize)
     arguments
         experimentName (1,1) string  = "TriLDPC_"  % Default experiment name
         logps = -5:-3  % Default range of log_p values
@@ -6,7 +6,8 @@ function RunPBS(experimentName, logps, sequenceInd, sequenceRes, ratio, n, R, nu
         sequenceRes = 2
         ratio (1,1) string = "u1";
         n = 256  % Default value for n
-        R = 0.5  % Default value for R
+        Rate_ind = 0.5  % Default value for Rate_ind
+        Rate_res = 0.5  % Default value for Rate_res
         numIter = 10000  % Default numIter values based on logps
         batchSize = 500  % Default value for batchSize
     end
@@ -36,7 +37,7 @@ function RunPBS(experimentName, logps, sequenceInd, sequenceRes, ratio, n, R, nu
         time = string(datetime('now','TimeZone','local','Format','HHmm'));
         errorFile = fullfile(logsDir,"e_logp" + log_p + "_t" + time + ".txt");
         outputeFile = fullfile(logsDir,"o_logp" + log_p +  "_t" + time + ".txt");
-        system(sprintf("qsub -N %s -o %s -e %s -v log_p=%g,experimentName=%s,sequenceInd=%d,sequenceRes=%d,ratio=%g,n=%d,R=%g,numIter=%g,batchSize=%d ./PBS_main.sh", experimentName, outputeFile, errorFile, log_p, experimentName, sequenceInd,sequenceRes, ratio, n, R, numIterCurr, batchSize));
+        system(sprintf("qsub -N %s -o %s -e %s -v log_p=%g,experimentName=%s,sequenceInd=%d,sequenceRes=%d,ratio=%g,n=%d,RateInd=%g,RateRes=%g,numIter=%g,batchSize=%d ./PBS_main.sh", experimentName, outputeFile, errorFile, log_p, experimentName, sequenceInd,sequenceRes, ratio, n, Rate_ind, Rate_res, numIterCurr, batchSize));
     end
 
 end
