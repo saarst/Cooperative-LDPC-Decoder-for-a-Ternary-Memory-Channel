@@ -106,9 +106,7 @@ if isempty(gcp('nocreate'))
     parpool(24); % Create a parallel pool with the default settings
 end
 % Get information about the parallel pool
-pool = gcp();
-fprintf("num of workers = %g \n", pool.NumWorkers);
-save(fullfile(ResultsFolder, log_p + "_pool.mat"), "pool");
+fprintf("num of workers = %g \n", gcp().NumWorkers);
 
 % main run:
 parfor iter_thread = 1 : num_threads_sim
