@@ -20,8 +20,6 @@ end
 
 function plotGraphFromFilesAux(folderPath)
     % plotGraphFromFiles - Plot a graph of (n, log_p) pairs from files in a folder
-    %   folderPath: string, optional, path to the folder containing the files (default: "./Results")
-
     arguments
         folderPath string = "./Results" % Default folder path
     end
@@ -40,7 +38,8 @@ function plotGraphFromFilesAux(folderPath)
     logPValues = [];
 
     % Variables to extract from the struct in the file
-    vars = {"BEP_MsgPas", "BEP_Naive", "log_p", "BEPind_Naive", "BEPind_MsgPas", "maxTrueIterMsgPas", "maxTrueIterNaive"};
+    vars = {"BEP_MsgPas", "BEP_Naive", "log_p", "BEPind_Naive", "BEPind_MsgPas", ...
+            "maxTrueIterMsgPas", "maxTrueIterNaive"};
 
     % Iterate over each file in the folder
     for i = 1:numel(files)
@@ -56,7 +55,8 @@ function plotGraphFromFilesAux(folderPath)
         BEPind_Naive = data.BEPind_Naive;
         maxTrueIterMsgPas = data.maxTrueIterMsgPas;
         maxTrueIterNaive = data.maxTrueIterNaive;
-        disp("with" + logP  + ": maxIterMsgPas : " + maxTrueIterMsgPas + ". maxIterNaive : " + maxTrueIterNaive);
+        disp("with" + logP  + ": maxIterMsgPas : " + maxTrueIterMsgPas + ...
+             ". maxIterNaive : " + maxTrueIterNaive);
         % Append the values to the arrays
         BEP_Naive_Values = [BEP_Naive_Values, BEP_Naive];
         BEP_MsgPas_Values = [BEP_MsgPas_Values, BEP_MsgPas];
@@ -78,6 +78,7 @@ function plotGraphFromFilesAux(folderPath)
     ylabel('BEP');
     [~,folderName,~] = fileparts(folderPath);
     nameSplitted = strsplit(folderName,"_");
+    len = nameSplitted(3).extractAfter(1);
     numIter = nameSplitted(4).extractAfter(1);
     ratio = nameSplitted(5).extractAfter(2);
     ratioUpDown = nameSplitted(5).extract(2);
@@ -85,9 +86,14 @@ function plotGraphFromFilesAux(folderPath)
     if strcmp(ratioUpDown,"d")
         ratio = 1 / ratio;
     end
-    seq1 = nameSplitted(6).extractAfter(2);
-    seq2 = nameSplitted(7).extractAfter(2);
-    currTitle = "$Iter : " + numIter + ",  \frac{\mathrm{Up}}{\mathrm{Down}} = " + ratio +  ", sequence : [" + seq1 + "," + seq2 + "]$";
-    title(currTitle,'Interpreter', 'latex', 'FontSize', 22);
+    seqInd = nameSplitted(6).extractAfter(2);
+    seqRes = nameSplitted(7).extractAfter(2);
+    RateInd = nameSplitted(8).extractAfter(2).insertAfter("0",".");
+    RateRes = nameSplitted(9).extractAfter(2).insertAfter("0",".");
+    currTitle1 = "$Len = " + len + " ,Iter : " + numIter + ... 
+                ",  \frac{\mathrm{Up}}{\mathrm{Down}} = " + ratio + "$";
+    currTitle2 = "$Sequence : [" + seqInd + "," + seqRes + "]" + ...
+                ", Rates : [" + RateInd + "," + RateRes + "]$";
+    title({currTitle1, currTitle2},'Interpreter', 'latex', 'FontSize', 14);
     legend('BEP Naive',  'BEP ind Naive', 'BEP MsgPas', 'BEP ind MsgPas', 'Location', 'northwest');
 end
