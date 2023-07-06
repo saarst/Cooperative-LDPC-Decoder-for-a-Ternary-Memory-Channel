@@ -74,7 +74,7 @@ function plotGraphFromFilesAux(folderPath)
     semilogy(logPValues, max(eps,BEP_MsgPas_Values) );
     hold on
     semilogy(logPValues, max(eps,BEPind_MsgPas_Values) );
-    xlabel('log_p');
+    xlabel('log(P(down))');
     ylabel('BEP');
     [~,folderName,~] = fileparts(folderPath);
     nameSplitted = strsplit(folderName,"_");
