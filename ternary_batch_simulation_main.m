@@ -2,7 +2,7 @@ function ternary_batch_simulation_main(n, log_p, rate_ind, rate_res, num_iter_si
 arguments
     n (1,1) {mustBeInteger,mustBePositive} = 16
     log_p (1,1) {mustBeNegative} = -5
-    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.25
+    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.75
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.1
     num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
     batchSize (1,1) {mustBeInteger, mustBePositive} = 1000;
@@ -44,8 +44,8 @@ filenameLDPC = sprintf('n%d_R0%.0f.mat',n,100*rate_ind);
 filepathLDPC = fullfile('.','LDPCcode',filenameLDPC);
 if ~exist(filepathLDPC,'file')
     try
-        [Lam, ~] = GenerateDist(15,rate_ind); % Generate distributions with requested rate of r
-        LDPCWrapper('GenerateIrregular',n,Lam,p,filepathLDPC); % Generate parity matrix for code length of n
+        [Lam, probInd] = GenerateDist(15,rate_ind); % Generate distributions with requested rate of r
+        LDPCWrapper('GenerateIrregular',n, Lam, probInd, filepathLDPC); % Generate parity matrix for code length of n
         SavePartiyMat(filepathLDPC); % Save MAT file
     catch err
         disp(err.getReport);
@@ -65,8 +65,8 @@ filenameLDPC = sprintf('n%d_R0%.0f.mat',n,100*rate_res);
 filepathLDPC = fullfile('.','LDPCcode',filenameLDPC);
 if ~exist(filepathLDPC,'file')
     try
-        [Lam, ~] = GenerateDist(15,rate_res); % Generate distributions with requested rate of r
-        LDPCWrapper('GenerateIrregular',n,Lam,p,filepathLDPC); % Generate parity matrix for code length of n
+        [Lam, probRes] = GenerateDist(15,rate_res); % Generate distributions with requested rate of r
+        LDPCWrapper('GenerateIrregular', n, Lam, probRes, filepathLDPC); % Generate parity matrix for code length of n
         SavePartiyMat(filepathLDPC); % Save MAT file
     catch err
         disp(err.getReport);
@@ -112,7 +112,6 @@ fprintf("num of workers = %g \n", gcp().NumWorkers);
 parfor iter_thread = 1 : num_threads_sim
     [BEP_Naive_batch(iter_thread), BEP_MsgPas_batch(iter_thread), numIterNaive(iter_thread), numIterMsgPas(iter_thread), BEPind_Naive_batch(iter_thread), BEPind_MsgPas_batch(iter_thread)] =  ...
         TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize, sequenceInd, sequenceRes);
-
 end
 % statistics:
 maxTrueIterNaive = max(numIterNaive);
