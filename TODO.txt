@@ -1,8 +1,8 @@
-1. increase span to 
-2. try [0.9, 0.25] [0.9, 0.4]
-3. messageInd and messageRes lenth - mean
-4. try ratio 10
-5. try [8,2]
+1. increase span to -8:-2 -- DONE
+2. try [0.9, 0.25] [0.9, 0.4] -- can't produce R=0.9
+3. messageInd and messageRes lenth mean -- DONE
+4. try ratio 10 -- DONE
+5. try [12,2] -- DONE
 6. add "naive" MsgPas
 7. add Naive Matlab
 

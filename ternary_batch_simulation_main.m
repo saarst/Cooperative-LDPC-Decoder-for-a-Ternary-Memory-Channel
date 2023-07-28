@@ -2,13 +2,13 @@ function ternary_batch_simulation_main(n, log_p, rate_ind, rate_res, num_iter_si
 arguments
     n (1,1) {mustBeInteger,mustBePositive} = 16
     log_p (1,1) {mustBeNegative} = -5
-    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.75
+    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.25
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.1
     num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
     batchSize (1,1) {mustBeInteger, mustBePositive} = 1000;
     sequenceInd = 4;
     sequenceRes = 2;
-    ratio {mustBePositive} = 0.5; 
+    ratio {mustBePositive} = 0.5; %  Down(p) / Up(q2) ratio
     ResultsFolder = "./Results"
 end
 clc
@@ -90,12 +90,8 @@ fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
 % Initialize results arrays
 num_threads_sim = num_iter_sim / batchSize;
-BEP_Naive_batch = zeros(1,num_threads_sim);  
-BEP_MsgPas_batch = zeros(1,num_threads_sim);
-BEPind_Naive_batch = zeros(1,num_threads_sim);  
-BEPind_MsgPas_batch = zeros(1,num_threads_sim); 
-numIterNaive = zeros(1,num_threads_sim);
-numIterMsgPas = zeros(1,num_threads_sim);
+stats = TernaryBatch([], [], [], [], [], [], 0, [], []);
+stats = repmat(stats,[1,num_threads_sim]);
 
 % Save start time
 simStartTime = datetime;
@@ -110,16 +106,13 @@ fprintf("num of workers = %g \n", gcp().NumWorkers);
 
 % main run:
 parfor iter_thread = 1 : num_threads_sim
-    [BEP_Naive_batch(iter_thread), BEP_MsgPas_batch(iter_thread), numIterNaive(iter_thread), numIterMsgPas(iter_thread), BEPind_Naive_batch(iter_thread), BEPind_MsgPas_batch(iter_thread)] =  ...
-        TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize, sequenceInd, sequenceRes);
+    stats(iter_thread) =  ...
+        TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, ...
+        batchSize, sequenceInd, sequenceRes);
 end
 % statistics:
-maxTrueIterNaive = max(numIterNaive);
-maxTrueIterMsgPas = max(numIterMsgPas);
-BEP_Naive = mean(BEP_Naive_batch);
-BEP_MsgPas = mean(BEP_MsgPas_batch);
-BEPind_Naive = mean(BEPind_Naive_batch);
-BEPind_MsgPas = mean(BEPind_MsgPas_batch);
+BEP_Naive = mean([stats.BEP_Naive]);
+BEP_MsgPas = mean([stats.BEP_MsgPas]);
 
 % print BEP
 fprintf('\tNaive BEP = %E, MsgPas BEP = %E\n', BEP_Naive, BEP_MsgPas);
@@ -134,55 +127,84 @@ end
 %  ------------------------------------------------------------------------
 % internal functions:
 
-function [BEP_Naive, BEP_MsgPas, maxTrueIterNaive, maxTrueIterMsgPas, BEPind_Naive, BEPind_MsgPas] = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize, sequenceInd, sequenceRes)
+function stats = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize, ...
+          sequenceInd, sequenceRes)
+    % Initializatoins:
     BEP_Naive_vec = ones(1,batchSize);
     BEPind_Naive_vec = ones(1,batchSize);
     BEP_MsgPas_vec = ones(1,batchSize);
     BEPind_MsgPas_vec = ones(1,batchSize);
-    MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 45, sequenceInd, sequenceRes);
-    NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, 20);
-    maxTrueIterNaive = 0;
-    maxTrueIterMsgPas = 0;
-    for iter_sim = 1:batchSize
-        % - % - % Encoding: % - % - % 
-        [CodewordComb,CodewordInd,CodewordRes,messageInd,messageRes] = ternary_enc_LDPCLDPC(gf(H_sys_ind,1),gf(H_sys_res,1));
-        % - % - % Encoding end % - % - % 
-        % - % - % Channel (asymmetric one2all): % - % - % 
-        tUp = q2* 2;
-        tDown = p;
-        ChannelOut = asymmchannel(CodewordComb, q, ChannelType, tUp, tDown);
-        tUp_Actual = sum(ChannelOut>CodewordComb);
-        tDown_Actual = sum(ChannelOut<CodewordComb);
-        % - % - % Channel end % - % - % 
-        
-        % - % - % Decoding: % - % - % 
-        [decCodewordRM_Naive, ~, numIterNaive]  = NaiveDecoder(ChannelOut, NaiveIndDec, H_sys_res, CodewordComb > 0);
-        [decCodewordRM_MsgPas, ~, ~, numIterMsgPas] = MsgPasDec.decode(ChannelOut);
-        % - % - % Decoding end % - % - % 
-        % - % - % BEP % - % - % 
-     
-        % 1. Standard 2-step decoder:
-        if isequal(decCodewordRM_Naive(:) > 0,CodewordComb(:) > 0)
-            BEPind_Naive_vec(iter_sim) = 0;
-        end
+    messageIndLength_vec = zeros(1, batchSize);
+    messageResLength_vec = zeros(1, batchSize);
+    numIterMsgPas_vec = zeros(1, batchSize);
+    numIterNaiveInd_vec = zeros(1, batchSize);
+    numIterNaiveRes_vec = zeros(1, batchSize);
 
-        if isequal(decCodewordRM_Naive(:),CodewordComb(:))
-            maxTrueIterNaive = max(maxTrueIterNaive, numIterNaive);
-            BEP_Naive_vec(iter_sim) = 0;
-        end
-        % 2. Interleaved iterations in message-passing:
-        if isequal(decCodewordRM_MsgPas(:) > 0,CodewordComb(:) > 0)
-            BEPind_MsgPas_vec(iter_sim) = 0;
-        end   
-
-        if isequal(decCodewordRM_MsgPas(:),CodewordComb(:))
-            maxTrueIterMsgPas = max(maxTrueIterMsgPas, numIterMsgPas);
-            BEP_MsgPas_vec(iter_sim) = 0;
+    if batchSize > 0
+        MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 50, sequenceInd, sequenceRes);
+        NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, 30);
+        for iter_sim = 1:batchSize
+            % - % - % Encoding: % - % - % 
+            [CodewordComb, CodewordInd, CodewordRes, messageInd, messageRes] =  ...
+                ternary_enc_LDPCLDPC(gf(H_sys_ind,1),gf(H_sys_res,1));
+            % - % - % Encoding end % - % - %
+            messageIndLength_vec(iter_sim) = length(messageInd);
+            messageResLength_vec(iter_sim) = length(messageRes);
+            % - % - % Channel (asymmetric one2all): % - % - % 
+            tUp = q2* 2;
+            tDown = p;
+            ChannelOut = asymmchannel(CodewordComb, q, ChannelType, tUp, tDown);
+            tUp_Actual = sum(ChannelOut>CodewordComb);
+            tDown_Actual = sum(ChannelOut<CodewordComb);
+            % - % - % Channel end % - % - % 
+            
+            % - % - % Decoding: % - % - % 
+            [decCodewordRM_Naive, ~, numIterNaiveInd_vec(iter_sim), ...
+                numIterNaiveRes_vec(iter_sim)]  =  ...
+                NaiveDecoder(ChannelOut, NaiveIndDec, H_sys_res, CodewordComb > 0);
+            [decCodewordRM_MsgPas, ~, ~, numIterMsgPas_vec(iter_sim)] =  ...
+                MsgPasDec.decode(ChannelOut);
+            % - % - % Decoding end % - % - % 
+            % - % - % BEP % - % - % 
+         
+            % 1. Standard 2-step decoder:
+            if isequal(decCodewordRM_Naive(:) > 0,CodewordComb(:) > 0)
+                BEPind_Naive_vec(iter_sim) = 0;
+            end
+    
+            if isequal(decCodewordRM_Naive(:),CodewordComb(:))
+                BEP_Naive_vec(iter_sim) = 0;
+            end
+            % 2. Interleaved iterations in message-passing:
+            if isequal(decCodewordRM_MsgPas(:) > 0,CodewordComb(:) > 0)
+                BEPind_MsgPas_vec(iter_sim) = 0;
+            end   
+    
+            if isequal(decCodewordRM_MsgPas(:),CodewordComb(:))
+                BEP_MsgPas_vec(iter_sim) = 0;
+            end
         end
     end
-    % - % - % BEP end % - % - % 
-    BEP_Naive = mean(BEP_Naive_vec);
-    BEP_MsgPas = mean(BEP_MsgPas_vec);
-    BEPind_Naive = mean(BEPind_Naive_vec);
-    BEPind_MsgPas = mean(BEPind_MsgPas_vec);
+    % - % - % BEP end % - % - %
+    % mean messageLength
+    stats.messageIndLen = mean(messageIndLength_vec);
+    stats.messageResLen = mean(messageResLength_vec);
+    % BEP
+    stats.BEP_Naive = mean(BEP_Naive_vec);
+    stats.BEP_MsgPas = mean(BEP_MsgPas_vec);
+    stats.BEPind_Naive = mean(BEPind_Naive_vec);
+    stats.BEPind_MsgPas = mean(BEPind_MsgPas_vec);
+    %max iters
+    stats.maxTrueIterNaiveInd = max(numIterNaiveInd_vec(BEPind_Naive_vec == 0));
+    stats.maxTrueIterNaiveRes = max(numIterNaiveRes_vec(BEP_Naive_vec == 0));
+    stats.maxTrueIterMsgPas = max(numIterMsgPas_vec(BEP_MsgPas_vec == 0));
+    % mean of true iters
+    stats.meanTrueIterNaiveInd = mean(numIterNaiveInd_vec(BEPind_Naive_vec == 0));
+    stats.meanTrueIterNaiveRes = mean(numIterNaiveRes_vec(BEP_Naive_vec == 0));
+    stats.meanTrueIterMsgPas = mean(numIterMsgPas_vec(BEP_MsgPas_vec == 0));
+    % mean of false iters
+    stats.meanFalseIterNaiveInd = mean(numIterNaiveInd_vec(BEPind_Naive_vec == 1));
+    stats.meanFalseIterNaiveRes = mean(numIterNaiveRes_vec(BEP_Naive_vec == 1));
+    stats.meanFalseIterMsgPas = mean(numIterMsgPas_vec(BEP_MsgPas_vec == 1));
+
 end
