@@ -34,6 +34,8 @@ q               = 3;   % alphabet size
 q2              = p/ratio; % upward error probability, q/2
 assert(q2 <= 0.5," q2 > 0.5");
 ChannelType     = "random"; % "random" / "upto"
+maxIterNaive = 30;
+maxIterMsgPas = 50;
 
 %% Construct LDPC codes
 addpath(fullfile('.','gen_par_mats'));
@@ -97,19 +99,20 @@ stats = repmat(stats,[1,num_threads_sim]);
 simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 
-% Check if parallel pool exists, and if not, create one
-if isempty(gcp('nocreate'))
-    parpool(24); % Create a parallel pool with the default settings
-end
+% create parllel pool
+c = parcluster('local');
+parpool(c,min(24,c.NumWorkers)); % Create a parallel pool with the default settings
 % Get information about the parallel pool
-fprintf("num of workers = %g \n", gcp().NumWorkers);
+NumWorkers = gcp().NumWorkers;
+fprintf("num of workers = %g \n", NumWorkers);
 
 % main run:
 parfor iter_thread = 1 : num_threads_sim
     stats(iter_thread) =  ...
         TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, ...
-        batchSize, sequenceInd, sequenceRes);
+        batchSize, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas);
 end
+delete(gcp)
 % statistics:
 BEP_Naive = mean([stats.BEP_Naive]);
 BEP_MsgPas = mean([stats.BEP_MsgPas]);
@@ -128,7 +131,7 @@ end
 % internal functions:
 
 function stats = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize, ...
-          sequenceInd, sequenceRes)
+          sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas)
     % Initializatoins:
     BEP_Naive_vec = ones(1,batchSize);
     BEPind_Naive_vec = ones(1,batchSize);
@@ -141,8 +144,8 @@ function stats = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batch
     numIterNaiveRes_vec = zeros(1, batchSize);
 
     if batchSize > 0
-        MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, 50, sequenceInd, sequenceRes);
-        NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, 30);
+        MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, maxIterMsgPas, sequenceInd, sequenceRes);
+        NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, maxIterNaive);
         for iter_sim = 1:batchSize
             % - % - % Encoding: % - % - % 
             [CodewordComb, CodewordInd, CodewordRes, messageInd, messageRes] =  ...

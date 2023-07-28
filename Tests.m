@@ -1,4 +1,4 @@
-% Tests:
+% % Tests:
 % ratios = "u" + ["10"];
 % sequences = {[4 2], [6 2], [12,2]};
 % rates = {[0.75, 0.5], [0.75, 0.1]}; % first is ind, second is res
