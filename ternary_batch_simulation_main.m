@@ -1,7 +1,7 @@
 function ternary_batch_simulation_main(n, log_p, rate_ind, rate_res, num_iter_sim, batchSize, sequenceInd, sequenceRes, ratio, ResultsFolder)
 arguments
     n (1,1) {mustBeInteger,mustBePositive} = 16
-    log_p (1,1) {mustBeNegative} = -5
+    log_p (1,1) {mustBeNegative} = -1
     rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.25
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.1
     num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
@@ -101,7 +101,8 @@ simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 
 % create parllel pool
 c = parcluster('local');
-parpool(c,min(24,c.NumWorkers)); % Create a parallel pool with the default settings
+delete(gcp('nocreate'));
+parpool(c,min([24,c.NumWorkers, num_threads_sim])); % Create a parallel pool with the default settings
 % Get information about the parallel pool
 NumWorkers = gcp().NumWorkers;
 fprintf("num of workers = %g \n", NumWorkers);
