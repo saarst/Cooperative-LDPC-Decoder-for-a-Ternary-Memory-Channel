@@ -11,6 +11,7 @@ arguments
     ratio {mustBePositive} = 0.5; %  Down(p) / Up(q2) ratio
     ResultsFolder = "./Results"
 end
+tic
 clc
 disp("Ternary LDPC simulation begin");
 disp("Parameters:")
@@ -122,6 +123,7 @@ BEP_MsgPas = mean([stats.BEP_MsgPas]);
 fprintf('\tNaive BEP = %E, MsgPas BEP = %E\n', BEP_Naive, BEP_MsgPas);
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 fprintf("End of simulation\n");
+TimeElapsed = toc;
 
 % Save data to .mat file
 save(sprintf('%s/len%d_logp%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s.mat',...
