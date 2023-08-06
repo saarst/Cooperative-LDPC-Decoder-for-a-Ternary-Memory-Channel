@@ -97,16 +97,16 @@ simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 % create parllel pool
 c = parcluster('local');
 delete(gcp('nocreate'));
-parpool(c,min([24,c.NumWorkers])); % Create a parallel pool with the default settings
+parpool(c,min([24*12,c.NumWorkers])); % Create a parallel pool with the default settings
 % Get information about the parallel pool
 NumWorkers = gcp().NumWorkers;
 fprintf("num of workers = %g \n", NumWorkers);
 
 % Initialize results arrays
-batchSize = round(num_iter_sim / NumWorkers);
+batchSize = ceil(num_iter_sim / NumWorkers);
 num_iter_sim = batchSize * NumWorkers;
 stats = TernaryBatch([], [], [], [], [], [], 0, [], []);
-stats = repmat(stats,[1,num_threads_sim]);
+stats = repmat(stats,[1,NumWorkers]);
 
 % Save data to .mat file
 save(sprintf('%s/len%d_logp%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s.mat',...
