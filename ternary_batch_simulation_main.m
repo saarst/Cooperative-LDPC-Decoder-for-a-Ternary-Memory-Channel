@@ -108,11 +108,6 @@ num_iter_sim = batchSize * NumWorkers;
 stats = TernaryBatch([], [], [], [], [], [], 0, [], []);
 stats = repmat(stats,[1,NumWorkers]);
 
-% Save data to .mat file
-save(sprintf('%s/len%d_logp%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s.mat',...
-            ResultsFolder,n,log_p,2*q2,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime)));
-return
-
 % main run:
 parfor iter_thread = 1 : NumWorkers
     stats(iter_thread) =  ...
