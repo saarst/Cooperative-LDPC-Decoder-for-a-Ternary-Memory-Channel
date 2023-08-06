@@ -63,6 +63,12 @@ function plotGraphFromFilesAux(folderPath)
         BEPind_MsgPas_Values = [BEPind_MsgPas_Values, BEPind_MsgPas];
         logPValues = [logPValues, logP];
     end
+    % sort:
+    [logPValues, indexes] = sort(logPValues);
+    BEP_Naive_Values = BEP_Naive_Values(indexes);
+    BEP_MsgPas_Values = BEP_MsgPas_Values(indexes);
+    BEPind_Naive_Values = BEPind_Naive_Values(indexes);
+    BEPind_MsgPas_Values = BEPind_MsgPas_Values(indexes);
     
     % Plot the graph
     figure;

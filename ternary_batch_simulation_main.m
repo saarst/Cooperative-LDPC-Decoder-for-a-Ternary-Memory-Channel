@@ -1,11 +1,10 @@
-function ternary_batch_simulation_main(n, log_p, rate_ind, rate_res, num_iter_sim, batchSize, sequenceInd, sequenceRes, ratio, ResultsFolder)
+function ternary_batch_simulation_main(n, log_p, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ratio, ResultsFolder)
 arguments
     n (1,1) {mustBeInteger,mustBePositive} = 16
     log_p (1,1) {mustBeNegative} = -1
     rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.25
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.1
     num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
-    batchSize (1,1) {mustBeInteger, mustBePositive} = 1000;
     sequenceInd = 4;
     sequenceRes = 2;
     ratio {mustBePositive} = 0.5; %  Down(p) / Up(q2) ratio
@@ -15,8 +14,8 @@ tic
 clc
 disp("Ternary LDPC simulation begin");
 disp("Parameters:")
-fprintf("n = %d, log_p = %g, rate_ind = %f, rate_res = %f, num_iter_sim = %g, batchSize = %g, sequenceInd = %d, sequenceRes = %d, ratio = %g, resultsFolder = '%s' \n", ...
-             n,          log_p,         rate_ind,      rate_res,          num_iter_sim,   batchSize,        sequenceInd,      sequenceRes,ratio,              ResultsFolder);
+fprintf("n = %d, log_p = %g, rate_ind = %f, rate_res = %f, num_iter_sim = %g, sequenceInd = %d, sequenceRes = %d, ratio = %g, resultsFolder = '%s' \n", ...
+             n,  log_p,      rate_ind,      rate_res,      num_iter_sim,      sequenceInd,      sequenceRes,      ratio,      ResultsFolder);
 rng('shuffle');
 seed = rng;
 filepath = cd(fileparts(mfilename('fullpath')));
@@ -35,7 +34,7 @@ q               = 3;   % alphabet size
 q2              = p/ratio; % upward error probability, q/2
 assert(q2 <= 0.5," q2 > 0.5");
 ChannelType     = "random"; % "random" / "upto"
-maxIterNaive = 30;
+maxIterNaive = 50;
 maxIterMsgPas = 50;
 
 %% Construct LDPC codes
@@ -91,10 +90,7 @@ fprintf("Loading Files is complete\n");
 %% Probability of correcting (p,q) errors with LDPC-LDPC code
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
-% Initialize results arrays
-num_threads_sim = num_iter_sim / batchSize;
-stats = TernaryBatch([], [], [], [], [], [], 0, [], []);
-stats = repmat(stats,[1,num_threads_sim]);
+
 
 % Save start time
 simStartTime = datetime;
@@ -103,13 +99,20 @@ simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 % create parllel pool
 c = parcluster('local');
 delete(gcp('nocreate'));
-parpool(c,min([24,c.NumWorkers, num_threads_sim])); % Create a parallel pool with the default settings
+parpool(c,min([24,c.NumWorkers])); % Create a parallel pool with the default settings
 % Get information about the parallel pool
 NumWorkers = gcp().NumWorkers;
 fprintf("num of workers = %g \n", NumWorkers);
 
+% Initialize results arrays
+batchSize = round(num_iter_sim / NumWorkers);
+num_iter_sim = batchSize * NumWorkers;
+stats = TernaryBatch([], [], [], [], [], [], 0, [], []);
+stats = repmat(stats,[1,num_threads_sim]);
+return
+
 % main run:
-parfor iter_thread = 1 : num_threads_sim
+parfor iter_thread = 1 : NumWorkers
     stats(iter_thread) =  ...
         TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, ...
         batchSize, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas);

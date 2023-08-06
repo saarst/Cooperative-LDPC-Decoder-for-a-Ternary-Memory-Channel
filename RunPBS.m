@@ -1,4 +1,4 @@
-function RunPBS(experimentName, logps, sequenceInd, sequenceRes, ratio, n, Rate_ind, Rate_res, numIter, batchSize)
+function RunPBS(experimentName, logps, sequenceInd, sequenceRes, ratio, n, Rate_ind, Rate_res, numIter)
     arguments
         experimentName (1,1) string  = "TriLDPC_"  % Default experiment name
         logps = -5:-3  % Default range of log_p values
@@ -9,7 +9,6 @@ function RunPBS(experimentName, logps, sequenceInd, sequenceRes, ratio, n, Rate_
         Rate_ind = 0.5  % Default value for Rate_ind
         Rate_res = 0.5  % Default value for Rate_res
         numIter = 10000  % Default numIter values based on logps
-        batchSize = 500  % Default value for batchSize
     end
     pattern = '^[A-Za-z0-9_]+$';
     assert(~isempty(regexp(experimentName, pattern, 'once')),"experimentName: " + experimentName + " is not valid")
@@ -36,7 +35,7 @@ function RunPBS(experimentName, logps, sequenceInd, sequenceRes, ratio, n, Rate_
         % Format and execute the qsub command with all the parameters
         errorFile = fullfile(logsDir,"e_logp" + log_p + ".txt");
         outputeFile = fullfile(logsDir,"o_logp" + log_p + ".txt");
-        system(sprintf("qsub -N %s -o %s -e %s -v log_p=%g,experimentName=%s,sequenceInd=%d,sequenceRes=%d,ratio=%g,n=%d,RateInd=%g,RateRes=%g,numIter=%g,batchSize=%d ./PBS_main.sh", experimentName, outputeFile, errorFile, log_p, experimentName, sequenceInd,sequenceRes, ratio, n, Rate_ind, Rate_res, numIterCurr, batchSize));
+        system(sprintf("qsub -N %s -o %s -e %s -v log_p=%g,experimentName=%s,sequenceInd=%d,sequenceRes=%d,ratio=%g,n=%d,RateInd=%g,RateRes=%g,numIter=%g ./PBS_main.sh", experimentName, outputeFile, errorFile, log_p, experimentName, sequenceInd,sequenceRes, ratio, n, Rate_ind, Rate_res, numIterCurr));
         fprintf("%s has started with log_p = %g\n", experimentName, log_p);
     end
 
