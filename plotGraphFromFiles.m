@@ -38,8 +38,7 @@ function plotGraphFromFilesAux(folderPath)
     logPValues = [];
 
     % Variables to extract from the struct in the file
-    vars = {"BEP_MsgPas", "BEP_Naive", "log_p", "BEPind_Naive", "BEPind_MsgPas", ...
-            "maxTrueIterMsgPas", "maxTrueIterNaive"};
+    vars = {"BEP_MsgPas", "BEP_Naive", "log_p", "stats"};
 
     % Iterate over each file in the folder
     for i = 1:numel(files)
@@ -51,10 +50,10 @@ function plotGraphFromFilesAux(folderPath)
         logP = data.log_p;
         BEP_Naive = data.BEP_Naive;
         BEP_MsgPas = data.BEP_MsgPas;
-        BEPind_MsgPas = data.BEPind_MsgPas;
-        BEPind_Naive = data.BEPind_Naive;
-        maxTrueIterMsgPas = data.maxTrueIterMsgPas;
-        maxTrueIterNaive = data.maxTrueIterNaive;
+        BEPind_MsgPas = mean([data.stats.BEPind_MsgPas]);
+        BEPind_Naive = mean([data.stats.BEPind_Naive]);
+        maxTrueIterMsgPas = max([data.stats.maxTrueIterMsgPas]);
+        maxTrueIterNaive = max([data.stats.maxTrueIterNaiveInd]);
         disp("with" + logP  + ": maxIterMsgPas : " + maxTrueIterMsgPas + ...
              ". maxIterNaive : " + maxTrueIterNaive);
         % Append the values to the arrays
