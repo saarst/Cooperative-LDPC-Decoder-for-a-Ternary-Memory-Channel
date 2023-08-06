@@ -10,4 +10,4 @@ PBS_O_WORKDIR=$HOME/project_1/TriLDPC
 cd $PBS_O_WORKDIR
 
 # Run MATLAB command and redirect output to the output file
-"/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main(${n}, ${log_p}, ${RateInd}, ${RateRes}, ${numIter}, ${batchSize}, ${sequenceInd}, ${sequenceRes}, ${ratio}, './Results/${experimentName}' )" 
+"/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main(${n}, ${log_p}, ${RateInd}, ${RateRes}, ${numIter}, ${sequenceInd}, ${sequenceRes}, ${ratio}, './Results/${experimentName}' )" 

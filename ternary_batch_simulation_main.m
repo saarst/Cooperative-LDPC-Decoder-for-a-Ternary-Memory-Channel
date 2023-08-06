@@ -90,8 +90,6 @@ fprintf("Loading Files is complete\n");
 %% Probability of correcting (p,q) errors with LDPC-LDPC code
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 
-
-
 % Save start time
 simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
@@ -109,6 +107,10 @@ batchSize = round(num_iter_sim / NumWorkers);
 num_iter_sim = batchSize * NumWorkers;
 stats = TernaryBatch([], [], [], [], [], [], 0, [], []);
 stats = repmat(stats,[1,num_threads_sim]);
+
+% Save data to .mat file
+save(sprintf('%s/len%d_logp%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s.mat',...
+            ResultsFolder,n,log_p,2*q2,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime)));
 return
 
 % main run:
