@@ -1,23 +1,25 @@
 % % Tests:
-% ratios = "u" + ["10"];
+% log_p = {log10(0.05)}; % downward errors
+% log_q = {log10(linspace(0.01,0.9,10))};
 % sequences = {[4 2]};
 % rates = {[0.5, 0.4]}; % first is ind, second is res
-% T = combinations(ratios, sequences, rates);
-T = load("testWaterfall.mat","T").T;
+% T = combinations(log_p, log_q, sequences, rates);
+T = load("testPQ.mat","T").T;
 date = char(datetime('now','TimeZone','local','Format','ddMMHHmm'));
 
 n = 128;
-numIter = "24e3";
 for i=1:height(T)
-    ratio = T{i,1};
-    sequence = T{i,2}{1};
-    rate = T{i,3}{1};
-    rateIndStr = string(rate(1)).replace(".","");
-    rateResStr = string(rate(2)).replace(".","");
-    experimentName = sprintf("TriLDPC_d%s_n%d_I%s_r%s_si%d_sr%d_Ri%s_Rr%s",date, n, numIter, ratio, sequence(1), sequence(2), rateIndStr, rateResStr);
+    log_p = T{i,1}{1};
+    log_q = T{i,2}{1};
+    log_pq = [repmat(log_p,size(log_q(:))), log_q(:)].';
+    numIter = ceil(10.^(-min(log_pq)+2));
+    sequence = T{i,3}{1};
+    rates = T{i,4}{1};
+    rateIndStr = string(rates(1)).replace(".","");
+    rateResStr = string(rates(2)).replace(".","");
+    experimentName = sprintf("TriLDPC_d%s_n%d_si%d_sr%d_Ri%s_Rr%s",date, n, sequence(1), sequence(2), rateIndStr, rateResStr);
     % d - date, I - num of Iterations, r - ratio, 
     % si - indicator part of sequence, sr - residual part of seuquence
-    % RunPBS(experimentName, -3:0.1:0.1, sequence(1), sequence(2), ratio, n, rate(1), rate(2), str2double(numIter))
-    RunPBS(experimentName, -3:0.1:-0.1, sequence(1), sequence(2), ratio, n, rate(1), rate(2), str2double(numIter))
+    RunPBS(experimentName, numIter, log_p, log_q, sequence(1), sequence(2), n, rates(1), rates(2))
 
 end

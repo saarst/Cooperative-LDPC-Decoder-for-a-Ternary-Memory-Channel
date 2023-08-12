@@ -1,13 +1,13 @@
-function ternary_batch_simulation_main(n, log_p, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ratio, ResultsFolder)
+function ternary_batch_simulation_main(n, log_p, log_q2, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ResultsFolder)
 arguments
     n (1,1) {mustBeInteger,mustBePositive} = 16
     log_p (1,1) {mustBeNegative} = -1
+    log_q2 (1,1) {mustBeNegative} = -1
     rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.25
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.1
     num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
     sequenceInd = 4;
     sequenceRes = 2;
-    ratio {mustBePositive} = 0.5; %  Down(p) / Up(q2) ratio
     ResultsFolder = "./Results"
 end
 tic
@@ -30,8 +30,8 @@ end
 %% User-defined parameters
 % Simulation parameters
 p = 10^(log_p);
-q               = 3;   % alphabet size
-q2              = p/ratio; % upward error probability, q/2
+q2  = 10^(log_q2); % upward error probability, q/2
+q   = 3;   % alphabet size
 assert(q2 <= 0.5," q2 > 0.5");
 ChannelType     = "random"; % "random" / "upto"
 maxIterNaive = 50;
