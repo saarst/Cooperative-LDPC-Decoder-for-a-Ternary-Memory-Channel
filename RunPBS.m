@@ -31,8 +31,8 @@ function RunPBS(experimentName, num_iter_sim, logps, logqs, sequenceInd, sequenc
             % Format and execute the qsub command with all the parameters
             errorFile = fullfile(logsDir,"e_logp" + log_p + "_logq" + log_q + ".txt");
             outputeFile = fullfile(logsDir,"o_logp" + log_p + "logq" + log_q + ".txt");
-            cmdString = "qsub -N %s -o %s -e %s -v log_p=%g,log_q=%g,experimentName=%s,sequenceInd=%d,sequenceRes=%d,n=%d,RateInd=%g,RateRes=%g,numIter=%g ./PBS_main.sh";
-            cmdVars = [experimentName, outputeFile, errorFile, log_p, log_q, experimentName, sequenceInd,sequenceRes, n, Rate_ind, Rate_res, numIterCurr];
+            cmdString = "qsub -N %s -o %s -e %s -v log_p=%g,log_q=%g,experimentName=%s,sequenceInd=%s,sequenceRes=%s,n=%s,RateInd=%g,RateRes=%g,numIter=%g ./PBS_main.sh";
+            cmdVars = [experimentName, outputeFile, errorFile, log_p, log_q, experimentName, sequenceInd, sequenceRes, n, Rate_ind, Rate_res, numIterCurr];
             system(sprintf(cmdString, cmdVars));
             fprintf("%s has started with log_p = %g log_q = %g\n", experimentName, log_p, log_q);
         end
