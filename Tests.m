@@ -1,10 +1,10 @@
 % % Tests:
-% log_p = {log10(0.05)}; % downward errors
+% log_p = {log10(0.001)}; % downward errors
 % log_q = {log10(linspace(0.01,0.2,20))};
 % sequences = {[4 2]};
 % rates = {[0.5, 0.4]}; % first is ind, second is res
 % T = combinations(log_p, log_q, sequences, rates);
-T = load("testPQ2.mat","T").T;
+T = load("testPQ3.mat","T").T;
 date = char(datetime('now','TimeZone','local','Format','ddMMHHmm'));
 
 n = 128;
