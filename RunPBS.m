@@ -3,7 +3,7 @@ function RunPBS(experimentName, num_iter_sim, logps, logqs, sequenceInd, sequenc
         experimentName (1,1) string  = "TriLDPC_"  % Default experiment name
         num_iter_sim (:,:) {mustBeInteger, mustBePositive} = 24e3;
         logps = -5:-3  % Default range of log_p values
-        logqs = -5:-3  % Default range of log_q2 values
+        logqs = -5:-3  % Default range of log_q values
         sequenceInd = 2  % Default sequence array
         sequenceRes = 2
         n = 256  % Default value for n
