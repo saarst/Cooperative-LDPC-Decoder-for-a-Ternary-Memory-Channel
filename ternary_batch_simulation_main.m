@@ -1,8 +1,8 @@
-function ternary_batch_simulation_main(n, log_p, log_q2, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ResultsFolder)
+function ternary_batch_simulation_main(n, log_p, log_q, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ResultsFolder)
 arguments
     n (1,1) {mustBeInteger,mustBePositive} = 16
     log_p (1,1) {mustBeNegative} = -1
-    log_q2 (1,1) {mustBeNegative} = -1
+    log_q (1,1) {mustBeNegative} = -1
     rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.25
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.1
     num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
@@ -30,9 +30,8 @@ end
 %% User-defined parameters
 % Simulation parameters
 p = 10^(log_p);
-q2  = 10^(log_q2); % upward error probability, q/2
-q   = 3;   % alphabet size
-assert(q2 <= 0.5," q2 > 0.5");
+q  = 10^(log_q); % upward error probability, q/2
+Q   = 3;   % alphabet size
 ChannelType     = "random"; % "random" / "upto"
 maxIterNaive = 50;
 maxIterMsgPas = 50;
@@ -111,7 +110,7 @@ stats = repmat(stats,[1,NumWorkers]);
 % main run:
 parfor iter_thread = 1 : NumWorkers
     stats(iter_thread) =  ...
-        TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, ...
+        TernaryBatch(ChannelType, H_sys_ind, H_sys_res, Q, p, q, ...
         batchSize, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas);
 end
 delete(gcp)
@@ -126,14 +125,14 @@ fprintf("End of simulation\n");
 TimeElapsed = toc;
 
 % Save data to .mat file
-save(sprintf('%s/len%d_logp%g_q%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s.mat',...
-            ResultsFolder,n,log_p,2*q2,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime)));
+save(sprintf('%s/len%d_logp%g_logq%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s.mat',...
+            ResultsFolder,n,log_p,log_q,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime)));
 
 end
 %  ------------------------------------------------------------------------
 % internal functions:
 
-function stats = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batchSize, ...
+function stats = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, Q, p, q, batchSize, ...
           sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas)
     % Initializatoins:
     BEP_Naive_vec = ones(1,batchSize);
@@ -147,8 +146,8 @@ function stats = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batch
     numIterNaiveRes_vec = zeros(1, batchSize);
 
     if batchSize > 0
-        MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, 2*q2, maxIterMsgPas, sequenceInd, sequenceRes);
-        NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, 2*q2, maxIterNaive);
+        MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, q, maxIterMsgPas, sequenceInd, sequenceRes);
+        NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, q, maxIterNaive);
         for iter_sim = 1:batchSize
             % - % - % Encoding: % - % - % 
             [CodewordComb, CodewordInd, CodewordRes, messageInd, messageRes] =  ...
@@ -157,9 +156,8 @@ function stats = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, q, p, q2, batch
             messageIndLength_vec(iter_sim) = length(messageInd);
             messageResLength_vec(iter_sim) = length(messageRes);
             % - % - % Channel (asymmetric one2all): % - % - % 
-            tUp = q2* 2;
-            tDown = p;
-            ChannelOut = asymmchannel(CodewordComb, q, ChannelType, tUp, tDown);
+            
+            ChannelOut = asymmchannel(CodewordComb, Q, ChannelType, q, p);
             tUp_Actual = sum(ChannelOut>CodewordComb);
             tDown_Actual = sum(ChannelOut<CodewordComb);
             % - % - % Channel end % - % - % 
