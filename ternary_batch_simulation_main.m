@@ -5,7 +5,7 @@ arguments
     log_q (1,1) {mustBeNegative} = -1
     rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.25
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.1
-    num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
+    num_iter_sim (1,1) {mustBeInteger, mustBePositive} = ceil(10^(-min[log_p, log_q] + 2));
     sequenceInd = 4;
     sequenceRes = 2;
     ResultsFolder = "./Results"
@@ -15,7 +15,7 @@ clc
 disp("Ternary LDPC simulation begin");
 disp("Parameters:")
 fprintf("n = %d, log_p = %g, log_q = %g, rate_ind = %f, rate_res = %f, num_iter_sim = %g, sequenceInd = %d, sequenceRes = %d, resultsFolder = '%s' \n", ...
-             n,  log_p,      log_q2,      rate_ind,      rate_res,      num_iter_sim,      sequenceInd,      sequenceRes,      ResultsFolder);
+             n,  log_p,      log_q,      rate_ind,      rate_res,      num_iter_sim,      sequenceInd,      sequenceRes,      ResultsFolder);
 rng('shuffle');
 seed = rng;
 filepath = cd(fileparts(mfilename('fullpath')));
