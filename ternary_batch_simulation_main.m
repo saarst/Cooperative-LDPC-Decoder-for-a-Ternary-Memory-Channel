@@ -5,7 +5,7 @@ arguments
     log_q (1,1) {mustBeNegative} = -1
     rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.25
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.1
-    num_iter_sim (1,1) {mustBeInteger, mustBePositive} = ceil(10^(-min[log_p, log_q] + 2));
+    num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
     sequenceInd = 4;
     sequenceRes = 2;
     ResultsFolder = "./Results"
