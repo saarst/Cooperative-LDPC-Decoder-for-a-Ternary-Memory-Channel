@@ -1,9 +1,9 @@
 % % Tests:
-log_p = {log10(0.001)}; % downward errors
-log_q = {log10(linspace(0.01,0.2,20))};
-sequences = {[4 2]};
-rates = {[0.75, 0.6]}; % first is ind, second is res
-T = combinations(log_p, log_q, sequences, rates);
+% log_p = {log10(0.001)}; % downward errors
+% log_q = {log10(linspace(0.01,0.2,20))};
+% sequences = {[4 2]};
+% rates = {[0.75, 0.6]}; % first is ind, second is res
+% T = combinations(log_p, log_q, sequences, rates);
 T = load("testPQ4.mat","T").T;
 date = char(datetime('now','TimeZone','local','Format','ddMMHHmm'));
 
