@@ -22,8 +22,8 @@ function RunBSCPBS(experimentName, num_iter_sim, logps, n, Rate)
             numIterCurr = num_iter_sim;
         end
         % Format and execute the qsub command with all the parameters
-        errorFile = fullfile(logsDir,"e_logp" + log_p + "_logq" + log_q + ".txt");
-        outputeFile = fullfile(logsDir,"o_logp" + log_p + "logq" + log_q + ".txt");
+        errorFile = fullfile(logsDir,"e_logp" + log_p + ".txt");
+        outputeFile = fullfile(logsDir,"o_logp" + log_p + ".txt");
         cmdString = "qsub -N %s -o %s -e %s -v log_p=%g,experimentName=%s,n=%s,Rate=%g,numIter=%g ./PBS_BSC.sh";
         cmdVars = [experimentName, outputeFile, errorFile, log_p, experimentName, n, Rate, numIterCurr];
         system(sprintf(cmdString, cmdVars));
