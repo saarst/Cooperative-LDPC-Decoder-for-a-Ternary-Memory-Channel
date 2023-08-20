@@ -115,7 +115,7 @@ function stats = BSCBatch(ChannelType, H_sys, Q, p, batchSize, ...
         Dec = BuildBSCDecoder(H_sys, p, maxIter);
         for iter_sim = 1:batchSize
             % - % - % Encoding: % - % - % 
-            [Codeword, message] =  BSC_enc_LDPCLDPC(gf(H_sys,1));
+            [Codeword, message] = BSC_enc_LDPCLDPC(gf(H_sys,1));
             % - % - % Encoding end % - % - %
             messageLength_vec(iter_sim) = length(message);
             % - % - % Channel (symetric one2all): % - % - % 
