@@ -86,7 +86,6 @@ parfor iter_thread = 1 : NumWorkers
         BSCBatch(ChannelType, H_sys, Q, p, batchSize, maxIter);
 end
 delete(gcp)
-delete(c)
 % statistics:
 BEP = mean([stats.BEP]);
 
