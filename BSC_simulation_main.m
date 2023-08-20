@@ -10,7 +10,7 @@ tic
 clc
 disp("BSC LDPC simulation begin");
 disp("Parameters:")
-fprintf("n = %d, log_p = %g, rate_ind = %f, num_iter_sim = %g, resultsFolder = '%s' \n", ...
+fprintf("n = %d, log_p = %g, rate = %f, num_iter_sim = %g, resultsFolder = '%s' \n", ...
              n,  log_p,      rate,      num_iter_sim,      ResultsFolder);
 rng('shuffle');
 seed = rng;
@@ -28,7 +28,7 @@ end
 p = 10^(log_p);
 Q   = 2;   % alphabet size
 ChannelType     = "random"; % "random" / "upto"
-maxIterNaive = 50;
+maxIter = 50;
 
 %% Construct LDPC codes
 addpath(fullfile('.','gen_par_mats'));
@@ -48,12 +48,12 @@ if ~exist(filepathLDPC,'file')
     end
 end
 load(filepathLDPC,"H","Hnonsys"); % H, Hnonsys are the parity-check matrices of the code
-H_sys_ind = full(H);
+H_sys = full(H);
 % what is this for?
 % H_nonsys_ind = full(Hnonsys);
 % enc_ind = comm.LDPCEncoder('ParityCheckMatrix',Hnonsys); 
 % dec_ind = comm.LDPCDecoder('ParityCheckMatrix',Hnonsys); % hard-decision message-passing decoder
-rate_ind_actual = (n-size(H_sys_ind,1)) / n;
+rate_actual = (n-size(H_sys,1)) / n;
 
 rmpath(fullfile('.','gen_par_mats'));
 fprintf("Loading Files is complete\n");
@@ -83,8 +83,7 @@ stats = repmat(stats,[1,NumWorkers]);
 % main run:
 parfor iter_thread = 1 : NumWorkers
     stats(iter_thread) =  ...
-        BSCBatch(ChannelType, H_sys_ind, Q, p, ...
-        batchSize, maxIterNaive);
+        BSCBatch(ChannelType, H_sys, Q, p, batchSize, maxIter);
 end
 delete(gcp)
 delete(c)
@@ -99,21 +98,21 @@ TimeElapsed = toc;
 
 % Save data to .mat file
 save(sprintf('%s/len%d_logp%g_LDPC_0%.0f_nIterSim%d_%s.mat',...
-            ResultsFolder,n,log_p,100*rate_ind_actual,num_iter_sim,string(simStartTime)));
+            ResultsFolder,n,log_p,100*rate_actual,num_iter_sim,string(simStartTime)));
 
 end
 %  ------------------------------------------------------------------------
 % internal functions:
 
 function stats = BSCBatch(ChannelType, H_sys, Q, p, batchSize, ...
-                              maxIterNaive)
+                              maxIter)
     % Initializatoins:
     BEP_vec = ones(1,batchSize);
     messageLength_vec = zeros(1, batchSize);
     numIter_vec = zeros(1, batchSize);
 
     if batchSize > 0
-        Dec = BuildBSCDecoder(H_sys, p, maxIterNaive);
+        Dec = BuildBSCDecoder(H_sys, p, maxIter);
         for iter_sim = 1:batchSize
             % - % - % Encoding: % - % - % 
             [Codeword, message] =  BSC_enc_LDPCLDPC(gf(H_sys,1));
