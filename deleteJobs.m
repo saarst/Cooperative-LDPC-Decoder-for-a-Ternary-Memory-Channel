@@ -1,3 +1,3 @@
-for i = 538188:538195
+for i = 621178:621210
     system("qdel " + i);
 end
