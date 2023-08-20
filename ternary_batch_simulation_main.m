@@ -114,6 +114,7 @@ parfor iter_thread = 1 : NumWorkers
         batchSize, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas);
 end
 delete(gcp)
+delete(c)
 % statistics:
 BEP_Naive = mean([stats.BEP_Naive]);
 BEP_MsgPas = mean([stats.BEP_MsgPas]);
