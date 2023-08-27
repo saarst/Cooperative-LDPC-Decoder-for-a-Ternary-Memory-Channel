@@ -7,7 +7,7 @@
 % T = load("testPQ4.mat","T").T;
 
 date = char(datetime('now','TimeZone','local','Format','ddMMHHmm'));
-n = 1024;
+n = 512;
 log_p = log10(linspace(0.005,0.08,20));
 numIter = ceil(10.^(-min(log_p)+2));
 rate = 0.25;
