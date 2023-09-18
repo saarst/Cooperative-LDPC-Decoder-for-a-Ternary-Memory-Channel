@@ -7,10 +7,10 @@
 % T = load("testPQ4.mat","T").T;
 
 date = char(datetime('now','TimeZone','local','Format','ddMMHHmm'));
-n = 512;
+n = 648;
 log_p = log10(linspace(0.005,0.08,20));
 numIter = ceil(10.^(-min(log_p)+2));
-rate = 0.25;
+rate = 0.5;
 rateStr = string(rate).replace(".","");
 experimentName = sprintf("BSCLDPC_d%s_n%d_R%s",date, n, rateStr);
 % d - date, I - num of Iterations

@@ -94,12 +94,17 @@ simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 
 % create parllel pool
-c = parcluster('local');
-delete(gcp('nocreate'));
-parpool(c,min([24*12,c.NumWorkers])); % Create a parallel pool with the default settings
-% Get information about the parallel pool
-NumWorkers = gcp().NumWorkers;
-fprintf("num of workers = %g \n", NumWorkers);
+currentPool = gcp('nocreate');
+if isempty(currentPool)
+    % If no parallel pool exists, create one with 40 workers
+    poolSize = 40;
+    parpool(poolSize);
+    disp(['Parallel pool created with ', num2str(poolSize), ' workers.']);
+else
+    % If a parallel pool exists, display the number of workers
+    poolSize = currentPool.NumWorkers;
+    disp(['Using existing parallel pool with ', num2str(poolSize), ' workers.']);
+end
 
 % Initialize results arrays
 batchSize = ceil(num_iter_sim / NumWorkers);
@@ -113,7 +118,6 @@ parfor iter_thread = 1 : NumWorkers
         TernaryBatch(ChannelType, H_sys_ind, H_sys_res, Q, p, q, ...
         batchSize, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas);
 end
-delete(gcp)
 % statistics:
 BEP_Naive = mean([stats.BEP_Naive]);
 BEP_MsgPas = mean([stats.BEP_MsgPas]);

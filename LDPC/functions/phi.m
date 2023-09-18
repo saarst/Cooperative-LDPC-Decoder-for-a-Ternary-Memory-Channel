@@ -3,6 +3,6 @@ function y = phi(x)
         y = 40;
         return
     end 
-    y = -log2(tanh(x/2));
+    y = -log(tanh(x/2));
 end
 

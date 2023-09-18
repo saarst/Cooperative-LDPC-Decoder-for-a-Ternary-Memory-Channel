@@ -9,5 +9,7 @@
 PBS_O_WORKDIR=$HOME/project_1/TriLDPC
 cd $PBS_O_WORKDIR
 
+echo "Number of allocated processors: $PBS_NUM_PPN"
+
 # Run MATLAB command and redirect output to the output file
 "/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main(${n}, ${log_p}, ${log_q}, ${RateInd}, ${RateRes}, ${numIter}, ${sequenceInd}, ${sequenceRes}, './Results/${experimentName}' )" 
