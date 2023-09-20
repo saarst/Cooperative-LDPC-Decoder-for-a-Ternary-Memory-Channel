@@ -78,11 +78,13 @@ if isempty(currentPool)
     % If no parallel pool exists, create one with 40 workers
     poolSize = 40;
     parpool(poolSize);
+    currentPool = gcp; % Get the current parallel pool
+    NumWorkers = currentPool.NumWorkers;
     disp(['Parallel pool created with ', num2str(poolSize), ' workers.']);
 else
     % If a parallel pool exists, display the number of workers
-    poolSize = currentPool.NumWorkers;
-    disp(['Using existing parallel pool with ', num2str(poolSize), ' workers.']);
+    NumWorkers = currentPool.NumWorkers;
+    disp(['Using existing parallel pool with ', num2str(NumWorkers), ' workers.']);
 end
 
 % Initialize results arrays
