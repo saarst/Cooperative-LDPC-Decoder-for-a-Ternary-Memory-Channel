@@ -8,7 +8,9 @@
 
 date = char(datetime('now','TimeZone','local','Format','ddMMHHmm'));
 n = 648;
-log_p = log10(linspace(0.005,0.08,20));
+% log_p = log10(linspace(0.005,0.08,20));
+log_p = log10(0.005);
+
 numIter = ceil(10.^(-min(log_p)+2));
 rate = 0.5;
 rateStr = string(rate).replace(".","");
