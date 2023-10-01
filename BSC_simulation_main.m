@@ -1,6 +1,6 @@
 function BSC_simulation_main(n, log_p, rate, num_iter_sim, ResultsFolder)
 arguments
-    n (1,1) {mustBeInteger,mustBePositive} = 648
+    n (1,1) {mustBeInteger,mustBePositive} = 256
     log_p (1,1) {mustBeNegative} = -1
     rate (1,1) {mustBeLessThanOrEqual(rate,1), mustBeGreaterThanOrEqual(rate,0)} = 0.5
     num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
@@ -28,7 +28,7 @@ end
 p = 10^(log_p);
 Q   = 2;   % alphabet size
 ChannelType     = "random"; % "random" / "upto"
-maxIter = 50;
+maxIter = 20;
 
 %% Construct LDPC codes
 addpath(fullfile('.','gen_par_mats'));
@@ -54,12 +54,12 @@ else
     end
     load(filepathLDPC,"H","Hnonsys"); % H, Hnonsys are the parity-check matrices of the code
 end
-H_sys = full(H);
+PCM = full(Hnonsys);
 % what is this for?
 % H_nonsys_ind = full(Hnonsys);
 % enc_ind = comm.LDPCEncoder('ParityCheckMatrix',Hnonsys); 
 % dec_ind = comm.LDPCDecoder('ParityCheckMatrix',Hnonsys); % hard-decision message-passing decoder
-rate_actual = (n-size(H_sys,1)) / n;
+rate_actual = (n-size(PCM,1)) / n;
 
 rmpath(fullfile('.','gen_par_mats'));
 fprintf("Loading Files is complete\n");
@@ -96,7 +96,7 @@ stats = repmat(stats,[1,NumWorkers]);
 % main run:
 parfor iter_thread = 1 : NumWorkers
     stats(iter_thread) =  ...
-        BSCBatch(ChannelType, H_sys, Q, p, batchSize, maxIter);
+        BSCBatch(ChannelType, PCM, Q, p, batchSize, maxIter);
 end
 % statistics:
 BEP = mean([stats.BEP]);
@@ -115,23 +115,24 @@ end
 %  ------------------------------------------------------------------------
 % internal functions:
 
-function stats = BSCBatch(ChannelType, H_sys, Q, p, batchSize, ...
+function stats = BSCBatch(ChannelType, PCM, Q, p, batchSize, ...
                               maxIter)
     % Initializatoins:
     BEP_vec = ones(1,batchSize);
     messageLength_vec = zeros(1, batchSize);
     numIter_vec = zeros(1, batchSize);
+    tActual_vec = zeros(1, batchSize);
 
     if batchSize > 0
-        Dec = BuildBSCDecoder(H_sys, p, maxIter);
+        Dec = BuildBSCDecoder(PCM, p, maxIter);
         for iter_sim = 1:batchSize
             % - % - % Encoding: % - % - % 
-            [Codeword, message] = BSC_enc_LDPCLDPC(gf(H_sys,1));
+            [Codeword, message] = BSC_enc_LDPCLDPC(gf(PCM,1));
             % - % - % Encoding end % - % - %
             messageLength_vec(iter_sim) = length(message);
             % - % - % Channel (symetric one2all): % - % - % 
             ChannelOut = BSCchannel(Codeword, Q, ChannelType, p);
-            t_Actual = sum(ChannelOut ~= Codeword);
+            tActual_vec(iter_sim) = sum(ChannelOut ~= Codeword);
             % - % - % Channel end % - % - % 
             
             % - % - % Decoding: % - % - % 
@@ -155,6 +156,8 @@ function stats = BSCBatch(ChannelType, H_sys, Q, p, batchSize, ...
     stats.meanTrueIter = mean(numIter_vec(BEP_vec == 0));
     % mean of false iters
     stats.meanFalseIter = mean(numIter_vec(BEP_vec == 1));
+    % t_actual
+    stats.meantActual = mean(tActual_vec);
 
 
 end
