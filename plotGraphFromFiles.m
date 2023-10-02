@@ -30,15 +30,15 @@ function plotGraphFromFilesAux(folderPath)
     files = dir(fullfile(folderPath, '*.mat'));
     p = 10.^(load(folderPath + "/pq.mat").log_p);
     q = 10.^(load(folderPath + "/pq.mat").log_q);
-    [P,Q] = meshgrid(p,q);
+    [~,Q] = meshgrid(p,q);
 
 
     % Initialize arrays to store (n, log_p) pairs
-    BEP_Naive_Values = zeros(size(Q));
-    BEP_MsgPas_Values = zeros(size(Q));
+    BEP_Naive_Values = NaN(size(Q));
+    BEP_MsgPas_Values = NaN(size(Q));
     
-    BEPind_Naive_Values = zeros(size(Q));
-    BEPind_MsgPas_Values = zeros(size(Q));
+    BEPind_Naive_Values = NaN(size(Q));
+    BEPind_MsgPas_Values = NaN(size(Q));
     
     % Variables to extract from the struct in the file
     vars = {"BEP_MsgPas", "BEP_Naive", "p", "q", "stats"};
@@ -83,11 +83,11 @@ function plotGraphFromFilesAux(folderPath)
         
         % Plot the graph
         figure;
-        plot(x_ax_vals, max(eps,BEP_Naive),'LineWidth',2);
+        semilogy(x_ax_vals, max(eps,BEP_Naive,"includenan"),'LineWidth',2);
         hold on
 %         plot(x_ax_vals, max(eps,BEPind_Naive) );
 %         hold on
-        plot(x_ax_vals, max(eps,BEP_MsgPas),'LineWidth',2);
+        semilogy(x_ax_vals, max(eps,BEP_MsgPas,"includenan"),'LineWidth',2);
 %         hold on
 %         plot(x_ax_vals, max(eps,BEPind_MsgPas) );
         xlabel(sprintf("q+p (up+down) for p=%.2E",curr_p));

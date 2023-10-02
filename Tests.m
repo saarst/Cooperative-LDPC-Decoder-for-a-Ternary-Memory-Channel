@@ -1,7 +1,7 @@
 date = char(datetime('now','TimeZone','local','Format','ddMMHHmm'));
 n = 128;
 p = 0.001;
-q = linspace(0.001,0.5,25);
+q = linspace(0.001,0.02,25);
 log_p = log10(p);
 log_q = log10(q);
 [P,Q] = meshgrid(log_p, log_q);
