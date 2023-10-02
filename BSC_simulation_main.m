@@ -75,8 +75,8 @@ simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 % create parllel pool
 currentPool = gcp('nocreate');
 if isempty(currentPool)
-    % If no parallel pool exists, create one with 40 workers
-    poolSize = 40;
+    % If no parallel pool exists, create one with max workers
+    poolSize = feature('numCores');
     parpool(poolSize);
     currentPool = gcp; % Get the current parallel pool
     NumWorkers = currentPool.NumWorkers;

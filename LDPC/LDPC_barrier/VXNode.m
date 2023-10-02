@@ -69,7 +69,7 @@ classdef VXNode < Node
             end
             node_msgs = values(obj.res_received_messages);
             obj.msg_sum_res = sum(node_msgs);
-            obj.msg_sum_res_aux = sum(-log2(1+2*2.^(-node_msgs)));
+            obj.msg_sum_res_aux = sum(-log(1+2*exp(-node_msgs)));
         end
 
         function receive_ind_messages(obj)
@@ -84,7 +84,7 @@ classdef VXNode < Node
             end
             node_msgs = values(obj.ind_received_messages);
             obj.msg_sum_ind = sum(node_msgs);
-            obj.msg_sum_ind_aux = sum(log2(1+2*2.^node_msgs));
+            obj.msg_sum_ind_aux = sum(log(1+2*exp(node_msgs)));
         end
 
         
@@ -101,16 +101,17 @@ classdef VXNode < Node
         end
 
         function prob = estimate(obj)
-            x = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux;
-            y =  obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux;
-            if 2^y == inf
+            Lm = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux;
+            Lu =  obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux;
+            if exp(Lu)+1 == inf
                 Pr0 = 1;
             else
-                Pr0 = 2^y / (1+2^y);
+                expLu = exp(Lu);
+                Pr0 = expLu / (1+expLu);
             end
 
-            Pr2 = 1 / (1+2^x);
-            Pr1 = 1 - Pr0 -Pr2;
+            Pr2 = 1 / (1 + exp(Lm));
+            Pr1 = 1 - Pr0 - Pr2;
             prob = [Pr0, Pr1, Pr2];
         end
     end

@@ -33,8 +33,8 @@ p = 10^(log_p);
 q  = 10^(log_q); % upward error probability, q/2
 Q   = 3;   % alphabet size
 ChannelType     = "random"; % "random" / "upto"
-maxIterNaive = 50;
-maxIterMsgPas = 50;
+maxIterNaive = 20;
+maxIterMsgPas = 20;
 
 %% Construct LDPC codes
 addpath(fullfile('.','gen_par_mats'));
@@ -54,12 +54,10 @@ if ~exist(filepathLDPC,'file')
     end
 end
 load(filepathLDPC,"H","Hnonsys"); % H, Hnonsys are the parity-check matrices of the code
-H_sys_ind = full(H);
-% what is this for?
-% H_nonsys_ind = full(Hnonsys);
+H_nonsys_ind = full(Hnonsys);
 % enc_ind = comm.LDPCEncoder('ParityCheckMatrix',Hnonsys); 
 % dec_ind = comm.LDPCDecoder('ParityCheckMatrix',Hnonsys); % hard-decision message-passing decoder
-rate_ind_actual = (n-size(H_sys_ind,1)) / n;
+rate_ind_actual = (n-size(H_nonsys_ind,1)) / n;
 
 % construct residual code
 filenameLDPC = sprintf('n%d_R0%.0f.mat',n,100*rate_res);
@@ -75,12 +73,10 @@ if ~exist(filepathLDPC,'file')
     end
 end
 load(filepathLDPC,"H","Hnonsys"); % H, Hnonsys are the parity-check matrices of the code
-H_sys_res = full(H);
-% what is this for?
-% H_nonsys_res = full(Hnonsys);
+H_nonsys_res = full(Hnonsys);
 % enc_res = comm.LDPCEncoder('ParityCheckMatrix',Hnonsys); 
 % dec_res = comm.LDPCDecoder('ParityCheckMatrix',Hnonsys); % hard-decision message-passing decoder
-rate_res_actual = (n-size(H_sys_res,1)) / n;
+rate_res_actual = (n-size(H_nonsys_res,1)) / n;
 
 rmpath(fullfile('.','gen_par_mats'));
 fprintf("Loading Files is complete\n");
@@ -96,14 +92,16 @@ simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 % create parllel pool
 currentPool = gcp('nocreate');
 if isempty(currentPool)
-    % If no parallel pool exists, create one with 40 workers
-    poolSize = 40;
+    % If no parallel pool exists, create one with max workers
+    poolSize = feature('numCores');
     parpool(poolSize);
+    currentPool = gcp; % Get the current parallel pool
+    NumWorkers = currentPool.NumWorkers;
     disp(['Parallel pool created with ', num2str(poolSize), ' workers.']);
 else
     % If a parallel pool exists, display the number of workers
-    poolSize = currentPool.NumWorkers;
-    disp(['Using existing parallel pool with ', num2str(poolSize), ' workers.']);
+    NumWorkers = currentPool.NumWorkers;
+    disp(['Using existing parallel pool with ', num2str(NumWorkers), ' workers.']);
 end
 
 % Initialize results arrays
@@ -115,7 +113,7 @@ stats = repmat(stats,[1,NumWorkers]);
 % main run:
 parfor iter_thread = 1 : NumWorkers
     stats(iter_thread) =  ...
-        TernaryBatch(ChannelType, H_sys_ind, H_sys_res, Q, p, q, ...
+        TernaryBatch(ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, ...
         batchSize, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas);
 end
 % statistics:
@@ -136,7 +134,7 @@ end
 %  ------------------------------------------------------------------------
 % internal functions:
 
-function stats = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, Q, p, q, batchSize, ...
+function stats = TernaryBatch(ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, batchSize, ...
           sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas)
     % Initializatoins:
     BEP_Naive_vec = ones(1,batchSize);
@@ -148,28 +146,31 @@ function stats = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, Q, p, q, batchS
     numIterMsgPas_vec = zeros(1, batchSize);
     numIterNaiveInd_vec = zeros(1, batchSize);
     numIterNaiveRes_vec = zeros(1, batchSize);
+    tUpActual_vec = zeros(1, batchSize);
+    tDownActual_vec = zeros(1, batchSize);
 
     if batchSize > 0
-        MsgPasDec = BuildMsgPasDecoder(H_sys_ind, H_sys_res, p, q, maxIterMsgPas, sequenceInd, sequenceRes);
-        NaiveIndDec = BuildNaiveIndDecoder(H_sys_ind, p, q, maxIterNaive);
+        MsgPasDec = BuildMsgPasDecoder(H_nonsys_ind, H_nonsys_res, p, q, maxIterMsgPas, sequenceInd, sequenceRes);
+        NaiveIndDec = BuildNaiveIndDecoder(H_nonsys_ind, p, q, maxIterNaive);
         for iter_sim = 1:batchSize
             % - % - % Encoding: % - % - % 
-            [CodewordComb, CodewordInd, CodewordRes, messageInd, messageRes] =  ...
-                ternary_enc_LDPCLDPC(gf(H_sys_ind,1),gf(H_sys_res,1));
+            [CodewordComb, ~, ~, messageInd, messageRes] =  ...
+                ternary_enc_LDPCLDPC(gf(H_nonsys_ind,1),gf(H_nonsys_res,1));
             % - % - % Encoding end % - % - %
             messageIndLength_vec(iter_sim) = length(messageInd);
             messageResLength_vec(iter_sim) = length(messageRes);
             % - % - % Channel (asymmetric one2all): % - % - % 
             
             ChannelOut = asymmchannel(CodewordComb, Q, ChannelType, q, p);
-            tUp_Actual = sum(ChannelOut>CodewordComb);
-            tDown_Actual = sum(ChannelOut<CodewordComb);
+            tUpActual_vec(iter_sim) = sum(ChannelOut>CodewordComb);
+            tDownActual_vec(iter_sim) = sum(ChannelOut<CodewordComb);
             % - % - % Channel end % - % - % 
             
             % - % - % Decoding: % - % - % 
             [decCodewordRM_Naive, ~, numIterNaiveInd_vec(iter_sim), ...
                 numIterNaiveRes_vec(iter_sim)]  =  ...
-                NaiveDecoder(ChannelOut, NaiveIndDec, H_sys_res, CodewordComb > 0);
+                NaiveDecoder(ChannelOut, NaiveIndDec, H_nonsys_res, CodewordComb > 0);
+
             [decCodewordRM_MsgPas, ~, ~, numIterMsgPas_vec(iter_sim)] =  ...
                 MsgPasDec.decode(ChannelOut);
             % - % - % Decoding end % - % - % 
@@ -214,5 +215,8 @@ function stats = TernaryBatch(ChannelType, H_sys_ind, H_sys_res, Q, p, q, batchS
     stats.meanFalseIterNaiveInd = mean(numIterNaiveInd_vec(BEPind_Naive_vec == 1));
     stats.meanFalseIterNaiveRes = mean(numIterNaiveRes_vec(BEP_Naive_vec == 1));
     stats.meanFalseIterMsgPas = mean(numIterMsgPas_vec(BEP_MsgPas_vec == 1));
+    %tActual
+    stats.tUpActual = mean(tUpActual_vec);
+    stats.tDownActual = mean(tDownActual_vec);
 
 end
