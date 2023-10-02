@@ -1,6 +1,6 @@
 function ternary_batch_simulation_main(n, log_p, log_q, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ResultsFolder)
 arguments
-    n (1,1) {mustBeInteger,mustBePositive} = 128
+    n (1,1) {mustBeInteger,mustBePositive} = 16
     log_p (1,1) {mustBeNegative} = -1
     log_q (1,1) {mustBeNegative} = -1
     rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.25
@@ -148,6 +148,7 @@ function stats = TernaryBatch(ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, 
     numIterNaiveRes_vec = zeros(1, batchSize);
     tUpActual_vec = zeros(1, batchSize);
     tDownActual_vec = zeros(1, batchSize);
+    iter_sim = 0;
 
     if batchSize > 0
         MsgPasDec = BuildMsgPasDecoder(H_nonsys_ind, H_nonsys_res, p, q, maxIterMsgPas, sequenceInd, sequenceRes);
