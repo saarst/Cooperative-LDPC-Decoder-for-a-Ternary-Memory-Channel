@@ -8,12 +8,12 @@
 
 date = char(datetime('now','TimeZone','local','Format','ddMMHHmm'));
 n = 128;
-log_p = log10(0.0001);
-log_q = log10(linspace(0.001,0.05,25));
+log_p = log10(linspace(0.001,0.05,5));
+log_q = log10(linspace(0.001,0.05,5));
 log_pq = [repmat(log_p,size(log_q(:))), log_q(:)].';
 numIter = ceil(10.^(-min(log_pq)+2));
-sequence = [4, 2];
-rates = [0.75, 0.6];
+sequence = [2, 2];
+rates = [0.5, 0.3];
 rateIndStr = string(rates(1)).replace(".","");
 rateResStr = string(rates(2)).replace(".","");
 experimentName = sprintf("TriLDPC_d%s_n%d_si%d_sr%d_Ri%s_Rr%s",date, n, sequence(1), sequence(2), rateIndStr, rateResStr);
