@@ -218,5 +218,7 @@ function stats = TernaryBatch(ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, 
     %tActual
     stats.tUpActual = mean(tUpActual_vec);
     stats.tDownActual = mean(tDownActual_vec);
+    %
+    stats.iters = iter_sim;
 
 end

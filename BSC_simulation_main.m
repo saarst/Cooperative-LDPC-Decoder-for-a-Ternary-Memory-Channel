@@ -158,6 +158,7 @@ function stats = BSCBatch(ChannelType, PCM, Q, p, batchSize, ...
     stats.meanFalseIter = mean(numIter_vec(BEP_vec == 1));
     % t_actual
     stats.meantActual = mean(tActual_vec);
+    stats.iters = iter_sim;
 
 
 end
