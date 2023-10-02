@@ -22,9 +22,8 @@ function RunPBS(experimentName, num_iter_sim, logps, logqs, sequenceInd, sequenc
         log_p = logps(ii);
         for jj = 1:length(logqs)
             log_q = logqs(jj);
-
             if any(size(num_iter_sim) > 1)
-                numIterCurr = num_iter_sim(ii,jj);
+                numIterCurr = num_iter_sim(jj,ii);
             else
                 numIterCurr = num_iter_sim;
             end
