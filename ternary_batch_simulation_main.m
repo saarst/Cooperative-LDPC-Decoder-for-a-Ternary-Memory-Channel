@@ -1,6 +1,6 @@
 function ternary_batch_simulation_main(n, log_p, log_q, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ResultsFolder)
 arguments
-    n (1,1) {mustBeInteger,mustBePositive} = 256
+    n (1,1) {mustBeInteger,mustBePositive} = 128
     log_p (1,1) {mustBeNegative} = -1
     log_q (1,1) {mustBeNegative} = -1
     rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.25
