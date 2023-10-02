@@ -17,7 +17,7 @@ function RunBSCPBS(experimentName, num_iter_sim, logps, n, Rate)
     for ii = 1:length(logps)
         log_p = logps(ii);
         if any(size(num_iter_sim) > 1)
-            numIterCurr = num_iter_sim(ii,jj);
+            numIterCurr = num_iter_sim(ii);
         else
             numIterCurr = num_iter_sim;
         end
