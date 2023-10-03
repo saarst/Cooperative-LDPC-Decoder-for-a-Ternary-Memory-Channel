@@ -205,17 +205,17 @@ function stats = TernaryBatch(ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, 
     stats.BEPind_Naive = mean(BEPind_Naive_vec);
     stats.BEPind_MsgPas = mean(BEPind_MsgPas_vec);
     %max iters
-    stats.maxTrueIterNaiveInd = max(numIterNaiveInd_vec(BEPind_Naive_vec == 0));
-    stats.maxTrueIterNaiveRes = max(numIterNaiveRes_vec(BEP_Naive_vec == 0));
-    stats.maxTrueIterMsgPas = max(numIterMsgPas_vec(BEP_MsgPas_vec == 0));
+    stats.maxTrueIterNaiveInd = max(max(numIterNaiveInd_vec(BEPind_Naive_vec == 0)),0);
+    stats.maxTrueIterNaiveRes = max(max(numIterNaiveRes_vec(BEP_Naive_vec == 0)),0);
+    stats.maxTrueIterMsgPas = max(max(numIterMsgPas_vec(BEP_MsgPas_vec == 0)),0);
     % mean of true iters
-    stats.meanTrueIterNaiveInd = mean(numIterNaiveInd_vec(BEPind_Naive_vec == 0));
-    stats.meanTrueIterNaiveRes = mean(numIterNaiveRes_vec(BEP_Naive_vec == 0));
-    stats.meanTrueIterMsgPas = mean(numIterMsgPas_vec(BEP_MsgPas_vec == 0));
+    stats.meanTrueIterNaiveInd =  max(mean(numIterNaiveInd_vec(BEPind_Naive_vec == 0)),0);
+    stats.meanTrueIterNaiveRes =  max(mean(numIterNaiveRes_vec(BEP_Naive_vec == 0)),0);
+    stats.meanTrueIterMsgPas =  max(mean(numIterMsgPas_vec(BEP_MsgPas_vec == 0)),0);
     % mean of false iters
-    stats.meanFalseIterNaiveInd = mean(numIterNaiveInd_vec(BEPind_Naive_vec == 1));
-    stats.meanFalseIterNaiveRes = mean(numIterNaiveRes_vec(BEP_Naive_vec == 1));
-    stats.meanFalseIterMsgPas = mean(numIterMsgPas_vec(BEP_MsgPas_vec == 1));
+    stats.meanFalseIterNaiveInd =  max(mean(numIterNaiveInd_vec(BEPind_Naive_vec == 1)),0);
+    stats.meanFalseIterNaiveRes =  max(mean(numIterNaiveRes_vec(BEP_Naive_vec == 1)),0);
+    stats.meanFalseIterMsgPas =  max(mean(numIterMsgPas_vec(BEP_MsgPas_vec == 1)),0);
     %tActual
     stats.tUpActual = mean(tUpActual_vec);
     stats.tDownActual = mean(tDownActual_vec);
