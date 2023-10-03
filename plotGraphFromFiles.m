@@ -62,6 +62,12 @@ function plotGraphFromFilesAux(folderPath)
         BEPind_Naive = mean([data.stats.BEPind_Naive]);
         maxTrueIterMsgPas = max([data.stats.maxTrueIterMsgPas]);
         maxTrueIterNaive = max([data.stats.maxTrueIterNaiveInd]);
+        if isempty(maxTrueIterMsgPas)
+            maxTrueIterMsgPas = 0;
+        end
+        if isempty(maxTrueIterNaive)
+            maxTrueIterNaive = 0;
+        end
         disp("with (" + data.p  + "," + data.q + ") " +  ": maxIterMsgPas : " + maxTrueIterMsgPas + ...
              ". maxIterNaive : " + maxTrueIterNaive);
         % Append the values to the arrays
