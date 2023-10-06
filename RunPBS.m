@@ -33,7 +33,8 @@ function RunPBS(experimentName, num_iter_sim, logps, logqs, sequenceInd, sequenc
             cmdString = "qsub -N %s -o %s -e %s -v log_p=%g,log_q=%g,experimentName=%s,sequenceInd=%s,sequenceRes=%s,n=%s,RateInd=%g,RateRes=%g,numIter=%g ./PBS_main.sh";
             cmdVars = [experimentName, outputeFile, errorFile, log_p, log_q, experimentName, sequenceInd, sequenceRes, n, Rate_ind, Rate_res, numIterCurr];
             system(sprintf(cmdString, cmdVars));
-            fprintf("%s has started with log_p = %g log_q = %g\n", experimentName, log_p, log_q);
+            numOfJob = (ii-1) * length(logqs) + (jj);
+            fprintf("Job no. %d - %s has started with log_p = %g log_q = %g\n", numOfJob, experimentName, log_p, log_q);
         end
     end
 
