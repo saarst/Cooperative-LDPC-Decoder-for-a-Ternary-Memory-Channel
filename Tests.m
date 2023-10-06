@@ -1,12 +1,12 @@
-sequenceCell = { [2,2], [4,2]};
-ratesCell = {[0.75, 0.75], [0.75, 0.5]};
+sequenceCell = { [1,1]};
+ratesCell = {[0.5, 0.3]};
 
 for ii = 1:length(sequenceCell)
     for jj = 1:length(ratesCell)
 date = char(datetime('now','TimeZone','local','Format','ddMMHHmm'));
 n = 128;
 p = 0.001;
-q = logspace(log10(0.001),log10(0.4),5);
+q = logspace(log10(0.001),log10(0.5),50);
 log_p = log10(p);
 log_q = log10(q);
 [P,Q] = meshgrid(log_p, log_q);
