@@ -1,5 +1,5 @@
 #!/bin/sh
-#PBS -q zeus_all_q
+#PBS -q zeus_combined_q
 #PBS -m abe
 #PBS -M saar.stern@campus.technion.ac.il
 #PBS -l select=4:ncpus=12
