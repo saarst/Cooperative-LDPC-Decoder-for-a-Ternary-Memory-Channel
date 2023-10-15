@@ -89,6 +89,7 @@ fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 
+NumWorkers = 1;
 % create parllel pool
 currentPool = gcp('nocreate');
 if isempty(currentPool)

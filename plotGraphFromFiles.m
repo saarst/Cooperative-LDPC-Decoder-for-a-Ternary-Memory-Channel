@@ -13,17 +13,13 @@ function plotGraphFromFiles(matchedString)
     end
     for i=1:length(subDirsNames)
         subDir = subDirsNames{i};
-        plotGraphFromFilesAux(fullfile("./Results",subDir));
+        plotGraphFromFilesAux(subDir);
     end
 end
 
 
-function plotGraphFromFilesAux(folderPath)
-    % plotGraphFromFiles - Plot a graph of (n, log_p) pairs from files in a folder
-    arguments
-        folderPath string = "./Results" % Default folder path
-    end
-    
+function plotGraphFromFilesAux(subDir)
+    folderPath = fullfile("./Results",subDir);
     addpath(genpath(folderPath));
     
     % Get a list of all files in the folder
@@ -88,12 +84,12 @@ function plotGraphFromFilesAux(folderPath)
         BEPind_MsgPas = BEPind_MsgPas_Values(:,k);
         
         % Plot the graph
-        figure;
-        semilogy(x_ax_vals, max(eps,BEP_Naive,"includenan"),'LineWidth',2);
+        fig = figure;
+        plot(x_ax_vals, max(eps,BEP_Naive,"includenan"),'LineWidth',2);
         hold on
 %         plot(x_ax_vals, max(eps,BEPind_Naive) );
 %         hold on
-        semilogy(x_ax_vals, max(eps,BEP_MsgPas,"includenan"),'LineWidth',2);
+        plot(x_ax_vals, max(eps,BEP_MsgPas,"includenan"),'LineWidth',2);
 %         hold on
 %         plot(x_ax_vals, max(eps,BEPind_MsgPas) );
         xlabel(sprintf("q+p (up+down) for p=%.2E",curr_p));
@@ -113,6 +109,9 @@ function plotGraphFromFilesAux(folderPath)
         title({currTitle1, currTitle2},'Interpreter', 'latex', 'FontSize', 14);
 %         legend('BEP Naive',  'BEP ind Naive', 'BEP MsgPas', 'BEP ind MsgPas', 'Location', 'northwest');
         legend('BEP Naive', 'BEP MsgPas', 'Location', 'northwest');
+        saveas(fig,fullfile("./Figures",subDir));
+        saveas(fig,fullfile("./Figures",subDir + ".png"));
+        close all
 
     end
 end
