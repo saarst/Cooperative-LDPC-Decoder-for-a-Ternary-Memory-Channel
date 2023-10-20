@@ -109,8 +109,8 @@ function plotGraphFromFilesAux(subDir)
         title({currTitle1, currTitle2},'Interpreter', 'latex', 'FontSize', 14);
 %         legend('BEP Naive',  'BEP ind Naive', 'BEP MsgPas', 'BEP ind MsgPas', 'Location', 'northwest');
         legend('BEP Naive', 'BEP MsgPas', 'Location', 'northwest');
-        saveas(fig,fullfile("./Figures",subDir));
-        saveas(fig,fullfile("./Figures",subDir + ".png"));
+        % saveas(fig,fullfile("./Figures",subDir));
+        saveas(fig,fullfile("./Figures",subDir + ".svg"));
         close all
 
     end
