@@ -24,13 +24,16 @@
 ## Background
 In this project, we developed a new decoding algorithm for error correction over a ternary “Barrier” channel. This channel has three symbols at its input and output, where one of the symbols is defined as a "barrier" symbol. When the "barrier" symbol is transmitted, the channel's output can be any of the three symbols, but when a non-barrier symbol is transmitted, the channel's output can only be the transmitted symbol or the "barrier" symbol.
 
-![The ternay barrier channel](https://github.com/saarst/TriLDPC/Figures/readme/Ternary_Barrier_Channel.png)
+The ternary barrier channel:
+
+![The ternay barrier channel](https://github.com/saarst/TriLDPC/blob/main/Figures/readme/Ternary_Barrier_Channel.png)
 
 A prior construction of error correcting codes for the ternary barrier channel uses a special mapping of two binary codes onto the ternary alphabet. In this project, we developed and implemented such a construction using LDPC (Low-Density Parity-Check) codes. The primary contribution of this project is the proposal of a new and efficient iterative decoder for the proposed code, which allows for improved error rates and/or reduced computational complexity compared to previous decoders.
 
 ## Results
 Simulation of the prior decoder and the joint (ours) decoder with Matlab (needs parallel computing toolbox), executed on Technion's HPC.
-![](https://github.com/saarst/TriLDPC/Figures/svg256_sep/TriLDPC_n256_Ri075_Rr05.svg)
+
+![alt](https://github.com/saarst/TriLDPC/blob/main/Figures/svg256_sep/TriLDPC_n256_Ri075_Rr05.svg)
 
 ## Files in the repository
 
