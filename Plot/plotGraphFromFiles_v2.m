@@ -89,7 +89,7 @@ function plotGraphFromFilesAux(subDir, path)
             
             % Plot the graph
             fig = figure;
-            semilogy(x_ax_vals, max(eps,BEP_Naive,"includenan"),'LineWidth',2);
+            loglog(x_ax_vals, max(eps,BEP_Naive,"includenan"),'LineWidth',2);
             hold on
             nums = 1:3;
             for i=1:length(BEP_MsgPas_Values)
@@ -108,13 +108,13 @@ function plotGraphFromFilesAux(subDir, path)
             currTitle1 = "$Len = " + len + "$";
             currTitle2 = "$Rates : [" + RateInd + "," + RateRes + "]$";
             title({currTitle1, currTitle2},'Interpreter', 'latex', 'FontSize', 14);
-            legend('Naive', ...
-                'MsgPas ' + sequenceStr{1}, ...
-                'MsgPas ' + sequenceStr{2}, ...
-                'MsgPas ' + sequenceStr{3}, ...
+            legend('Standard', ...
+                'Joint (ours) ' + sequenceStr{1}, ...
+                'Joint (ours) ' + sequenceStr{2}, ...
+                'Joint (ours) ' + sequenceStr{3}, ...
                 'Location', 'southeast');
-            % saveas(fig,fullfile("./Figures/fig128",subDir + ".fig"));
+            saveas(fig,fullfile("./Figures/svg256sep",subDir + ".svg"));
     
      end
-
+    close all
 end

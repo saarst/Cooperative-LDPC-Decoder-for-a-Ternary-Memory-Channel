@@ -106,10 +106,10 @@ function plotGraphFromFilesAux(subDir, path)
         currTitle2 = "$Sequence : [" + seqInd + "," + seqRes + "]" + ...
                     ", Rates : [" + RateInd + "," + RateRes + "]$";
         title({currTitle1, currTitle2},'Interpreter', 'latex', 'FontSize', 14);
-        legend('Naive', 'MsgPas', 'Location', 'southeast');
-        saveas(fig,fullfile("./Figures/fig128",subDir + ".fig"));
+        legend('Standard', 'Joint (ours)', 'Location', 'southeast');
+        saveas(fig,fullfile("./Figures/svg128",subDir + ".svg"));
 
     end
-    % close all
+    close all
 
 end
