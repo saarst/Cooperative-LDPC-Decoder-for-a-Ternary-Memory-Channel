@@ -1,4 +1,4 @@
-function plotGraphFromFiles_v2(matchedString, path, savePath, format)
+function plotGraphFromFiles_sep(matchedString, path, savePath, format)
     arguments
         matchedString string = ""
         path string = "./Results/256sep"
