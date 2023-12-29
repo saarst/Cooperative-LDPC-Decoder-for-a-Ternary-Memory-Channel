@@ -1,11 +1,13 @@
-function plotGraphFromFiles_v2(matchedString, path)
+function plotGraphFromFiles_v2(matchedString, path, savePath, format)
     arguments
         matchedString string = ""
         path string = "./Results/256sep"
+        savePath string = "./Figures/svg256_sep"
+        format string = "svg"
     end
     addpath(genpath("./"));
     files = dir(path);
-    
+    status = mkdir(savePath);
     dirFlags = [files.isdir];
     subDirs = files(dirFlags);
     subDirsNames = {subDirs(3:end).name};
@@ -14,12 +16,12 @@ function plotGraphFromFiles_v2(matchedString, path)
     end
     for i=1:length(subDirsNames)
         subDir = subDirsNames{i};
-        plotGraphFromFilesAux(subDir, path);
+        plotGraphFromFilesAux(subDir, path,savePath, format);
     end
 end
 
 
-function plotGraphFromFilesAux(subDir, path)
+function plotGraphFromFilesAux(subDir, path, savePath, format)
     
     folderPath_up = fullfile(path,subDir);
     files_up = dir(folderPath_up);
@@ -98,7 +100,7 @@ function plotGraphFromFilesAux(subDir, path)
                 semilogy(x_ax_vals, max(eps,BEP_MsgPas,"includenan"),'LineWidth',1.5);
             end
             xlabel(sprintf("q+p (up+down) for p=%.2E",curr_p));
-            ylabel('BER');
+            ylabel('BLER');
             ylim([1e-2,1]);
             xlim([0,0.2]);
         
@@ -108,12 +110,12 @@ function plotGraphFromFilesAux(subDir, path)
             currTitle1 = "$Len = " + len + "$";
             currTitle2 = "$Rates : [" + RateInd + "," + RateRes + "]$";
             title({currTitle1, currTitle2},'Interpreter', 'latex', 'FontSize', 14);
-            legend('Standard', ...
+            legend('Prior', ...
                 'Joint (ours) ' + sequenceStr{1}, ...
                 'Joint (ours) ' + sequenceStr{2}, ...
                 'Joint (ours) ' + sequenceStr{3}, ...
                 'Location', 'southeast');
-            saveas(fig,fullfile("./Figures/svg256sep",subDir + ".svg"));
+            saveas(fig,fullfile(savePath,subDir + "." + format));
     
      end
     close all

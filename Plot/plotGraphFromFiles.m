@@ -1,11 +1,13 @@
-function plotGraphFromFiles(matchedString, path)
+function plotGraphFromFiles(matchedString, path, savePath, format)
     arguments
         matchedString string = ""
-        path string = "./Results/128"
+        path string = "./Results/256"
+        savePath string = "./Figures/fig256"
+        format string = "fig"
     end
     addpath(genpath("./"));
     files = dir(path);
-    
+    status = mkdir(savePath);
     dirFlags = [files.isdir];
     subDirs = files(dirFlags);
     subDirsNames = {subDirs(3:end).name};
@@ -14,12 +16,12 @@ function plotGraphFromFiles(matchedString, path)
     end
     for i=1:length(subDirsNames)
         subDir = subDirsNames{i};
-        plotGraphFromFilesAux(subDir, path);
+        plotGraphFromFilesAux(subDir, path, savePath, format);
     end
 end
 
 
-function plotGraphFromFilesAux(subDir, path)
+function plotGraphFromFilesAux(subDir, path, savePath, format)
     folderPath = fullfile(path,subDir);
     addpath(genpath(folderPath));
     
@@ -38,7 +40,7 @@ function plotGraphFromFilesAux(subDir, path)
     BEPind_MsgPas_Values = NaN(size(Q));
     
     % Variables to extract from the struct in the file
-    vars = {"BEP_MsgPas", "BEP_Naive", "p", "q", "stats"};
+    vars = {"BEP_MsgPas", "BEP_Naive", "p", "q", "stats", "n","rate_ind_actual","rate_res_actual"};
     disp("loading from:" + subDir);
     disp("loading " + length(q) + " files" )
 
@@ -92,7 +94,7 @@ function plotGraphFromFilesAux(subDir, path)
         hold on
         plot(x_ax_vals, max(eps,BEP_MsgPas,"includenan"),'LineWidth',2);
         xlabel(sprintf("q+p (up+down) for p=%.2E",curr_p));
-        ylabel('BER');
+        ylabel('BLER');
     
     
         [~,folderName,~] = fileparts(folderPath);
@@ -100,14 +102,14 @@ function plotGraphFromFilesAux(subDir, path)
         len = nameSplitted(3).extractAfter(1);
         seqInd = nameSplitted(4).extractAfter(2);
         seqRes = nameSplitted(5).extractAfter(2);
-        RateInd = nameSplitted(6).extractAfter(2).insertAfter("0",".");
-        RateRes = nameSplitted(7).extractAfter(2).insertAfter("0",".");
+        RateInd = round(data.rate_ind_actual * 100) / 100;
+        RateRes = round(data.rate_res_actual * 100) / 100;
         currTitle1 = "$Len = " + len + "$";
         currTitle2 = "$Sequence : [" + seqInd + "," + seqRes + "]" + ...
                     ", Rates : [" + RateInd + "," + RateRes + "]$";
         title({currTitle1, currTitle2},'Interpreter', 'latex', 'FontSize', 14);
-        legend('Standard', 'Joint (ours)', 'Location', 'southeast');
-        saveas(fig,fullfile("./Figures/svg128",subDir + ".svg"));
+        legend('Prior', 'Joint (ours)', 'Location', 'southeast');
+        saveas(fig,fullfile(savePath,subDir + "." + format));
 
     end
     close all
