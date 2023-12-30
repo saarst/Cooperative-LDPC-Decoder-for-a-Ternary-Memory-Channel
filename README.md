@@ -64,15 +64,15 @@ You should use the `ternary_batch_simulation_main.m` file with the following arg
 
 |Argument                 | Description                                 |
 |-------------------------|---------------------------------------------|
-|  --n |           block length
-|  --log_p |   log of p (down error probability)
-|  --log_q |   log of q (up error probability)
-|  --rate_ind  | rate of indicator code
-|  --rate_res  | rate of residual code
-|  --num_iter_sim | number of iterations in the simulation
-|  --sequenceInd | hyper-parameter of the decoder
-|  --sequenceRes | hyper-parameter of the decoder
-|  --ResultsFolder | folder to save the results in|
+|  n |           block length
+|  log_p |   log of p (down error probability)
+|  log_q |   log of q (up error probability)
+|  rate_ind  | rate of indicator code
+|  rate_res  | rate of residual code
+|  num_iter_sim | number of iterations in the simulation
+|  sequenceInd | hyper-parameter of the decoder
+|  sequenceRes | hyper-parameter of the decoder
+|  ResultsFolder | folder to save the results in|
 
 ## Usage
 
