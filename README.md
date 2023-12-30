@@ -1,5 +1,5 @@
 <h2 align="center">Cooperative LDPC Decoder for a Ternary Memory Channel</h2> 
-<h2 align="center">Project in Technion's EE faculty (044167)</h2> 
+<h2 align="center">Project in the Technion's EE faculty (044167)</h2> 
 <h4 align="center">Design  and simulate of a new decoder for LDPC-Barrier code</h4> 
 
 
@@ -17,7 +17,7 @@
   * [Background](#background)
   * [Results](#results)
   * [Files in the repository](#files-in-the-repository)
-  * [API](#api-mplpy---help)
+  * [API](#api)
   * [Usage](#usage)
   * [References](#references)
 
@@ -30,14 +30,18 @@ The ternary barrier channel:
 
 A prior construction of error correcting codes for the ternary barrier channel uses a special mapping of two binary codes onto the ternary alphabet. In this project, we developed and implemented such a construction using LDPC (Low-Density Parity-Check) codes. The primary contribution of this project is the proposal of a new and efficient iterative decoder for the proposed code, which allows for improved error rates and/or reduced computational complexity compared to previous decoders.
 
+Further details in the project book (hebrew) or presentation.
+
 ## Results
 Simulation of the prior decoder and the joint (ours) decoder with Matlab (needs parallel computing toolbox), executed on Technion's HPC.
 
 ![alt](https://github.com/saarst/TriLDPC/blob/main/Figures/svg256_sep/TriLDPC_n256_Ri075_Rr05.svg)
 
+More results are in /Results,/Figures, the project book or the presentation.
+
 ## Files in the repository
 
-| File name                                                     | Purpsoe                                                                                                                                       |
+| File name                                                     | Purpose                                                                                                                                       |
 |---------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
 | `ternary_batch_simulation_main.m`                         | main simulation                                                                                                              |
 | `ternary_enc_LDPCLDPC.m`                                               | ternary LDPC-Barrier encoder                                                                                                  |
