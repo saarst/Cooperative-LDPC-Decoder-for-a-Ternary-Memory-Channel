@@ -10,8 +10,12 @@ classdef VXNode < Node
         channel_llr_ind = [];
         res_received_messages
         ind_received_messages
-        res_neighbors = dictionary
-        ind_neighbors = dictionary
+        ind_messages_out
+        res_messages_out
+        res_neighbors_ids = []
+        res_neighbors_nodes = []
+        ind_neighbors_ids = []
+        ind_neighbors_nodes = []
         msg_sum_ind = nan
         msg_sum_ind_aux
         msg_sum_res = nan
@@ -41,50 +45,55 @@ classdef VXNode < Node
             obj.msg_sum_ind_aux = 0;
             obj.msg_sum_res = 0;
             obj.msg_sum_res_aux = 0;
-            obj.ind_received_messages = dictionary(obj.ind_neighbors.keys,zeros(size(obj.ind_neighbors.keys)));
-            obj.res_received_messages = dictionary(obj.res_neighbors.keys,zeros(size(obj.res_neighbors.keys)));
+            obj.ind_received_messages = zeros(size(obj.ind_neighbors_ids));
+            obj.res_received_messages = zeros(size(obj.res_neighbors_ids));
+            obj.ind_messages_out = dictionary(obj.ind_neighbors_ids, obj.channel_llr_ind * ones(size(obj.ind_neighbors_ids)));
+            obj.res_messages_out = dictionary(obj.res_neighbors_ids, obj.channel_llr_res * ones(size(obj.res_neighbors_ids)));
         end
 
         function register_ind_neighbor(obj, neighbor)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
-            obj.ind_neighbors(neighbor.uid) = neighbor;
+            obj.ind_neighbors_ids = [obj.ind_neighbors_ids ; neighbor.uid];
+            obj.ind_neighbors_nodes = [obj.ind_neighbors_nodes ; neighbor];
         end
 
         function register_res_neighbor(obj, neighbor)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
-            obj.res_neighbors(neighbor.uid) = neighbor;
+            obj.res_neighbors_ids = [obj.res_neighbors_ids ; neighbor.uid];
+            obj.res_neighbors_nodes = [obj.res_neighbors_nodes ; neighbor];
         end
 
         function receive_res_messages(obj)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
-            node_ids = keys(obj.res_neighbors);
-            nodes = values(obj.res_neighbors);
-            for i=1:length(node_ids)
-                node_id = node_ids(i);
-                node = nodes(i);
-                obj.res_received_messages(node_id) = node.message(obj.uid);
+            nodes = obj.res_neighbors_nodes;
+            for i=1:length(obj.res_neighbors_ids)
+                obj.res_received_messages(i) = nodes(i).messages_out(obj.uid);
             end
-            node_msgs = values(obj.res_received_messages);
-            obj.msg_sum_res = sum(node_msgs);
-            obj.msg_sum_res_aux = sum(-log(1+2*exp(-node_msgs)));
+            obj.msg_sum_res = sum(obj.res_received_messages);
+            % obj.msg_sum_res_aux = sum(-log(1+2*exp(-obj.res_received_messages))); old
+            obj.msg_sum_res_aux = sum(-log(0.5+exp(-obj.res_received_messages)));
+            % update messages
+            obj.ind_messages_out(obj.ind_neighbors_ids) = obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux - obj.ind_received_messages;
+            obj.res_messages_out(obj.res_neighbors_ids) = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux - obj.res_received_messages;
         end
 
         function receive_ind_messages(obj)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
-            node_ids = keys(obj.ind_neighbors);
-            nodes = values(obj.ind_neighbors);
-            for i=1:length(node_ids)
-                node_id = node_ids(i);
-                node = nodes(i);
-                obj.ind_received_messages(node_id) = node.message(obj.uid);
+            nodes = obj.ind_neighbors_nodes;
+            for i=1:length(obj.ind_neighbors_ids)
+                obj.ind_received_messages(i) = nodes(i).messages_out(obj.uid);
             end
-            node_msgs = values(obj.ind_received_messages);
-            obj.msg_sum_ind = sum(node_msgs);
-            obj.msg_sum_ind_aux = sum(log(1+2*exp(node_msgs)));
+            obj.msg_sum_ind = sum(obj.ind_received_messages);
+            % obj.msg_sum_ind_aux = sum(log(1+2*exp(obj.ind_received_messages))); old
+            obj.msg_sum_ind_aux = sum(log((1/3)+(2/3)*exp(obj.ind_received_messages)));
+            % update messages
+            obj.ind_messages_out(obj.ind_neighbors_ids) = obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux - obj.ind_received_messages;
+            obj.res_messages_out(obj.res_neighbors_ids) = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux - obj.res_received_messages;
+
         end
 
         

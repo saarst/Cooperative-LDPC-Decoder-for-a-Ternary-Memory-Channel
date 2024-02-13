@@ -7,13 +7,15 @@ classdef CNode < Node
         msg_prod_sign
         ind
         res
+        messages_out = dictionary
     end
 
     methods
         function initialize(obj, ind, res)
             %CNODE Construct an instance of this class
             %   Detailed explanation goes here
-            obj.received_messages = dictionary(obj.neighbors.keys,zeros(size(obj.neighbors.keys)));
+            obj.received_messages = zeros(size(obj.neighbors_ids));
+            obj.messages_out = dictionary(obj.neighbors_ids, zeros(size(obj.neighbors_ids)));
             obj.msg_sum_phi_abs = 0;
             obj.msg_prod_sign = 0;
             obj.ind = ind;
@@ -30,18 +32,23 @@ classdef CNode < Node
         end
 
         function receive_messages(obj)
-            node_ids = keys(obj.neighbors);
-            nodes = values(obj.neighbors);
-            for i=1:length(node_ids)
-                if obj.ind || obj.res
-                    obj.received_messages(node_ids(i)) = nodes(i).message(obj.uid, obj.ind, obj.res);
+            nodes = obj.neighbors_nodes;
+            for i=1:length(obj.neighbors_ids)
+                if obj.ind
+                    obj.received_messages(i) = nodes(i).ind_messages_out(obj.uid);
+                elseif obj.res
+                    obj.received_messages(i) = nodes(i).res_messages_out(obj.uid);
                 else
-                    obj.received_messages(node_ids(i)) = nodes(i).message(obj.uid);
+                    obj.received_messages(i) = nodes(i).messages_out(obj.uid);
                 end
             end
-            node_msgs = values(obj.received_messages);
-            obj.msg_sum_phi_abs  = sum(phi(abs(node_msgs)));
-            obj.msg_prod_sign = prod(sign(node_msgs));
+            obj.msg_sum_phi_abs  = sum(phi(abs(obj.received_messages)));
+            obj.msg_prod_sign = prod(sign(obj.received_messages));
+            % construct messages
+            msg_prod_sign_aux = obj.msg_prod_sign ./ sign(obj.received_messages);
+            msg_phi_sum_phi_abs = phi( obj.msg_sum_phi_abs - phi(abs(obj.received_messages)) );
+
+            obj.messages_out(obj.neighbors_ids) = msg_prod_sign_aux .* msg_phi_sum_phi_abs;
         end
     end
 end

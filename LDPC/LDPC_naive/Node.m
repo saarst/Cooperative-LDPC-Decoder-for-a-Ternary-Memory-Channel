@@ -6,7 +6,8 @@ classdef Node < handle
         uid
         name string
         ordering_key {mustBeNumeric} 
-        neighbors = dictionary
+        neighbors_ids = []
+        neighbors_nodes = []
         received_messages
     end
     
@@ -46,13 +47,13 @@ classdef Node < handle
             else
                 obj.ordering_key = ordering_key;
             end
-            % obj.neighbors = dictionary;
         end
         
         function register_neighbor(obj, neighbor)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
-            obj.neighbors(neighbor.uid) = neighbor;
+            obj.neighbors_ids = [obj.neighbors_ids ; neighbor.uid];
+            obj.neighbors_nodes = [obj.neighbors_nodes ; neighbor];
         end
 
     end
