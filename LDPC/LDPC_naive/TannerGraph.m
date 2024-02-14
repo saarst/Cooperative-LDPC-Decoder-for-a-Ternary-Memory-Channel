@@ -5,7 +5,6 @@ classdef TannerGraph < handle
     properties
         v_nodes = dictionary
         c_nodes = dictionary
-        edges = dictionary
     end
     
     methods
@@ -26,9 +25,12 @@ classdef TannerGraph < handle
         function  add_edge(obj, vnode_uid, cnode_uid)
             assert(isKey(obj.v_nodes,vnode_uid), "vnode_uid is not in dict");
             assert(isKey(obj.c_nodes,cnode_uid), "cnode_uid is not in dict");
-            obj.c_nodes(cnode_uid).register_neighbor(obj.v_nodes(vnode_uid));
-            obj.v_nodes(vnode_uid).register_neighbor(obj.c_nodes(cnode_uid));
-            obj.edges([vnode_uid,cnode_uid]) = 1;
+            c_node = obj.c_nodes(cnode_uid);
+            v_node = obj.v_nodes(vnode_uid);
+            v_next_index = v_node.next_index();
+            c_next_index = c_node.next_index();
+            c_node.register_neighbor(v_node, v_next_index);
+            v_node.register_neighbor(c_node, c_next_index);
         end 
 
         function add_edges_by_name(obj, vnode_name, cnode_name)

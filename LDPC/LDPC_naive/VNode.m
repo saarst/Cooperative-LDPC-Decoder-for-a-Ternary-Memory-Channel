@@ -7,7 +7,7 @@ classdef VNode < Node
         channel_symbol = [];
         channel_llr = [];
         msg_sum = [];
-        messages_out = dictionary
+        messages_out = []
     end
     
     methods
@@ -28,7 +28,7 @@ classdef VNode < Node
             obj.channel_llr = obj.channel_model(channel_symbol);
             obj.msg_sum = 0;
             obj.received_messages = zeros(size(obj.neighbors_ids));
-            obj.messages_out = dictionary(obj.neighbors_ids, obj.channel_llr * ones(size(obj.neighbors_ids)));
+            obj.messages_out = obj.channel_llr * ones(size(obj.neighbors_ids));
         end
         
         function msg = message(obj, requester_id)
@@ -41,10 +41,10 @@ classdef VNode < Node
             %   Detailed explanation goes here
             nodes = obj.neighbors_nodes;
             for i=1:length(obj.neighbors_ids)
-                obj.received_messages(i) = nodes(i).messages_out(obj.uid);
+                obj.received_messages(i) = nodes(i).messages_out(obj.self_index_at_neighbors(i));
             end
             obj.msg_sum = sum(obj.received_messages);
-            obj.messages_out(obj.neighbors_ids) =  obj.channel_llr + obj.msg_sum - obj.received_messages;
+            obj.messages_out =  obj.channel_llr + obj.msg_sum - obj.received_messages;
         end
 
         function bit = estimate(obj)

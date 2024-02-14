@@ -8,6 +8,7 @@ classdef Node < handle
         ordering_key {mustBeNumeric} 
         neighbors_ids = []
         neighbors_nodes = []
+        self_index_at_neighbors = [];
         received_messages
     end
     
@@ -49,11 +50,18 @@ classdef Node < handle
             end
         end
         
-        function register_neighbor(obj, neighbor)
+        function register_neighbor(obj, neighbor, self_index_at_neighbor)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
             obj.neighbors_ids = [obj.neighbors_ids ; neighbor.uid];
             obj.neighbors_nodes = [obj.neighbors_nodes ; neighbor];
+            if self_index_at_neighbor > 0
+                obj.self_index_at_neighbors = [obj.self_index_at_neighbors, self_index_at_neighbor];
+            end
+        end
+        
+        function nextIndex = next_index(obj)
+            nextIndex = length(obj.neighbors_ids) + 1;
         end
 
     end

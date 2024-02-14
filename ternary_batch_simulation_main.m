@@ -1,6 +1,6 @@
 function ternary_batch_simulation_main(decoder, n, log_p, log_q, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ResultsFolder)
 arguments
-    decoder (1,1) string {mustBeMember(decoder, ["2step", "joint", "both"])} = "joint"
+    decoder (1,1) string {mustBeMember(decoder, ["2step", "joint", "both"])} = "2step"
     n (1,1) {mustBeInteger,mustBePositive} = 32
     log_p (1,1) {mustBeNegative} = -1
     log_q (1,1) {mustBeNegative} = -1
@@ -139,8 +139,8 @@ fprintf('Time elapsed: %f seconds\n', TimeElapsed)
 fprintf("End of simulation\n");
 
 % Save data to .mat file
-save(sprintf('%s/len%d_logp%g_logq%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d_%s.mat',...
-            ResultsFolder,n,log_p,log_q,100*rate_ind_actual,100*rate_res_actual,num_iter_sim,string(simStartTime)));
+save(sprintf('%s/len%d_logp%g_logq%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d.mat',...
+            ResultsFolder,n,log_p,log_q,100*rate_ind_actual,100*rate_res_actual,num_iter_sim));
 
 end
 %  ------------------------------------------------------------------------
