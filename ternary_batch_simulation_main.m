@@ -127,24 +127,29 @@ end
 % Initialize results arrays
 batchSize = ceil(num_iter_sim / NumWorkers);
 num_iter_sim = batchSize * NumWorkers;
-if loadWords
-    if num_iter_sim > totalNumberCodewords
+if loadWords && num_iter_sim > totalNumberCodewords
     error("Num of iterations is bigger than num of codewords");
-    end
 end
 [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, [], [], [], [], [], [], 0, [], []);
 statsJoint = repmat(statsJoint,[1,NumWorkers]);
 stats2step = repmat(stats2step,[1,NumWorkers]);
 statsGeneral = repmat(statsGeneral,[1,NumWorkers]);
 
+CodewordsCell = cell(1, NumWorkers);
+if loadWords
+    for iter_thread = 1 : NumWorkers
+    startIndex = (iter_thread - 1) * batchSize + 1;
+    endIndex = min(iter_thread * batchSize, totalNumberCodewords);
+    % Extract the slice for the current worker
+    CodewordsCell{iter_thread} = totalCodewords(startIndex:endIndex, :);
+    end
+end
+
 % main run:
 parfor iter_thread = 1 : NumWorkers
     % Calculate start and end indices for each worker's slice of the matrix
     if loadWords
-        startIndex = (iter_thread - 1) * batchSize + 1;
-        endIndex = min(iter_thread * batchSize, totalNumberCodewords);
-        % Extract the slice for the current worker
-        currCodewords = totalCodewords(startIndex:endIndex, :);
+        currCodewords = CodewordsCell{iter_thread};
     else
         currCodewords = [];
     end
