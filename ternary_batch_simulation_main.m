@@ -108,27 +108,29 @@ fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 
-NumWorkers = 20;
-% % create parllel pool
-% currentPool = gcp('nocreate');
-% if isempty(currentPool)
-%     % If no parallel pool exists, create one with max workers
-%     poolSize = feature('numCores');
-%     parpool(poolSize);
-%     currentPool = gcp; % Get the current parallel pool
-%     NumWorkers = currentPool.NumWorkers;
-%     disp(['Parallel pool created with ', num2str(poolSize), ' workers.']);
-% else
-%     % If a parallel pool exists, display the number of workers
-%     NumWorkers = currentPool.NumWorkers;
-%     disp(['Using existing parallel pool with ', num2str(NumWorkers), ' workers.']);
-% end
+NumWorkers = 1;
+% create parllel pool
+currentPool = gcp('nocreate');
+if isempty(currentPool)
+    % If no parallel pool exists, create one with max workers
+    poolSize = feature('numCores');
+    parpool(poolSize);
+    currentPool = gcp; % Get the current parallel pool
+    NumWorkers = currentPool.NumWorkers;
+    disp(['Parallel pool created with ', num2str(poolSize), ' workers.']);
+else
+    % If a parallel pool exists, display the number of workers
+    NumWorkers = currentPool.NumWorkers;
+    disp(['Using existing parallel pool with ', num2str(NumWorkers), ' workers.']);
+end
 
 % Initialize results arrays
 batchSize = ceil(num_iter_sim / NumWorkers);
 num_iter_sim = batchSize * NumWorkers;
-if loadWords && num_iter_sim > totalNumberCodewords
+if loadWords
+    if num_iter_sim > totalNumberCodewords
     error("Num of iterations is bigger than num of codewords");
+    end
 end
 [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, [], [], [], [], [], [], 0, [], []);
 statsJoint = repmat(statsJoint,[1,NumWorkers]);
@@ -136,7 +138,7 @@ stats2step = repmat(stats2step,[1,NumWorkers]);
 statsGeneral = repmat(statsGeneral,[1,NumWorkers]);
 
 % main run:
-for iter_thread = 1 : NumWorkers
+parfor iter_thread = 1 : NumWorkers
     % Calculate start and end indices for each worker's slice of the matrix
     if loadWords
         startIndex = (iter_thread - 1) * batchSize + 1;
