@@ -163,7 +163,8 @@ parfor iter_thread = 1 : NumWorkers
         batchSize, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas, indG_sys, parCols);
 end
 
-
+% remove the codewords from the results file:
+clear totalCodewords currCodewords CodewordsCell
 % statistics:
 BEP_Naive = NaN;
 BEP_MsgPas = NaN;
