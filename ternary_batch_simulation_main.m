@@ -4,9 +4,9 @@ arguments
     loadWords (1,1) = 1
     n (1,1) {mustBeInteger,mustBePositive} = 32
     log_p (1,1) {mustBeNegative} = -1
-    log_q (1,1) {mustBeNegative} = -1
-    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.25
-    rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.1
+    log_q (1,1) {mustBeNegative} = -2
+    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.5
+    rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.3
     num_iter_sim (1,1) {mustBeInteger, mustBeNonnegative} = 10^(-log_p + 2); 
     sequenceInd = 2;
     sequenceRes = 2;
@@ -62,14 +62,19 @@ H_nonsys_ind = full(Hnonsys);
 % dec_ind = comm.LDPCDecoder('ParityCheckMatrix',Hnonsys); % hard-decision message-passing decoder
 rate_ind_actual = (n-size(H_nonsys_ind,1)) / n;
 
-% construct indG_sys and parColsIdxs just one time!
-indH_gf = gf(H_nonsys_ind,1);
-rInd = size(indH_gf,1);
-kInd = n-rInd;
-[indH_rref, parColsIdxs] = gfrref(indH_gf,1);
-parCols = false(1,n); parCols(parColsIdxs) = true; % parity columns
-indH_sys = [indH_rref(:,~parCols) indH_rref(:,parCols)];
-indG_sys = [gf(eye(kInd)) indH_sys(:,1:kInd).'];
+if ~loadWords
+    % construct indG_sys and parColsIdxs just one time!
+    indH_gf = gf(H_nonsys_ind,1);
+    rInd = size(indH_gf,1);
+    kInd = n-rInd;
+    [indH_rref, parColsIdxs] = gfrref(indH_gf,1);
+    parCols = false(1,n); parCols(parColsIdxs) = true; % parity columns
+    indH_sys = [indH_rref(:,~parCols) indH_rref(:,parCols)];
+    indG_sys = [gf(eye(kInd)) indH_sys(:,1:kInd).'];
+else
+    indG_sys = [];
+    parCols = [];
+end
 
 % construct residual code
 filenameLDPC = sprintf('n%d_R0%.0f.mat',n,100*rate_res);
