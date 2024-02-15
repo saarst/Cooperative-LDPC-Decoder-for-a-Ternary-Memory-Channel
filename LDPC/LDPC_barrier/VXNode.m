@@ -92,8 +92,8 @@ classdef VXNode < Node
             % obj.msg_sum_res_aux = sum(-log(1+2*exp(-obj.res_received_messages))); old
             obj.msg_sum_res_aux = sum(-log(0.5+exp(-obj.res_received_messages)));
             % update messages
-            obj.ind_messages_out(obj.ind_neighbors_ids) = obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux - obj.ind_received_messages;
-            obj.res_messages_out(obj.res_neighbors_ids) = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux - obj.res_received_messages;
+            obj.ind_messages_out = obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux - obj.ind_received_messages;
+            obj.res_messages_out = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux - obj.res_received_messages;
         end
 
         function receive_ind_messages(obj)
