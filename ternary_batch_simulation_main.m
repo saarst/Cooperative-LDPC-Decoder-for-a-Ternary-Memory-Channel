@@ -1,22 +1,24 @@
-function ternary_batch_simulation_main(decoder, n, log_p, log_q, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ResultsFolder)
+function ternary_batch_simulation_main(decoder, loadWords, n, log_p, log_q, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ResultsFolder)
 arguments
-    decoder (1,1) string {mustBeMember(decoder, ["2step", "joint", "both"])} = "2step"
+    decoder (1,1) string {mustBeMember(decoder, ["generateWords", "2step", "joint", "both"])} = "joint"
+    loadWords (1,1) = 1
     n (1,1) {mustBeInteger,mustBePositive} = 32
     log_p (1,1) {mustBeNegative} = -1
     log_q (1,1) {mustBeNegative} = -1
     rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.25
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.1
-    num_iter_sim (1,1) {mustBeInteger, mustBePositive} = 10^(-log_p + 2);
+    num_iter_sim (1,1) {mustBeInteger, mustBeNonnegative} = 10^(-log_p + 2); 
     sequenceInd = 2;
     sequenceRes = 2;
     ResultsFolder = "./Results"
 end
+
 tic
 clc
 disp("Ternary LDPC simulation begin");
 disp("Parameters:")
-fprintf("n = %d, log_p = %g, log_q = %g, rate_ind = %f, rate_res = %f, num_iter_sim = %g, sequenceInd = %d, sequenceRes = %d, resultsFolder = '%s' \n", ...
-             n,  log_p,      log_q,      rate_ind,      rate_res,      num_iter_sim,      sequenceInd,      sequenceRes,      ResultsFolder);
+fprintf("decoder = %s, loadWords = %d, n = %d, log_p = %g, log_q = %g, rate_ind = %f, rate_res = %f, num_iter_sim = %g, sequenceInd = %d, sequenceRes = %d, resultsFolder = '%s' \n", ...
+             decoder, loadWords, n,  log_p,      log_q,      rate_ind,      rate_res,      num_iter_sim,      sequenceInd,      sequenceRes,      ResultsFolder);
 rng('shuffle');
 seed = rng;
 filepath = cd(fileparts(mfilename('fullpath')));
@@ -60,6 +62,15 @@ H_nonsys_ind = full(Hnonsys);
 % dec_ind = comm.LDPCDecoder('ParityCheckMatrix',Hnonsys); % hard-decision message-passing decoder
 rate_ind_actual = (n-size(H_nonsys_ind,1)) / n;
 
+% construct indG_sys and parColsIdxs just one time!
+indH_gf = gf(H_nonsys_ind,1);
+rInd = size(indH_gf,1);
+kInd = n-rInd;
+[indH_rref, parColsIdxs] = gfrref(indH_gf,1);
+parCols = false(1,n); parCols(parColsIdxs) = true; % parity columns
+indH_sys = [indH_rref(:,~parCols) indH_rref(:,parCols)];
+indG_sys = [gf(eye(kInd)) indH_sys(:,1:kInd).'];
+
 % construct residual code
 filenameLDPC = sprintf('n%d_R0%.0f.mat',n,100*rate_res);
 filepathLDPC = fullfile('.','LDPCcode',filenameLDPC);
@@ -82,6 +93,13 @@ rate_res_actual = (n-size(H_nonsys_res,1)) / n;
 rmpath(fullfile('.','gen_par_mats'));
 fprintf("Loading Files is complete\n");
 
+%% Loading codewords
+if loadWords
+    nameOfFile = sprintf('Codewords/len%d_Ri0%.0f_Rr0%.0f.mat',...
+        n,100*rate_ind_actual,100*rate_res_actual);
+    load(nameOfFile, 'totalCodewords', 'messageIndLen', 'messageResLen');
+    totalNumberCodewords = length(totalCodewords);
+end
 
 %% Probability of correcting (p,q) errors with LDPC-LDPC code
 fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
@@ -90,36 +108,50 @@ fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 
-NumWorkers = 2;
-% create parllel pool
-currentPool = gcp('nocreate');
-if isempty(currentPool)
-    % If no parallel pool exists, create one with max workers
-    poolSize = feature('numCores');
-    parpool(poolSize);
-    currentPool = gcp; % Get the current parallel pool
-    NumWorkers = currentPool.NumWorkers;
-    disp(['Parallel pool created with ', num2str(poolSize), ' workers.']);
-else
-    % If a parallel pool exists, display the number of workers
-    NumWorkers = currentPool.NumWorkers;
-    disp(['Using existing parallel pool with ', num2str(NumWorkers), ' workers.']);
-end
+NumWorkers = 20;
+% % create parllel pool
+% currentPool = gcp('nocreate');
+% if isempty(currentPool)
+%     % If no parallel pool exists, create one with max workers
+%     poolSize = feature('numCores');
+%     parpool(poolSize);
+%     currentPool = gcp; % Get the current parallel pool
+%     NumWorkers = currentPool.NumWorkers;
+%     disp(['Parallel pool created with ', num2str(poolSize), ' workers.']);
+% else
+%     % If a parallel pool exists, display the number of workers
+%     NumWorkers = currentPool.NumWorkers;
+%     disp(['Using existing parallel pool with ', num2str(NumWorkers), ' workers.']);
+% end
 
 % Initialize results arrays
 batchSize = ceil(num_iter_sim / NumWorkers);
 num_iter_sim = batchSize * NumWorkers;
+if loadWords && num_iter_sim > totalNumberCodewords
+    error("Num of iterations is bigger than num of codewords");
+end
 [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, [], [], [], [], [], [], 0, [], []);
 statsJoint = repmat(statsJoint,[1,NumWorkers]);
 stats2step = repmat(stats2step,[1,NumWorkers]);
 statsGeneral = repmat(statsGeneral,[1,NumWorkers]);
 
 % main run:
-parfor iter_thread = 1 : NumWorkers
+for iter_thread = 1 : NumWorkers
+    % Calculate start and end indices for each worker's slice of the matrix
+    if loadWords
+        startIndex = (iter_thread - 1) * batchSize + 1;
+        endIndex = min(iter_thread * batchSize, totalNumberCodewords);
+        % Extract the slice for the current worker
+        currCodewords = totalCodewords(startIndex:endIndex, :);
+    else
+        currCodewords = [];
+    end
     [statsJoint(iter_thread), stats2step(iter_thread), statsGeneral(iter_thread)] =  ...
-        TernaryBatch(decoder, ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, ...
-        batchSize, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas);
+        TernaryBatch(decoder, currCodewords, ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, ...
+        batchSize, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas, indG_sys, parCols);
 end
+
+
 % statistics:
 BEP_Naive = NaN;
 BEP_MsgPas = NaN;
@@ -138,17 +170,30 @@ fprintf('* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *\n');
 fprintf('Time elapsed: %f seconds\n', TimeElapsed)
 fprintf("End of simulation\n");
 
+if strcmp(decoder, "generateWords")
+    % concatenate codewords to single file
+    totalCodewords = vertcat(statsGeneral(:).codewords);
+    messageIndLen = mean([statsGeneral.messageIndLen]);
+    messageResLen = mean([statsGeneral.messageResLen]);
+    nameOfFile = sprintf('Codewords/len%d_Ri0%.0f_Rr0%.0f.mat',...
+            n,100*rate_ind_actual,100*rate_res_actual);
+    save(nameOfFile, 'totalCodewords', 'messageIndLen', 'messageResLen');
+else
 % Save data to .mat file
 save(sprintf('%s/len%d_logp%g_logq%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d.mat',...
             ResultsFolder,n,log_p,log_q,100*rate_ind_actual,100*rate_res_actual,num_iter_sim));
+end
 
 end
 %  ------------------------------------------------------------------------
 % internal functions:
 
-function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, batchSize, ...
-          sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas)
+function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codewords, ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, batchSize, ...
+          sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas, indG_sys, parCols)
     % Initializatoins:
+    if strcmp(decoder,"generateWords")
+        codewords = zeros(batchSize,size(H_nonsys_ind,2),'uint8');
+    end
     statsJoint = struct;
     stats2step = struct;
     statsGeneral = struct;
@@ -178,13 +223,22 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, ChannelT
         if any(strcmp(decoder, ["2step" , "both"]))
             NaiveIndDec = BuildNaiveIndDecoder(H_nonsys_ind, p, q, maxIterNaive);
         end
+        
         for iter_sim = 1:batchSize
             % - % - % Encoding: % - % - % 
-            [CodewordComb, ~, ~, messageInd, messageRes] =  ...
-                ternary_enc_LDPCLDPC(gf(H_nonsys_ind,1),gf(H_nonsys_res,1));
-            % - % - % Encoding end % - % - %
-            messageIndLength_vec(iter_sim) = length(messageInd);
-            messageResLength_vec(iter_sim) = length(messageRes);
+            if isempty(codewords) || strcmp(decoder,"generateWords")
+                [CodewordComb, ~, ~, messageInd, messageRes] =  ...
+                    ternary_enc_LDPCLDPC(gf(H_nonsys_ind,1), gf(H_nonsys_res,1), indG_sys, parCols);
+                % - % - % Encoding end % - % - %
+                messageIndLength_vec(iter_sim) = length(messageInd);
+                messageResLength_vec(iter_sim) = length(messageRes);
+                if strcmp(decoder,"generateWords")
+                    codewords(iter_sim,:) = uint8(CodewordComb);
+                    continue
+                end
+            else
+                CodewordComb = double(codewords(iter_sim,:));
+            end
             % - % - % Channel (asymmetric one2all): % - % - % 
             
             ChannelOut = asymmchannel(CodewordComb, Q, ChannelType, q, p);
@@ -240,7 +294,8 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, ChannelT
     %
     statsGeneral.iters = iter_sim;
 
-
+    % save codewords mode:
+    statsGeneral.codewords = codewords;
 
     % joint decoder stats:
     if any(strcmp(decoder, ["joint" , "both"]))            

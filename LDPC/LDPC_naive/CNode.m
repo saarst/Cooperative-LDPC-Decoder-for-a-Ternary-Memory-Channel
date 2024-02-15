@@ -35,9 +35,9 @@ classdef CNode < Node
             nodes = obj.neighbors_nodes;
             for i=1:length(obj.neighbors_ids)
                 if obj.ind
-                    obj.received_messages(i) = nodes(i).ind_messages_out(obj.uid);
+                    obj.received_messages(i) = nodes(i).ind_messages_out(obj.self_index_at_neighbors(i));
                 elseif obj.res
-                    obj.received_messages(i) = nodes(i).res_messages_out(obj.uid);
+                    obj.received_messages(i) = nodes(i).res_messages_out(obj.self_index_at_neighbors(i));
                 else
                     obj.received_messages(i) = nodes(i).messages_out(obj.self_index_at_neighbors(i));
                 end

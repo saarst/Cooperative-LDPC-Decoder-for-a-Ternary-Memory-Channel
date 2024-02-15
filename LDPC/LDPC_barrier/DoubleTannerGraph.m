@@ -6,8 +6,6 @@ classdef DoubleTannerGraph < handle
         v_nodes = dictionary
         ind_nodes = dictionary
         res_nodes = dictionary
-        ind_edges = dictionary
-        res_edges = dictionary
     end
     
     methods
@@ -33,17 +31,26 @@ classdef DoubleTannerGraph < handle
         function  add_ind_edge(obj, vnode_uid, cnode_uid)
             assert(isKey(obj.v_nodes,vnode_uid), "vnode_uid is not in dict");
             assert(isKey(obj.ind_nodes,cnode_uid), "cnode_uid is not in dict");
-            obj.ind_nodes(cnode_uid).register_neighbor(obj.v_nodes(vnode_uid));
-            obj.v_nodes(vnode_uid).register_ind_neighbor(obj.ind_nodes(cnode_uid));
-            obj.ind_edges(vnode_uid) = cnode_uid;
+
+            ind_node = obj.ind_nodes(cnode_uid);
+            v_node = obj.v_nodes(vnode_uid);
+            v_res_next_index = v_node.next_ind_index();
+            ind_next_index = ind_node.next_index();
+
+            ind_node.register_neighbor(v_node, v_res_next_index);
+            v_node.register_ind_neighbor(ind_node, ind_next_index);
         end 
 
         function  add_res_edge(obj, vnode_uid, cnode_uid)
             assert(isKey(obj.v_nodes,vnode_uid), "vnode_uid is not in dict");
             assert(isKey(obj.res_nodes,cnode_uid), "cnode_uid is not in dict");
-            obj.res_nodes(cnode_uid).register_neighbor(obj.v_nodes(vnode_uid));
-            obj.v_nodes(vnode_uid).register_res_neighbor(obj.res_nodes(cnode_uid));
-            obj.res_edges(vnode_uid) = cnode_uid;
+            res_node = obj.res_nodes(cnode_uid);
+            v_node = obj.v_nodes(vnode_uid);
+            v_ind_next_index = v_node.next_res_index();
+            res_next_index = res_node.next_index();
+
+            res_node.register_neighbor(v_node, v_ind_next_index);
+            v_node.register_res_neighbor(res_node, res_next_index);
         end 
 
         function add_ind_edges_by_name(obj, vnode_name, cnode_name)

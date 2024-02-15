@@ -1,4 +1,10 @@
-function [c,cInd,cRes,messageInd,messageRes] = ternary_enc_LDPCLDPC(indH,resH)
+function [c,cInd,cRes,messageInd,messageRes] = ternary_enc_LDPCLDPC(indH, resH, indG_sys, parCols)
+arguments
+    indH
+    resH
+    indG_sys = []
+    parCols = []
+end
 % function [CodewordComb,CodewordIndicator,CodewordResidual,messageIndicator,messageResidual] = ...
 %     ternary_enc_RMLDPC(r,m,HeBCH,kRM)
 % 
@@ -20,11 +26,13 @@ function [c,cInd,cRes,messageInd,messageRes] = ternary_enc_LDPCLDPC(indH,resH)
     rInd = size(indH,1);
     kInd = n-rInd;
     messageInd = gf(randi([0,1],[1,kInd])); % random indicator message
+    if isempty(indG_sys) || isempty(parCols)
+        [indH_rref, parColsIdxs] = gfrref(indH,1);
+        parCols = false(1,n); parCols(parColsIdxs) = true; % parity columns
+        indH_sys = [indH_rref(:,~parCols) indH_rref(:,parCols)];
+        indG_sys = [gf(eye(kInd)) indH_sys(:,1:kInd).'];
+    end
     % encode indicator word
-    [indH_rref, parColsIdxs] = gfrref(indH,1);
-    parCols = false(1,n); parCols(parColsIdxs) = true; % parity columns
-    indH_sys = [indH_rref(:,~parCols) indH_rref(:,parCols)];
-    indG_sys = [gf(eye(kInd)) indH_sys(:,1:kInd).'];
     cInd_perm = messageInd * indG_sys; % indicator codeword (permuted)
     perm = [find(~parCols) find(parCols)]; % reverse column permutation
     % generate indicator codeword
@@ -65,8 +73,8 @@ function [c,cInd,cRes,messageInd,messageRes] = ternary_enc_LDPCLDPC(indH,resH)
     % combine binary codewords to ternary codeword
     cInd = double(cInd.x);
     cRes = double(cRes.x); 
-    messageInd = double(messageInd.x);
-    messageRes = double(messageRes.x);
+    messageInd = logical(messageInd.x);
+    messageRes = logical(messageRes.x);
     c = cInd + cRes;
 
 end
