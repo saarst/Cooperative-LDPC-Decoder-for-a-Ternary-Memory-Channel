@@ -1,4 +1,4 @@
-sequenceCell = { [1,1]};
+sequenceCell = { [2,2]};
 ratesCell = {[0.5, 0.3]};
 
 for ii = 1:length(sequenceCell)
