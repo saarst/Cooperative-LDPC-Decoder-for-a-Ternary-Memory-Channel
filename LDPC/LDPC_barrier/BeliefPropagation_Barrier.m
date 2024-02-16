@@ -40,6 +40,7 @@ classdef BeliefPropagation_Barrier < handle
             % continue Initializations
             prob = zeros(3,obj.n);
             assert(length(channel_word) == obj.n, "Incorrect block size");
+
             vnodes = obj.graph.v_nodes.values;
             ind_nodes = obj.graph.ind_nodes.values;
             res_nodes = obj.graph.res_nodes.values;
@@ -66,9 +67,10 @@ classdef BeliefPropagation_Barrier < handle
                     indCount = obj.sequenceInd;
                     resCount = obj.sequenceRes;
                 end
-                % Estimate:
+
+                % Vnodes receive messages:
                 for i=1:length(vnodes)
-                    prob(:,i) = vnodes(i).estimate();
+                    prob(:,i) = vnodes(i).receive_and_estimate();
                 end
 
                 [~, estimated_trits] = max(prob);
@@ -80,12 +82,6 @@ classdef BeliefPropagation_Barrier < handle
                 suc = ~any([syndrome_ind; syndrome_res]);
                 if suc 
                     break
-                end
-                
-                % Vnodes receive messages:
-                for i=1:length(vnodes)
-                    vnodes(i).receive_res_messages();
-                    vnodes(i).receive_ind_messages();
                 end
 
                 if indCount > 0

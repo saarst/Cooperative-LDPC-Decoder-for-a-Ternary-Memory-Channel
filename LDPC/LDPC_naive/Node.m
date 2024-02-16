@@ -67,7 +67,6 @@ classdef Node < handle
     end
 
     methods (Abstract)
-        message(obj)
         initialize(obj)
     end
 end

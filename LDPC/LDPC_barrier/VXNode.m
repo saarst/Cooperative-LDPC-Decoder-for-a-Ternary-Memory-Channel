@@ -22,6 +22,9 @@ classdef VXNode < Node
         msg_sum_ind_aux
         msg_sum_res = nan
         msg_sum_res_aux
+
+        ind_self
+        res_self
     end
     
     methods
@@ -45,8 +48,10 @@ classdef VXNode < Node
             obj.channel_llr_res = obj.channel_model_res(channel_symbol);
             obj.msg_sum_ind = 0;
             obj.msg_sum_ind_aux = 0;
+            obj.ind_self = 0;
             obj.msg_sum_res = 0;
             obj.msg_sum_res_aux = 0;
+            obj.res_self = 0;
             obj.ind_received_messages = zeros(size(obj.ind_neighbors_ids));
             obj.res_received_messages = zeros(size(obj.res_neighbors_ids));
             obj.ind_messages_out = obj.channel_llr_ind * ones(size(obj.ind_neighbors_ids));
@@ -81,60 +86,33 @@ classdef VXNode < Node
             nextIndex = length(obj.res_neighbors_ids) + 1;
         end
 
-        function receive_res_messages(obj)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            nodes = obj.res_neighbors_nodes;
+        function prob = receive_and_estimate(obj)
+            %res
             for i=1:length(obj.res_neighbors_ids)
-                obj.res_received_messages(i) = nodes(i).messages_out(obj.self_index_at_res_neighbors(i));
+                obj.res_received_messages(i) = obj.res_neighbors_nodes(i).messages_out(obj.self_index_at_res_neighbors(i));
             end
             obj.msg_sum_res = sum(obj.res_received_messages);
-            % obj.msg_sum_res_aux = sum(-log(1+2*exp(-obj.res_received_messages))); old
             obj.msg_sum_res_aux = sum(-log(0.5+exp(-obj.res_received_messages)));
-            % update messages
-            obj.ind_messages_out = obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux - obj.ind_received_messages;
-            obj.res_messages_out = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux - obj.res_received_messages;
-        end
-
-        function receive_ind_messages(obj)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            nodes = obj.ind_neighbors_nodes;
+            %ind
             for i=1:length(obj.ind_neighbors_ids)
-                obj.ind_received_messages(i) = nodes(i).messages_out(obj.self_index_at_ind_neighbors(i));
+                obj.ind_received_messages(i) = obj.ind_neighbors_nodes(i).messages_out(obj.self_index_at_ind_neighbors(i));
             end
             obj.msg_sum_ind = sum(obj.ind_received_messages);
-            % obj.msg_sum_ind_aux = sum(log(1+2*exp(obj.ind_received_messages))); old
             obj.msg_sum_ind_aux = sum(log((1/3)+(2/3)*exp(obj.ind_received_messages)));
-            % update messages
-            obj.ind_messages_out = obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux - obj.ind_received_messages;
-            obj.res_messages_out = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux - obj.res_received_messages;
-
-        end
-
-        
-        function msg = message(obj, requester_id, ind, res)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            if res
-                requester_msg = obj.res_received_messages(requester_id);
-                msg = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux - requester_msg;
-            elseif ind
-                requester_msg = obj.ind_received_messages(requester_id);
-                msg = obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux - requester_msg;
-            end
-        end
-
-        function prob = estimate(obj)
-            Lm = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux;
-            Lu =  obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux;
-
-            Pr0 = 1 / (1+exp(-Lu));
-            Pr2 = 1 / (1 + exp(Lm));
+            % update self messages
+            obj.ind_self = obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux;
+            obj.res_self = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux;
+            % update out messages
+            obj.ind_messages_out = obj.ind_self - obj.ind_received_messages;
+            obj.res_messages_out = obj.res_self - obj.res_received_messages;
+            %update probabilites
+            Pr0 = 1 / (1+exp(-obj.ind_self));
+            Pr2 = 1 / (1 + exp(obj.res_self));
             Pr1 = 1 - Pr0 - Pr2;
 
             prob = [Pr0, Pr1, Pr2];
         end
+
     end
 end
 
