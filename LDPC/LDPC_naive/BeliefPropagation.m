@@ -45,12 +45,6 @@ classdef BeliefPropagation < handle
                 vnodes(idx).initialize(channel_word(idx));
             end
 
-            % for idx=1:length(cnodes)
-            %     cnodes(idx).initialize();
-            %     cnodes(idx).receive_messages();
-            % end
-
-
             % Algorithm:
             for iter=1:obj.maxIter
                 
