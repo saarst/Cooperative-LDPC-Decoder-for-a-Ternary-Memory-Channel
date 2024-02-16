@@ -20,11 +20,13 @@ classdef DoubleTannerGraph < handle
 
         function node = add_ind_node(obj, ordering_key, name)
             node = CNode(name,ordering_key);
+            node.ind = true;
             obj.ind_nodes(node.uid) = node;
         end
         
         function node = add_res_node(obj, ordering_key, name)
             node = CNode(name,ordering_key);
+            node.res = true;
             obj.res_nodes(node.uid) = node;
         end
 

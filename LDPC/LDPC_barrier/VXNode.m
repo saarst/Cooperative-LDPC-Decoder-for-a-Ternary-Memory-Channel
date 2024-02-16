@@ -86,15 +86,15 @@ classdef VXNode < Node
             nextIndex = length(obj.res_neighbors_ids) + 1;
         end
 
-        function prob = receive_and_estimate(obj, lastSubSequence)
-            if strcmp(lastSubSequence, "res")
+        function prob = receive_and_estimate(obj, isLastSubsequenceInd)
+            if isLastSubsequenceInd
                 %res
                 for i=1:length(obj.res_neighbors_ids)
                     obj.res_received_messages(i) = obj.res_neighbors_nodes(i).messages_out(obj.self_index_at_res_neighbors(i));
                 end
                 obj.msg_sum_res = sum(obj.res_received_messages);
                 obj.msg_sum_res_aux = sum(-log(0.5+exp(-obj.res_received_messages)));
-            elseif strcmp(lastSubSequence, "ind")
+            elseif ~isLastSubsequenceInd
                 %ind
                 for i=1:length(obj.ind_neighbors_ids)
                     obj.ind_received_messages(i) = obj.ind_neighbors_nodes(i).messages_out(obj.self_index_at_ind_neighbors(i));

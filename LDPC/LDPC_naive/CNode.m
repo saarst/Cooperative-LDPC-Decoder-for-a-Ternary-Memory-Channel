@@ -5,21 +5,17 @@ classdef CNode < Node
     properties
         msg_sum_phi_abs
         msg_prod_sign
-        ind
-        res
+        ind = false
+        res = false
         messages_out = []
     end
 
     methods
-        function initialize(obj, ind, res)
+        function initialize(obj)
             %CNODE Construct an instance of this class
             %   Detailed explanation goes here
             obj.received_messages = zeros(size(obj.neighbors_ids));
             obj.messages_out = zeros(size(obj.neighbors_ids));
-            obj.msg_sum_phi_abs = 0;
-            obj.msg_prod_sign = 0;
-            obj.ind = ind;
-            obj.res = res;
         end
         
         function receive_messages(obj)

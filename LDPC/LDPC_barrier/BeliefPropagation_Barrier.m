@@ -50,16 +50,16 @@ classdef BeliefPropagation_Barrier < handle
             end
 
             for idx=1:length(ind_nodes)
-                ind_nodes(idx).initialize(1,0);
+                ind_nodes(idx).initialize();
             end
 
             for idx=1:length(res_nodes)
-                res_nodes(idx).initialize(0,1);
+                res_nodes(idx).initialize();
             end
 
             indCount = 0;
             resCount = 0;
-            lastSubSequence = "";
+            isLastSubsequenceInd = true;
 
             % Algorithm:
             for iter=1:obj.maxIter
@@ -73,20 +73,20 @@ classdef BeliefPropagation_Barrier < handle
                     for i=1:length(ind_nodes)
                         ind_nodes(i).receive_messages();
                     end
-                    lastSubSequence = "ind";
+                    isLastSubsequenceInd = true;
                     indCount = indCount - 1;
                 elseif resCount > 0
                     % resNodes receive messages:
                     for i=1:length(res_nodes)
                         res_nodes(i).receive_messages();
                     end
-                    lastSubSequence = "res";
+                    isLastSubsequenceInd = false;
                     resCount = resCount - 1;
                 end
 
                 % Vnodes receive messages:
                 for i=1:length(vnodes)
-                    prob(:,i) = vnodes(i).receive_and_estimate(lastSubSequence);
+                    prob(:,i) = vnodes(i).receive_and_estimate(isLastSubsequenceInd);
                 end
 
                 [~, estimated_trits] = max(prob);
