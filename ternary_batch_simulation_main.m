@@ -193,8 +193,8 @@ if strcmp(decoder, "generateWords")
     save(nameOfFile, 'totalCodewords', 'messageIndLen', 'messageResLen');
 else
 % Save data to .mat file
-save(sprintf('%s/len%d_logp%g_logq%g_LDPC_0%.0f_0%.0f_Joint_nIterSim%d.mat',...
-            ResultsFolder,n,log_p,log_q,100*rate_ind_actual,100*rate_res_actual,num_iter_sim));
+save(sprintf('%s/len%d_logp%g_logq%g_LDPC_0%.0f_0%.0f_%s.mat',...
+            ResultsFolder,n,log_p,log_q,100*rate_ind_actual,100*rate_res_actual,string(simStartTime)));
 end
 
 end
