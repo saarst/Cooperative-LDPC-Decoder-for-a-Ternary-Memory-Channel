@@ -86,19 +86,22 @@ classdef VXNode < Node
             nextIndex = length(obj.res_neighbors_ids) + 1;
         end
 
-        function prob = receive_and_estimate(obj)
-            %res
-            for i=1:length(obj.res_neighbors_ids)
-                obj.res_received_messages(i) = obj.res_neighbors_nodes(i).messages_out(obj.self_index_at_res_neighbors(i));
+        function prob = receive_and_estimate(obj, lastSubSequence)
+            if strcmp(lastSubSequence, "res")
+                %res
+                for i=1:length(obj.res_neighbors_ids)
+                    obj.res_received_messages(i) = obj.res_neighbors_nodes(i).messages_out(obj.self_index_at_res_neighbors(i));
+                end
+                obj.msg_sum_res = sum(obj.res_received_messages);
+                obj.msg_sum_res_aux = sum(-log(0.5+exp(-obj.res_received_messages)));
+            elseif strcmp(lastSubSequence, "ind")
+                %ind
+                for i=1:length(obj.ind_neighbors_ids)
+                    obj.ind_received_messages(i) = obj.ind_neighbors_nodes(i).messages_out(obj.self_index_at_ind_neighbors(i));
+                end
+                obj.msg_sum_ind = sum(obj.ind_received_messages);
+                obj.msg_sum_ind_aux = sum(log((1/3)+(2/3)*exp(obj.ind_received_messages)));
             end
-            obj.msg_sum_res = sum(obj.res_received_messages);
-            obj.msg_sum_res_aux = sum(-log(0.5+exp(-obj.res_received_messages)));
-            %ind
-            for i=1:length(obj.ind_neighbors_ids)
-                obj.ind_received_messages(i) = obj.ind_neighbors_nodes(i).messages_out(obj.self_index_at_ind_neighbors(i));
-            end
-            obj.msg_sum_ind = sum(obj.ind_received_messages);
-            obj.msg_sum_ind_aux = sum(log((1/3)+(2/3)*exp(obj.ind_received_messages)));
             % update self messages
             obj.ind_self = obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux;
             obj.res_self = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux;

@@ -24,7 +24,7 @@ classdef BeliefPropagation_Barrier < handle
         end
         
         function [estimate, prob, suc, iter] = decode(obj, channel_word)
-            % Initializations & check for 0 errors
+            % Naive estimate
             iter = 0;
             prob = [];
             estimate = channel_word;
@@ -37,7 +37,7 @@ classdef BeliefPropagation_Barrier < handle
                 return
             end
 
-            % continue Initializations
+            % Initializations
             prob = zeros(3,obj.n);
             assert(length(channel_word) == obj.n, "Incorrect block size");
 
@@ -51,15 +51,15 @@ classdef BeliefPropagation_Barrier < handle
 
             for idx=1:length(ind_nodes)
                 ind_nodes(idx).initialize(1,0);
-                ind_nodes(idx).receive_messages();
             end
 
             for idx=1:length(res_nodes)
                 res_nodes(idx).initialize(0,1);
-                res_nodes(idx).receive_messages();
             end
+
             indCount = 0;
             resCount = 0;
+            lastSubSequence = "";
 
             % Algorithm:
             for iter=1:obj.maxIter
@@ -68,9 +68,25 @@ classdef BeliefPropagation_Barrier < handle
                     resCount = obj.sequenceRes;
                 end
 
+                if indCount > 0
+                    % indNodes receive messages:
+                    for i=1:length(ind_nodes)
+                        ind_nodes(i).receive_messages();
+                    end
+                    lastSubSequence = "ind";
+                    indCount = indCount - 1;
+                elseif resCount > 0
+                    % resNodes receive messages:
+                    for i=1:length(res_nodes)
+                        res_nodes(i).receive_messages();
+                    end
+                    lastSubSequence = "res";
+                    resCount = resCount - 1;
+                end
+
                 % Vnodes receive messages:
                 for i=1:length(vnodes)
-                    prob(:,i) = vnodes(i).receive_and_estimate();
+                    prob(:,i) = vnodes(i).receive_and_estimate(lastSubSequence);
                 end
 
                 [~, estimated_trits] = max(prob);
@@ -82,20 +98,6 @@ classdef BeliefPropagation_Barrier < handle
                 suc = ~any([syndrome_ind; syndrome_res]);
                 if suc 
                     break
-                end
-
-                if indCount > 0
-                    % indNodes receive messages:
-                    for i=1:length(ind_nodes)
-                        ind_nodes(i).receive_messages();
-                    end
-                    indCount = indCount - 1;
-                elseif resCount > 0
-                    % resNodes receive messages:
-                    for i=1:length(res_nodes)
-                        res_nodes(i).receive_messages();
-                    end
-                    resCount = resCount - 1;
                 end
 
             end
