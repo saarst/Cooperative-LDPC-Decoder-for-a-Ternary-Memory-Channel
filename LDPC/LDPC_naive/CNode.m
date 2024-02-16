@@ -12,21 +12,18 @@ classdef CNode < Node
 
     methods
         function initialize(obj)
-            %CNODE Construct an instance of this class
-            %   Detailed explanation goes here
             obj.received_messages = zeros(size(obj.neighbors_ids));
             obj.messages_out = zeros(size(obj.neighbors_ids));
         end
         
         function receive_messages(obj)
-            nodes = obj.neighbors_nodes;
             for i=1:length(obj.neighbors_ids)
                 if obj.ind
-                    obj.received_messages(i) = nodes(i).ind_messages_out(obj.self_index_at_neighbors(i));
+                    obj.received_messages(i) = obj.neighbors_nodes(i).ind_messages_out(obj.self_index_at_neighbors(i));
                 elseif obj.res
-                    obj.received_messages(i) = nodes(i).res_messages_out(obj.self_index_at_neighbors(i));
+                    obj.received_messages(i) = obj.neighbors_nodes(i).res_messages_out(obj.self_index_at_neighbors(i));
                 else
-                    obj.received_messages(i) = nodes(i).messages_out(obj.self_index_at_neighbors(i));
+                    obj.received_messages(i) = obj.neighbors_nodes(i).messages_out(obj.self_index_at_neighbors(i));
                 end
             end
             obj.msg_sum_phi_abs  = sum(phi(abs(obj.received_messages)));

@@ -21,6 +21,18 @@ classdef BeliefPropagation_Barrier < handle
             obj.maxIter = maxIter;
             obj.sequenceInd = sequenceInd;
             obj.sequenceRes = sequenceRes;
+            
+            %check in superPC !!!
+            ind_nodes = obj.graph.ind_nodes.values;
+            res_nodes = obj.graph.res_nodes.values;
+            for idx=1:length(ind_nodes)
+                ind_nodes(idx).initialize();
+            end
+
+            for idx=1:length(res_nodes)
+                res_nodes(idx).initialize();
+            end
+
         end
         
         function [estimate, prob, suc, iter] = decode(obj, channel_word)
@@ -47,14 +59,6 @@ classdef BeliefPropagation_Barrier < handle
 
             for idx=1:obj.n
                 vnodes(idx).initialize(channel_word(idx));
-            end
-
-            for idx=1:length(ind_nodes)
-                ind_nodes(idx).initialize();
-            end
-
-            for idx=1:length(res_nodes)
-                res_nodes(idx).initialize();
             end
 
             indCount = 0;
