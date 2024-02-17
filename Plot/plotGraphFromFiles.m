@@ -1,8 +1,8 @@
 function plotGraphFromFiles(matchedString, path, savePath, format)
     arguments
-        matchedString string = ""
-        path string = "./Results/256"
-        savePath string = "./Figures/fig256"
+        matchedString string = "TriLDPC_d16021958_n128_si2_sr2_Ri05_Rr03"
+        path string = "./Results/"
+        savePath string = "./Figures/"
         format string = "fig"
     end
     addpath(genpath("./"));
@@ -40,7 +40,7 @@ function plotGraphFromFilesAux(subDir, path, savePath, format)
     BEPind_MsgPas_Values = NaN(size(Q));
     
     % Variables to extract from the struct in the file
-    vars = {"BEP_MsgPas", "BEP_Naive", "p", "q", "stats", "n","rate_ind_actual","rate_res_actual"};
+    vars = {"decoder", "BEP_MsgPas", "BEP_Naive", "p", "q", "statsGeneral", "stats2step", "statsJoint", "n","rate_ind_actual","rate_res_actual"};
     disp("loading from:" + subDir);
     disp("loading " + length(q) + " files" )
 
@@ -56,27 +56,34 @@ function plotGraphFromFilesAux(subDir, path, savePath, format)
         % Extract the log_p and BEP values from the struct
         [~,c] = min(abs(p - data.p));
         [~,r] = min(abs(q - data.q));
+        if any(strcmp(data.decoder, ["2step", "both"]))
+            BEP_Naive = data.BEP_Naive;
+            BEPind_Naive = mean([data.stats2step.BEPind_Naive]);
+            maxTrueIterNaive = max([data.stats2step.maxTrueIterNaiveInd]);
+            if isempty(maxTrueIterNaive)
+                maxTrueIterNaive = 0;
+            end
+            BEP_Naive_Values(r,c) = BEP_Naive;
+            BEPind_Naive_Values(r,c) = BEPind_Naive;
+        end
+        if any(strcmp(data.decoder, ["joint", "both"]))
+            BEP_MsgPas = data.BEP_MsgPas;
+            BEPind_MsgPas = mean([data.statsJoint.BEPind_MsgPas]);
+            maxTrueIterMsgPas = max([data.statsJoint.maxTrueIterMsgPas]);
+            if isempty(maxTrueIterMsgPas)
+                maxTrueIterMsgPas = 0;
+            end
+            BEP_MsgPas_Values(r,c) = BEP_MsgPas;
+            BEPind_MsgPas_Values(r,c) = BEPind_MsgPas;            
+        end
 
-        BEP_Naive = data.BEP_Naive;
-        BEP_MsgPas = data.BEP_MsgPas;
-        BEPind_MsgPas = mean([data.stats.BEPind_MsgPas]);
-        BEPind_Naive = mean([data.stats.BEPind_Naive]);
-        maxTrueIterMsgPas = max([data.stats.maxTrueIterMsgPas]);
-        maxTrueIterNaive = max([data.stats.maxTrueIterNaiveInd]);
-        if isempty(maxTrueIterMsgPas)
-            maxTrueIterMsgPas = 0;
-        end
-        if isempty(maxTrueIterNaive)
-            maxTrueIterNaive = 0;
-        end
+        
+       
         % disp(i + ". with (" + data.p  + "," + data.q + ") " +  ": maxIterMsgPas : " + maxTrueIterMsgPas + ...
              % ". maxIterNaive : " + maxTrueIterNaive);
         % Append the values to the arrays
 
-        BEP_Naive_Values(r,c) = BEP_Naive;
-        BEP_MsgPas_Values(r,c) = BEP_MsgPas;
-        BEPind_Naive_Values(r,c) = BEPind_Naive;
-        BEPind_MsgPas_Values(r,c) = BEPind_MsgPas;
+
     end
     if i ~= (length(q) + 1)
         disp("missing " + (length(q)+1-i) + " files");
@@ -85,14 +92,17 @@ function plotGraphFromFilesAux(subDir, path, savePath, format)
     for k = 1:length(p)
         curr_p = p(k);
         x_ax_vals = q + curr_p;
-        BEP_Naive = BEP_Naive_Values(:,k);
-        BEP_MsgPas = BEP_MsgPas_Values(:,k);
-        
-        % Plot the graph
-        fig = figure;
-        plot(x_ax_vals, max(eps,BEP_Naive,"includenan"),'LineWidth',2);
+        fig = figure;        
+        if any(strcmp(data.decoder, ["2step", "both"]))
+            BEP_Naive = BEP_Naive_Values(:,k);
+            plot(x_ax_vals, max(eps,BEP_Naive,"includenan"),'LineWidth',2);    
+        end
         hold on
-        plot(x_ax_vals, max(eps,BEP_MsgPas,"includenan"),'LineWidth',2);
+        if any(strcmp(data.decoder, ["joint", "both"]))
+            BEP_MsgPas = BEP_MsgPas_Values(:,k);
+            plot(x_ax_vals, max(eps,BEP_MsgPas,"includenan"),'LineWidth',2);            
+        end
+                
         xlabel(sprintf("q+p (up+down) for p=%.2E",curr_p));
         ylabel('BLER');
     
@@ -108,10 +118,17 @@ function plotGraphFromFilesAux(subDir, path, savePath, format)
         currTitle2 = "$Sequence : [" + seqInd + "," + seqRes + "]" + ...
                     ", Rates : [" + RateInd + "," + RateRes + "]$";
         title({currTitle1, currTitle2},'Interpreter', 'latex', 'FontSize', 14);
-        legend('Prior', 'Joint (ours)', 'Location', 'southeast');
-        saveas(fig,fullfile(savePath,subDir + "." + format));
+        if strcmp(data.decoder, "joint")
+            legend('Joint (ours)', 'Location', 'southeast');
+        elseif strcmp(data.decoder, "2step")
+            legend('Prior', 'Location', 'southeast');
+        elseif strcmp(data.decoder, "both")
+            legend('Prior', 'Joint (ours)', 'Location', 'southeast');
+        end
+
+        % saveas(fig,fullfile(savePath,subDir + "." + format));
 
     end
-    close all
+    % close all
 
 end

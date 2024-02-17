@@ -307,8 +307,10 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
     %
     statsGeneral.iters = iter_sim;
 
+    if strcmp(decoder,"generateWords")
     % save codewords mode:
-    statsGeneral.codewords = codewords;
+        statsGeneral.codewords = codewords;
+    end
 
     % joint decoder stats:
     if any(strcmp(decoder, ["joint" , "both"]))            
