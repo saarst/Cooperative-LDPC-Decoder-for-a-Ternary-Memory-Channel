@@ -22,7 +22,6 @@ classdef BeliefPropagation_Barrier < handle
             obj.sequenceInd = sequenceInd;
             obj.sequenceRes = sequenceRes;
             
-            %check in superPC !!!
             ind_nodes = obj.graph.ind_nodes.values;
             res_nodes = obj.graph.res_nodes.values;
             for idx=1:length(ind_nodes)

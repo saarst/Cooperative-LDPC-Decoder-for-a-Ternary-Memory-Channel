@@ -1,8 +1,5 @@
 function y = phi(x)
-    if x <= 2e3 * eps
-        y = 30;
-        return
-    end 
     y = -log(tanh(x/2));
+    y(isinf(y)) = 1000;
 end
 
