@@ -25,6 +25,8 @@ classdef VXNode < Node
 
         ind_self
         res_self
+
+        lowComplex = [];
     end
     
     methods
@@ -87,13 +89,23 @@ classdef VXNode < Node
         end
 
         function prob = receive_and_estimate(obj, isLastSubsequenceInd)
+            P0 = 0.5;
+            P1 = 0.25;
+            P2 = 0.25;
+            res_1_over_12 = P1 / (P1+P2);
+            ind_1_over_10 = P1 / (P1+P0);
+
             if isempty(isLastSubsequenceInd) || ~isLastSubsequenceInd 
                 %res
                 for i=1:length(obj.res_neighbors_ids)
                     obj.res_received_messages(i) = obj.res_neighbors_nodes(i).messages_out(obj.self_index_at_res_neighbors(i));
                 end
                 obj.msg_sum_res = sum(obj.res_received_messages);
-                obj.msg_sum_res_aux = sum(-log(0.5+exp(-obj.res_received_messages)));
+                if ~obj.lowComplex
+                    msg_res_aux = -log(res_1_over_12+(1-res_1_over_12)*exp(-obj.res_received_messages)); % new try
+                    msg_res_aux(isinf(msg_res_aux)) = obj.res_received_messages(isinf(msg_res_aux)) - log(1-res_1_over_12);
+                    obj.msg_sum_res_aux = sum(msg_res_aux);
+                end
             end
             if isempty(isLastSubsequenceInd) || isLastSubsequenceInd
                 %ind
@@ -101,16 +113,25 @@ classdef VXNode < Node
                     obj.ind_received_messages(i) = obj.ind_neighbors_nodes(i).messages_out(obj.self_index_at_ind_neighbors(i));
                 end
                 obj.msg_sum_ind = sum(obj.ind_received_messages);
-                obj.msg_sum_ind_aux = sum(log((1/3)+(2/3)*exp(obj.ind_received_messages)));
+                if ~obj.lowComplex
+                    msg_ind_aux = log(ind_1_over_10+(1-ind_1_over_10)*exp(obj.ind_received_messages)); % new try
+                    msg_ind_aux(isinf(msg_ind_aux)) = obj.ind_received_messages(isinf(msg_ind_aux)) + log(1-ind_1_over_10);
+                    obj.msg_sum_ind_aux = sum(msg_ind_aux);
+                end
             end
             % update self messages
-            obj.ind_self = obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux;
-            obj.res_self = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux;
+            if obj.lowComplex
+                obj.ind_self = obj.channel_llr_ind + obj.msg_sum_ind;
+                obj.res_self = obj.channel_llr_res + obj.msg_sum_res;
+            else
+                obj.ind_self = obj.channel_llr_ind + obj.msg_sum_ind + obj.msg_sum_res_aux;
+                obj.res_self = obj.channel_llr_res + obj.msg_sum_res + obj.msg_sum_ind_aux;
+            end
             % update out messages
             obj.ind_messages_out = obj.ind_self - obj.ind_received_messages;
             obj.res_messages_out = obj.res_self - obj.res_received_messages;
             %update probabilites
-            Pr0 = 1 / (1+exp(-obj.ind_self));
+            Pr0 = 1 / (1 + exp(-obj.ind_self));
             Pr2 = 1 / (1 + exp(obj.res_self));
             Pr1 = 1 - Pr0 - Pr2;
 

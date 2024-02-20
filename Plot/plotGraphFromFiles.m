@@ -1,6 +1,6 @@
 function plotGraphFromFiles(matchedString, path, savePath, format)
     arguments
-        matchedString string = "TriLDPC_d16021958_n128_si2_sr2_Ri05_Rr03"
+        matchedString string = "TriLDPC_d20021511_n128_si2_sr2_Ri05_Rr05"
         path string = "./Results/"
         savePath string = "./Figures/"
         format string = "fig"
@@ -66,7 +66,7 @@ function plotGraphFromFilesAux(subDir, path, savePath, format)
             BEP_Naive_Values(r,c) = BEP_Naive;
             BEPind_Naive_Values(r,c) = BEPind_Naive;
         end
-        if any(strcmp(data.decoder, ["joint", "both"]))
+        if any(strcmp(data.decoder, ["joint","joint-LC", "both"]))
             BEP_MsgPas = data.BEP_MsgPas;
             BEPind_MsgPas = mean([data.statsJoint.BEPind_MsgPas]);
             maxTrueIterMsgPas = max([data.statsJoint.maxTrueIterMsgPas]);
@@ -98,7 +98,7 @@ function plotGraphFromFilesAux(subDir, path, savePath, format)
             plot(x_ax_vals, max(eps,BEP_Naive,"includenan"),'LineWidth',2);    
         end
         hold on
-        if any(strcmp(data.decoder, ["joint", "both"]))
+        if any(strcmp(data.decoder, ["joint","joint-LC", "both"]))
             BEP_MsgPas = BEP_MsgPas_Values(:,k);
             plot(x_ax_vals, max(eps,BEP_MsgPas,"includenan"),'LineWidth',2);            
         end
@@ -121,9 +121,11 @@ function plotGraphFromFilesAux(subDir, path, savePath, format)
         if strcmp(data.decoder, "joint")
             legend('Joint (ours)', 'Location', 'southeast');
         elseif strcmp(data.decoder, "2step")
-            legend('Prior', 'Location', 'southeast');
+            legend('2-Step (Prior)', 'Location', 'southeast');
         elseif strcmp(data.decoder, "both")
-            legend('Prior', 'Joint (ours)', 'Location', 'southeast');
+            legend('2-Step (Prior)', 'Joint (ours)', 'Location', 'southeast');
+        elseif strcmp(data.decoder, "joint-LC")
+            legend('Joint-LC (ours)', 'Location', 'southeast');
         end
 
         % saveas(fig,fullfile(savePath,subDir + "." + format));

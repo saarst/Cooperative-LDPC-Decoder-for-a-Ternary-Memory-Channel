@@ -1,10 +1,10 @@
-function g = from_2_biadjacency_matrices(H_ind, H_res ,channel_model_ind, channel_model_res)
+function g = from_2_biadjacency_matrices(H_ind, H_res ,channel_model_ind, channel_model_res, lowComplex)
     g = DoubleTannerGraph();
     [m,n] = size(H_ind);
     [k,l] = size(H_res);
     assert(n==l,"dimensions of H_ind and H_res does not match");
     for i=1:n
-        g.add_v_node(channel_model_ind, channel_model_res, i,  "v" + string(i));
+        g.add_v_node(channel_model_ind, channel_model_res, i,  "v" + string(i), lowComplex);
     end
     
     for j=1:m

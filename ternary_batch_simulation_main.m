@@ -1,15 +1,16 @@
-function ternary_batch_simulation_main(decoder, loadWords, n, log_p, log_q, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ResultsFolder)
+function ternary_batch_simulation_main(decoder, loadWords, id, n, log_p, log_q, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ResultsFolder)
 arguments
-    decoder (1,1) string {mustBeMember(decoder, ["generateWords", "2step", "joint", "both"])} = "joint"
-    loadWords (1,1) = 1
-    n (1,1) {mustBeInteger,mustBePositive} = 32
-    log_p (1,1) {mustBeNegative} = -1
-    log_q (1,1) {mustBeNegative} = -2
+    decoder (1,1) string {mustBeMember(decoder, ["generateWords", "2step", "joint", "joint-LC", "both"])} = "joint-LC"
+    loadWords (1,1) = 0;
+    id (1,1) = 1;
+    n (1,1) {mustBeInteger,mustBePositive} = 128
+    log_p (1,1) {mustBeNegative} = -3
+    log_q (1,1) {mustBeNegative} = -1.074900000000000
     rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.5
-    rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.3
-    num_iter_sim (1,1) {mustBeInteger, mustBeNonnegative} = 10^(-log_p + 2); 
+    rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.5
+    num_iter_sim (1,1) {mustBeInteger, mustBeNonnegative} = 10^(-log_p+2); 
     sequenceInd = 2;
-    sequenceRes = 2;
+    sequenceRes = 2;    
     ResultsFolder = "./Results"
 end
 
@@ -20,6 +21,8 @@ disp("Parameters:")
 fprintf("decoder = %s, loadWords = %d, n = %d, log_p = %g, log_q = %g, rate_ind = %f, rate_res = %f, num_iter_sim = %g, sequenceInd = %d, sequenceRes = %d, resultsFolder = '%s' \n", ...
              decoder, loadWords, n,  log_p,      log_q,      rate_ind,      rate_res,      num_iter_sim,      sequenceInd,      sequenceRes,      ResultsFolder);
 rng('shuffle');
+seed = rng;
+rng(seed.Seed + id);
 seed = rng;
 filepath = cd(fileparts(mfilename('fullpath')));
 cd(filepath);
@@ -114,20 +117,20 @@ simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 
 NumWorkers = 1;
-% create parllel pool
-currentPool = gcp('nocreate');
-if isempty(currentPool)
-    % If no parallel pool exists, create one with max workers
-    poolSize = feature('numCores');
-    parpool(poolSize);
-    currentPool = gcp; % Get the current parallel pool
-    NumWorkers = currentPool.NumWorkers;
-    disp(['Parallel pool created with ', num2str(poolSize), ' workers.']);
-else
-    % If a parallel pool exists, display the number of workers
-    NumWorkers = currentPool.NumWorkers;
-    disp(['Using existing parallel pool with ', num2str(NumWorkers), ' workers.']);
-end
+% % create parllel pool
+% currentPool = gcp('nocreate');
+% if isempty(currentPool)
+%     % If no parallel pool exists, create one with max workers
+%     poolSize = feature('numCores');
+%     parpool(poolSize);
+%     currentPool = gcp; % Get the current parallel pool
+%     NumWorkers = currentPool.NumWorkers;
+%     disp(['Parallel pool created with ', num2str(poolSize), ' workers.']);
+% else
+%     % If a parallel pool exists, display the number of workers
+%     NumWorkers = currentPool.NumWorkers;
+%     disp(['Using existing parallel pool with ', num2str(NumWorkers), ' workers.']);
+% end
 
 % Initialize results arrays
 batchSize = ceil(num_iter_sim / NumWorkers);
@@ -151,7 +154,7 @@ if loadWords
 end
 
 % main run:
-parfor iter_thread = 1 : NumWorkers
+for iter_thread = 1 : NumWorkers
     % Calculate start and end indices for each worker's slice of the matrix
     if loadWords
         currCodewords = CodewordsCell{iter_thread};
@@ -171,7 +174,7 @@ BEP_MsgPas = NaN;
 if any(strcmp(decoder, ["2step" , "both"]))
     BEP_Naive = mean([stats2step.BEP_Naive]);
 end
-if any(strcmp(decoder, ["joint" , "both"]))
+if any(strcmp(decoder, ["joint", "joint-LC" , "both"]))
     BEP_MsgPas = mean([statsJoint.BEP_MsgPas]);
 end
 
@@ -188,9 +191,9 @@ if strcmp(decoder, "generateWords")
     totalCodewords = vertcat(statsGeneral(:).codewords);
     messageIndLen = mean([statsGeneral.messageIndLen]);
     messageResLen = mean([statsGeneral.messageResLen]);
-    nameOfFile = sprintf('Codewords/len%d_Ri0%.0f_Rr0%.0f.mat',...
-            n,100*rate_ind_actual,100*rate_res_actual);
-    save(nameOfFile, 'totalCodewords', 'messageIndLen', 'messageResLen');
+    nameOfFile = sprintf('Codewords/len%d_Ri0%.0f_Rr0%.0f_%s.mat',...
+            n,100*rate_ind_actual,100*rate_res_actual,string(simStartTime));
+    save(nameOfFile, 'totalCodewords', 'messageIndLen', 'messageResLen', 'id', 'seed');
 else
 % Save data to .mat file
 save(sprintf('%s/len%d_logp%g_logq%g_LDPC_0%.0f_0%.0f_%s.mat',...
@@ -217,7 +220,7 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
         numIterNaiveRes_vec = zeros(1, batchSize);
     end
 
-    if any(strcmp(decoder, ["joint" , "both"]))
+    if any(strcmp(decoder, ["joint", "joint-LC" , "both"]))
         BEP_MsgPas_vec = ones(1,batchSize);
         BEPind_MsgPas_vec = ones(1,batchSize);
         numIterMsgPas_vec = zeros(1, batchSize);
@@ -230,8 +233,9 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
     iter_sim = 0;
 
     if batchSize > 0
-        if any(strcmp(decoder, ["joint" , "both"]))
-            MsgPasDec = BuildMsgPasDecoder(H_nonsys_ind, H_nonsys_res, p, q, maxIterMsgPas, sequenceInd, sequenceRes);
+        if any(strcmp(decoder, ["joint", "joint-LC" , "both"]))
+            lowComplex = strcmp(decoder,"joint-LC");
+            MsgPasDec = BuildMsgPasDecoder(H_nonsys_ind, H_nonsys_res, p, q, maxIterMsgPas, sequenceInd, sequenceRes,lowComplex);
         end
         if any(strcmp(decoder, ["2step" , "both"]))
             NaiveIndDec = BuildNaiveIndDecoder(H_nonsys_ind, p, q, maxIterNaive);
@@ -265,7 +269,7 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
                     numIterNaiveRes_vec(iter_sim)]  =  ...
                     NaiveDecoder(ChannelOut, NaiveIndDec, H_nonsys_res, CodewordComb > 0);
             end
-            if any(strcmp(decoder, ["joint" , "both"]))
+            if any(strcmp(decoder, ["joint", "joint-LC" , "both"]))
                 [decCodewordRM_MsgPas, ~, ~, numIterMsgPas_vec(iter_sim)] =  ...
                     MsgPasDec.decode(ChannelOut);
             end
@@ -283,7 +287,7 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
                 end
             end
             % 2. Interleaved iterations in message-passing:
-            if any(strcmp(decoder, ["joint" , "both"]))            
+            if any(strcmp(decoder, ["joint", "joint-LC" , "both"]))            
                 if isequal(decCodewordRM_MsgPas(:) > 0,CodewordComb(:) > 0)
                     BEPind_MsgPas_vec(iter_sim) = 0;
                 end   
@@ -313,7 +317,7 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
     end
 
     % joint decoder stats:
-    if any(strcmp(decoder, ["joint" , "both"]))            
+    if any(strcmp(decoder, ["joint", "joint-LC" , "both"]))            
         statsJoint.BEP_MsgPas = mean(BEP_MsgPas_vec);
         statsJoint.BEPind_MsgPas = mean(BEPind_MsgPas_vec);
         statsJoint.maxTrueIterMsgPas = max(max(numIterMsgPas_vec(BEP_MsgPas_vec == 0)),0);
