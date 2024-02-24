@@ -23,10 +23,14 @@ classdef VXNode < Node
         msg_sum_res = nan
         msg_sum_res_aux
 
+        
         ind_self
         res_self
 
         lowComplex = [];
+        symbolsPrior = [];
+        res_1_over_12 = [];
+        ind_1_over_10 = [];
     end
     
     methods
@@ -89,11 +93,6 @@ classdef VXNode < Node
         end
 
         function prob = receive_and_estimate(obj, isLastSubsequenceInd)
-            P0 = 0.5;
-            P1 = 0.25;
-            P2 = 0.25;
-            res_1_over_12 = P1 / (P1+P2);
-            ind_1_over_10 = P1 / (P1+P0);
 
             if isempty(isLastSubsequenceInd) || ~isLastSubsequenceInd 
                 %res
@@ -102,8 +101,8 @@ classdef VXNode < Node
                 end
                 obj.msg_sum_res = sum(obj.res_received_messages);
                 if ~obj.lowComplex
-                    msg_res_aux = -log(res_1_over_12+(1-res_1_over_12)*exp(-obj.res_received_messages)); % new try
-                    msg_res_aux(isinf(msg_res_aux)) = obj.res_received_messages(isinf(msg_res_aux)) - log(1-res_1_over_12);
+                    msg_res_aux = -log(obj.res_1_over_12+(1-obj.res_1_over_12)*exp(-obj.res_received_messages)); % new try
+                    msg_res_aux(isinf(msg_res_aux)) = obj.res_received_messages(isinf(msg_res_aux)) - log(1-obj.res_1_over_12);
                     obj.msg_sum_res_aux = sum(msg_res_aux);
                 end
             end
@@ -114,8 +113,8 @@ classdef VXNode < Node
                 end
                 obj.msg_sum_ind = sum(obj.ind_received_messages);
                 if ~obj.lowComplex
-                    msg_ind_aux = log(ind_1_over_10+(1-ind_1_over_10)*exp(obj.ind_received_messages)); % new try
-                    msg_ind_aux(isinf(msg_ind_aux)) = obj.ind_received_messages(isinf(msg_ind_aux)) + log(1-ind_1_over_10);
+                    msg_ind_aux = log(obj.ind_1_over_10+(1-obj.ind_1_over_10)*exp(obj.ind_received_messages)); % new try
+                    msg_ind_aux(isinf(msg_ind_aux)) = obj.ind_received_messages(isinf(msg_ind_aux)) + log(1-obj.ind_1_over_10);
                     obj.msg_sum_ind_aux = sum(msg_ind_aux);
                 end
             end

@@ -13,9 +13,12 @@ classdef DoubleTannerGraph < handle
             Node.count(-1);
         end
         
-        function node = add_v_node(obj, channel_model_ind, channel_model_res, ordering_key, name, lowComplex)
+        function node = add_v_node(obj, symbolsPrior, channel_model_ind, channel_model_res, ordering_key, name, lowComplex)
             node = VXNode(channel_model_ind, channel_model_res, name, ordering_key);
             node.lowComplex = lowComplex;
+            node.symbolsPrior = symbolsPrior;
+            node.res_1_over_12 = symbolsPrior(2) / (symbolsPrior(2) + symbolsPrior(3));
+            node.ind_1_over_10 = symbolsPrior(2) / (symbolsPrior(2) + symbolsPrior(1));
             obj.v_nodes(node.uid) = node;
         end
 

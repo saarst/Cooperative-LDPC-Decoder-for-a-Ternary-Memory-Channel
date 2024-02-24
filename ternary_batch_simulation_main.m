@@ -1,11 +1,11 @@
 function ternary_batch_simulation_main(decoder, loadWords, id, n, log_p, log_q, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ResultsFolder)
 arguments
-    decoder (1,1) string {mustBeMember(decoder, ["generateWords", "2step", "joint", "joint-LC", "both"])} = "joint-LC"
-    loadWords (1,1) = 0;
+    decoder (1,1) string {mustBeMember(decoder, ["generateWords", "2step", "joint", "joint-LC", "both"])} = "joint"
+    loadWords (1,1) = 1;
     id (1,1) = 1;
     n (1,1) {mustBeInteger,mustBePositive} = 128
     log_p (1,1) {mustBeNegative} = -3
-    log_q (1,1) {mustBeNegative} = -1.074900000000000
+    log_q (1,1) {mustBeNegative} = -1
     rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.5
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.5
     num_iter_sim (1,1) {mustBeInteger, mustBeNonnegative} = 10^(-log_p+2); 
@@ -51,9 +51,10 @@ filenameLDPC = sprintf('n%d_R0%.0f.mat',n,100*rate_ind);
 filepathLDPC = fullfile('.','LDPCcode',filenameLDPC);
 if ~exist(filepathLDPC,'file')
     try
-        [Lam, probInd] = GenerateDist(15,rate_ind); % Generate distributions with requested rate of r
+        dInd = 15;
+        [Lam, probInd] = GenerateDist(dInd,rate_ind); % Generate distributions with requested rate of r
         LDPCWrapper('GenerateIrregular',n, Lam, probInd, filepathLDPC); % Generate parity matrix for code length of n
-        SavePartiyMat(filepathLDPC); % Save MAT file
+        SavePartiyMat(filepathLDPC,dInd); % Save MAT file
     catch err
         disp(err.getReport);
         return;
@@ -107,6 +108,9 @@ if loadWords
         n,100*rate_ind_actual,100*rate_res_actual);
     load(nameOfFile, 'totalCodewords', 'messageIndLen', 'messageResLen');
     totalNumberCodewords = length(totalCodewords);
+    symbolsPrior  = histcounts(totalCodewords,"Normalization","probability");
+else
+    symbolsPrior = [0.5, 0.25, 0.25]; % default prior
 end
 
 %% Probability of correcting (p,q) errors with LDPC-LDPC code
@@ -117,20 +121,20 @@ simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 
 NumWorkers = 1;
-% % create parllel pool
-% currentPool = gcp('nocreate');
-% if isempty(currentPool)
-%     % If no parallel pool exists, create one with max workers
-%     poolSize = feature('numCores');
-%     parpool(poolSize);
-%     currentPool = gcp; % Get the current parallel pool
-%     NumWorkers = currentPool.NumWorkers;
-%     disp(['Parallel pool created with ', num2str(poolSize), ' workers.']);
-% else
-%     % If a parallel pool exists, display the number of workers
-%     NumWorkers = currentPool.NumWorkers;
-%     disp(['Using existing parallel pool with ', num2str(NumWorkers), ' workers.']);
-% end
+% create parllel pool
+currentPool = gcp('nocreate');
+if isempty(currentPool)
+    % If no parallel pool exists, create one with max workers
+    poolSize = feature('numCores');
+    parpool(poolSize);
+    currentPool = gcp; % Get the current parallel pool
+    NumWorkers = currentPool.NumWorkers;
+    disp(['Parallel pool created with ', num2str(poolSize), ' workers.']);
+else
+    % If a parallel pool exists, display the number of workers
+    NumWorkers = currentPool.NumWorkers;
+    disp(['Using existing parallel pool with ', num2str(NumWorkers), ' workers.']);
+end
 
 % Initialize results arrays
 batchSize = ceil(num_iter_sim / NumWorkers);
@@ -154,7 +158,7 @@ if loadWords
 end
 
 % main run:
-for iter_thread = 1 : NumWorkers
+parfor iter_thread = 1 : NumWorkers
     % Calculate start and end indices for each worker's slice of the matrix
     if loadWords
         currCodewords = CodewordsCell{iter_thread};
@@ -162,7 +166,7 @@ for iter_thread = 1 : NumWorkers
         currCodewords = [];
     end
     [statsJoint(iter_thread), stats2step(iter_thread), statsGeneral(iter_thread)] =  ...
-        TernaryBatch(decoder, currCodewords, ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, ...
+        TernaryBatch(decoder, currCodewords, symbolsPrior, ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, ...
         batchSize, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas, indG_sys, parCols);
 end
 
@@ -204,7 +208,7 @@ end
 %  ------------------------------------------------------------------------
 % internal functions:
 
-function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codewords, ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, batchSize, ...
+function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codewords, symbolsPrior, ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, batchSize, ...
           sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas, indG_sys, parCols)
     % Initializatoins:
     if strcmp(decoder,"generateWords")
@@ -235,7 +239,7 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
     if batchSize > 0
         if any(strcmp(decoder, ["joint", "joint-LC" , "both"]))
             lowComplex = strcmp(decoder,"joint-LC");
-            MsgPasDec = BuildMsgPasDecoder(H_nonsys_ind, H_nonsys_res, p, q, maxIterMsgPas, sequenceInd, sequenceRes,lowComplex);
+            MsgPasDec = BuildMsgPasDecoder(symbolsPrior, H_nonsys_ind, H_nonsys_res, p, q, maxIterMsgPas, sequenceInd, sequenceRes, lowComplex);
         end
         if any(strcmp(decoder, ["2step" , "both"]))
             NaiveIndDec = BuildNaiveIndDecoder(H_nonsys_ind, p, q, maxIterNaive);
