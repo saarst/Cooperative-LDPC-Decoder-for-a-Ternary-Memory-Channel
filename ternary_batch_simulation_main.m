@@ -8,7 +8,7 @@ arguments
     log_q (1,1) {mustBeNegative} = -1
     rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.5
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.5
-    num_iter_sim (1,1) {mustBeInteger, mustBeNonnegative} = 10^(-log_p+2); 
+    num_iter_sim (1,1) {mustBeInteger, mustBeNonnegative} = 1e5; 
     sequenceInd = 2;
     sequenceRes = 2;    
     ResultsFolder = "./Results"
@@ -228,6 +228,7 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
         BEP_MsgPas_vec = ones(1,batchSize);
         BEPind_MsgPas_vec = ones(1,batchSize);
         numIterMsgPas_vec = zeros(1, batchSize);
+        SER_MsgPas_vec = ones(1,batchSize);
     end
 
     messageIndLength_vec = zeros(1, batchSize);
@@ -299,11 +300,12 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
                 if isequal(decCodewordRM_MsgPas(:),CodewordComb(:))
                     BEP_MsgPas_vec(iter_sim) = 0;
                 end
+                SER_MsgPas_vec(iter_sim) = 1 - mean(decCodewordRM_MsgPas == CodewordComb);
+
             end
         end
     end
     % - % - % BEP end % - % - %
-
 
     % general stats
     % mean messageLength
@@ -324,6 +326,7 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
     if any(strcmp(decoder, ["joint", "joint-LC" , "both"]))            
         statsJoint.BEP_MsgPas = mean(BEP_MsgPas_vec);
         statsJoint.BEPind_MsgPas = mean(BEPind_MsgPas_vec);
+        statsJoint.SER_MsgPas = mean(SER_MsgPas_vec);
         statsJoint.maxTrueIterMsgPas = max(max(numIterMsgPas_vec(BEP_MsgPas_vec == 0)),0);
         statsJoint.meanTrueIterMsgPas =  max(mean(numIterMsgPas_vec(BEP_MsgPas_vec == 0)),0);
         statsJoint.meanFalseIterMsgPas =  max(mean(numIterMsgPas_vec(BEP_MsgPas_vec == 1)),0);
