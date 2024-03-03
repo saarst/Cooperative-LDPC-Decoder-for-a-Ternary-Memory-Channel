@@ -2,15 +2,15 @@ function ternary_batch_simulation_main(decoder, loadWords, id, n, log_p, log_q, 
 arguments
     decoder (1,1) string {mustBeMember(decoder, ["generateWords", "2step", "joint", "joint-LC", "both"])} = "joint"
     loadWords (1,1) = 1;
-    id (1,1) = 1;
+    id (1,1) = 0;
     n (1,1) {mustBeInteger,mustBePositive} = 128
     log_p (1,1) {mustBeNegative} = -3
     log_q (1,1) {mustBeNegative} = -1
-    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.5
+    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.75
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.5
-    num_iter_sim (1,1) {mustBeInteger, mustBeNonnegative} = 1e5; 
+    num_iter_sim (1,1) {mustBeInteger, mustBeNonnegative} = 1e6; 
     sequenceInd = 2;
-    sequenceRes = 2;    
+    sequenceRes = 1;    
     ResultsFolder = "./Results"
 end
 
@@ -111,6 +111,7 @@ if loadWords
     symbolsPrior  = histcounts(totalCodewords,"Normalization","probability");
 else
     symbolsPrior = [0.5, 0.25, 0.25]; % default prior
+    totalNumberCodewords = length(num_iter_sim);
 end
 
 %% Probability of correcting (p,q) errors with LDPC-LDPC code
@@ -136,26 +137,35 @@ else
     disp(['Using existing parallel pool with ', num2str(NumWorkers), ' workers.']);
 end
 
-% Initialize results arrays
-batchSize = ceil(num_iter_sim / NumWorkers);
-num_iter_sim = batchSize * NumWorkers;
-if loadWords && num_iter_sim > totalNumberCodewords
-    error("Num of iterations is bigger than num of codewords");
+% slices codewords between cells:
+if  loadWords && num_iter_sim > totalNumberCodewords
+    codeWordsPerCell = floor(totalNumberCodewords / NumWorkers);
+else
+    codeWordsPerCell = ceil(num_iter_sim / NumWorkers);
 end
-[statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, [], [], [], [], [], [], 0, [], []);
-statsJoint = repmat(statsJoint,[1,NumWorkers]);
-stats2step = repmat(stats2step,[1,NumWorkers]);
-statsGeneral = repmat(statsGeneral,[1,NumWorkers]);
-
+totalNumberCodewords = codeWordsPerCell * NumWorkers;
 CodewordsCell = cell(1, NumWorkers);
 if loadWords
     for iter_thread = 1 : NumWorkers
-    startIndex = (iter_thread - 1) * batchSize + 1;
-    endIndex = min(iter_thread * batchSize, totalNumberCodewords);
+    startIndex = (iter_thread - 1) * codeWordsPerCell + 1;
+    endIndex = iter_thread * codeWordsPerCell;
     % Extract the slice for the current worker
     CodewordsCell{iter_thread} = totalCodewords(startIndex:endIndex, :);
     end
 end
+
+% Initialize results arrays
+if loadWords && num_iter_sim > totalNumberCodewords
+    repeatFactor = ceil(num_iter_sim / totalNumberCodewords);
+else
+    repeatFactor = 1;
+end
+[statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, [], [], [], [], [], [], [], 0, [], []);
+statsJoint = repmat(statsJoint,[1,NumWorkers]);
+stats2step = repmat(stats2step,[1,NumWorkers]);
+statsGeneral = repmat(statsGeneral,[1,NumWorkers]);
+
+
 
 % main run:
 parfor iter_thread = 1 : NumWorkers
@@ -167,7 +177,7 @@ parfor iter_thread = 1 : NumWorkers
     end
     [statsJoint(iter_thread), stats2step(iter_thread), statsGeneral(iter_thread)] =  ...
         TernaryBatch(decoder, currCodewords, symbolsPrior, ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, ...
-        batchSize, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas, indG_sys, parCols);
+        codeWordsPerCell, repeatFactor, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas, indG_sys, parCols);
 end
 
 % remove the codewords from the results file:
@@ -208,9 +218,10 @@ end
 %  ------------------------------------------------------------------------
 % internal functions:
 
-function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codewords, symbolsPrior, ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, batchSize, ...
-          sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas, indG_sys, parCols)
+function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codewords, symbolsPrior, ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, codeWordsPerCell, ...
+          repeatFacor, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas, indG_sys, parCols)
     % Initializatoins:
+    batchSize = codeWordsPerCell * repeatFacor;
     if strcmp(decoder,"generateWords")
         codewords = zeros(batchSize,size(H_nonsys_ind,2),'uint8');
     end
@@ -231,8 +242,8 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
         SER_MsgPas_vec = ones(1,batchSize);
     end
 
-    messageIndLength_vec = zeros(1, batchSize);
-    messageResLength_vec = zeros(1, batchSize);
+    messageIndLength_vec = zeros(1, codeWordsPerCell);
+    messageResLength_vec = zeros(1, codeWordsPerCell);
     tUpActual_vec = zeros(1, batchSize);
     tDownActual_vec = zeros(1, batchSize);
     iter_sim = 0;
@@ -246,7 +257,7 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
             NaiveIndDec = BuildNaiveIndDecoder(H_nonsys_ind, p, q, maxIterNaive);
         end
         
-        for iter_sim = 1:batchSize
+        for iter_sim = 1:codeWordsPerCell
             % - % - % Encoding: % - % - % 
             if isempty(codewords) || strcmp(decoder,"generateWords")
                 [CodewordComb, ~, ~, messageInd, messageRes] =  ...
@@ -262,46 +273,47 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
                 CodewordComb = double(codewords(iter_sim,:));
             end
             % - % - % Channel (asymmetric one2all): % - % - % 
+            for iter_error = 1:repeatFacor
+                batch_sim = (iter_sim-1) * repeatFacor + iter_error;
+                ChannelOut = asymmchannel(CodewordComb, Q, ChannelType, q, p);
+                tUpActual_vec(batch_sim) = sum(ChannelOut>CodewordComb);
+                tDownActual_vec(batch_sim) = sum(ChannelOut<CodewordComb);
+                % - % - % Channel end % - % - % 
+                
+                % - % - % Decoding: % - % - %
+                if any(strcmp(decoder, ["2step" , "both"]))
+                    [decCodewordRM_Naive, ~, numIterNaiveInd_vec(batch_sim), ...
+                        numIterNaiveRes_vec(batch_sim)]  =  ...
+                        NaiveDecoder(ChannelOut, NaiveIndDec, H_nonsys_res, CodewordComb > 0);
+                end
+                if any(strcmp(decoder, ["joint", "joint-LC" , "both"]))
+                    [decCodewordRM_MsgPas, ~, ~, numIterMsgPas_vec(batch_sim)] =  ...
+                        MsgPasDec.decode(ChannelOut);
+                end
+                % - % - % Decoding end % - % - % 
+                % - % - % BEP % - % - % 
+             
+                % 1. Standard 2-step decoder:
+                if any(strcmp(decoder, ["2step" , "both"]))
+                    if isequal(decCodewordRM_Naive(:) > 0,CodewordComb(:) > 0)
+                        BEPind_Naive_vec(batch_sim) = 0;
+                    end
             
-            ChannelOut = asymmchannel(CodewordComb, Q, ChannelType, q, p);
-            tUpActual_vec(iter_sim) = sum(ChannelOut>CodewordComb);
-            tDownActual_vec(iter_sim) = sum(ChannelOut<CodewordComb);
-            % - % - % Channel end % - % - % 
+                    if isequal(decCodewordRM_Naive(:),CodewordComb(:))
+                        BEP_Naive_vec(batch_sim) = 0;
+                    end
+                end
+                % 2. Interleaved iterations in message-passing:
+                if any(strcmp(decoder, ["joint", "joint-LC" , "both"]))            
+                    if isequal(decCodewordRM_MsgPas(:) > 0,CodewordComb(:) > 0)
+                        BEPind_MsgPas_vec(batch_sim) = 0;
+                    end   
             
-            % - % - % Decoding: % - % - %
-            if any(strcmp(decoder, ["2step" , "both"]))
-                [decCodewordRM_Naive, ~, numIterNaiveInd_vec(iter_sim), ...
-                    numIterNaiveRes_vec(iter_sim)]  =  ...
-                    NaiveDecoder(ChannelOut, NaiveIndDec, H_nonsys_res, CodewordComb > 0);
-            end
-            if any(strcmp(decoder, ["joint", "joint-LC" , "both"]))
-                [decCodewordRM_MsgPas, ~, ~, numIterMsgPas_vec(iter_sim)] =  ...
-                    MsgPasDec.decode(ChannelOut);
-            end
-            % - % - % Decoding end % - % - % 
-            % - % - % BEP % - % - % 
-         
-            % 1. Standard 2-step decoder:
-            if any(strcmp(decoder, ["2step" , "both"]))
-                if isequal(decCodewordRM_Naive(:) > 0,CodewordComb(:) > 0)
-                    BEPind_Naive_vec(iter_sim) = 0;
+                    if isequal(decCodewordRM_MsgPas(:),CodewordComb(:))
+                        BEP_MsgPas_vec(batch_sim) = 0;
+                    end
+                    SER_MsgPas_vec(batch_sim) = 1 - mean(decCodewordRM_MsgPas == CodewordComb);
                 end
-        
-                if isequal(decCodewordRM_Naive(:),CodewordComb(:))
-                    BEP_Naive_vec(iter_sim) = 0;
-                end
-            end
-            % 2. Interleaved iterations in message-passing:
-            if any(strcmp(decoder, ["joint", "joint-LC" , "both"]))            
-                if isequal(decCodewordRM_MsgPas(:) > 0,CodewordComb(:) > 0)
-                    BEPind_MsgPas_vec(iter_sim) = 0;
-                end   
-        
-                if isequal(decCodewordRM_MsgPas(:),CodewordComb(:))
-                    BEP_MsgPas_vec(iter_sim) = 0;
-                end
-                SER_MsgPas_vec(iter_sim) = 1 - mean(decCodewordRM_MsgPas == CodewordComb);
-
             end
         end
     end
