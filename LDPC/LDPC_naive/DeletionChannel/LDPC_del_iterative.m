@@ -22,7 +22,8 @@ function [suc, vec, iters] = LDPC_del_iterative (H, vec)
             solvable = sum(isnan(vec(indices)));
             if (solvable == 0)
                 parity = mod(sum(vec(indices)), 2);
-                if parity 
+                if parity
+                    vec(isnan(vec)) = 0;
                     return
                 else
                     openCBs(openCBs == currCB) = 0;
@@ -44,5 +45,5 @@ function [suc, vec, iters] = LDPC_del_iterative (H, vec)
         end
 
     end
-  
+    vec(isnan(vec)) = 0;
 end

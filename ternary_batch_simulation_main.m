@@ -1,14 +1,14 @@
 function ternary_batch_simulation_main(decoder, loadWords, id, n, log_p, log_q, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ResultsFolder)
 arguments
-    decoder (1,1) string {mustBeMember(decoder, ["generateWords", "2step", "joint", "joint-LC", "both"])} = "joint"
+    decoder (1,1) string {mustBeMember(decoder, ["generateWords", "2step", "joint", "joint-LC", "both"])} = "both"
     loadWords (1,1) = 1;
     id (1,1) = 0;
     n (1,1) {mustBeInteger,mustBePositive} = 128
-    log_p (1,1) {mustBeNegative} = -3
-    log_q (1,1) {mustBeNegative} = -1
-    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.75
+    log_p (1,1) {mustBeNegative} = -5
+    log_q (1,1) {mustBeNegative} = -0.2
+    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.5
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.5
-    num_iter_sim (1,1) {mustBeInteger, mustBeNonnegative} = 1e6; 
+    num_iter_sim (1,1) {mustBeInteger, mustBeNonnegative} = 100; 
     sequenceInd = 2;
     sequenceRes = 1;    
     ResultsFolder = "./Results"
@@ -166,7 +166,6 @@ stats2step = repmat(stats2step,[1,NumWorkers]);
 statsGeneral = repmat(statsGeneral,[1,NumWorkers]);
 
 
-
 % main run:
 parfor iter_thread = 1 : NumWorkers
     % Calculate start and end indices for each worker's slice of the matrix
@@ -233,6 +232,7 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
         BEPind_Naive_vec = ones(1,batchSize);
         numIterNaiveInd_vec = zeros(1, batchSize);
         numIterNaiveRes_vec = zeros(1, batchSize);
+        SER_Naive_vec = ones(1,batchSize);
     end
 
     if any(strcmp(decoder, ["joint", "joint-LC" , "both"]))
@@ -276,6 +276,8 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
             for iter_error = 1:repeatFacor
                 batch_sim = (iter_sim-1) * repeatFacor + iter_error;
                 ChannelOut = asymmchannel(CodewordComb, Q, ChannelType, q, p);
+                tIndActual = sum((ChannelOut ~= 0) ~= (CodewordComb ~= 0));
+                tResActual = sum((ChannelOut == 2) ~= (CodewordComb == 2));
                 tUpActual_vec(batch_sim) = sum(ChannelOut>CodewordComb);
                 tDownActual_vec(batch_sim) = sum(ChannelOut<CodewordComb);
                 % - % - % Channel end % - % - % 
@@ -302,6 +304,8 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
                     if isequal(decCodewordRM_Naive(:),CodewordComb(:))
                         BEP_Naive_vec(batch_sim) = 0;
                     end
+                    SER_Naive_vec(batch_sim) = mean(decCodewordRM_Naive ~= CodewordComb);
+
                 end
                 % 2. Interleaved iterations in message-passing:
                 if any(strcmp(decoder, ["joint", "joint-LC" , "both"]))            
@@ -312,7 +316,7 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
                     if isequal(decCodewordRM_MsgPas(:),CodewordComb(:))
                         BEP_MsgPas_vec(batch_sim) = 0;
                     end
-                    SER_MsgPas_vec(batch_sim) = 1 - mean(decCodewordRM_MsgPas == CodewordComb);
+                    SER_MsgPas_vec(batch_sim) = mean(decCodewordRM_MsgPas ~= CodewordComb);
                 end
             end
         end
@@ -348,6 +352,7 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
         % BEP
         stats2step.BEP_Naive = mean(BEP_Naive_vec);
         stats2step.BEPind_Naive = mean(BEPind_Naive_vec);
+        stats2step.SER_Naive = mean(SER_Naive_vec);
         %max iters
         stats2step.maxTrueIterNaiveInd = max(max(numIterNaiveInd_vec(BEPind_Naive_vec == 0)),0);
         stats2step.maxTrueIterNaiveRes = max(max(numIterNaiveRes_vec(BEP_Naive_vec == 0)),0);
