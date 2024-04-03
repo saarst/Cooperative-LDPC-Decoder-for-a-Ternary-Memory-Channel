@@ -18,8 +18,7 @@ end
 % Written by: Yuval Ben-Hur, 07/09/2022
 % Last modified by: Yuval Ben-Hur, 02/10/2022
 % 
-    
-    if ~isequal(size(resH,2),size(indH,2)), error("Parity-check matrix mismatch."); end % check code lengths matches
+    % if ~isequal(size(resH,2),size(indH,2)), error("Parity-check matrix mismatch."); end % check code lengths matches
     n = size(indH,2); % code length
         
     % - * - Indicator encoder - * -
@@ -37,7 +36,15 @@ end
     perm = [find(~parCols) find(parCols)]; % reverse column permutation
     % generate indicator codeword
     cInd = gf(zeros(1,n));
-    cInd(perm) = cInd_perm; 
+    cInd(perm) = cInd_perm;
+    NR5G = true;
+    if NR5G
+        Zi = 16;
+        cInd_pruned = cInd(2*Zi+1:end);
+    else
+        cInd_pruned = cInd;
+    end
+
     
     % - * - Residual encoder - * -    
     % encode residual word, given indicator codeword
@@ -45,7 +52,12 @@ end
         messageRes = gf(0,1);
         cRes = gf(zeros(1,n),1);
     else
-        nzH = resH(:,logical(cInd.x)); % columns corresponding to un-nulled locations
+        if NR5G
+            Zr = 11;
+            nzH = resH(:,[true(1,2*Zr),logical(cInd_pruned.x)]); % columns corresponding to un-nulled locations
+        else
+            nzH = resH(:,logical(cInd.x)); % columns corresponding to un-nulled locations
+        end
         n_res_short = size(nzH,2); % shortened residual code length
         k_res_short = n_res_short-gfrank(double(nzH.x),2); % shortened residual code dimension
         if k_res_short<=0 % residual code too short --> empty residual code
@@ -76,6 +88,7 @@ end
     messageInd = logical(messageInd.x);
     messageRes = logical(messageRes.x);
     c = cInd + cRes;
+
 
 end
 

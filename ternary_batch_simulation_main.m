@@ -1,12 +1,12 @@
 function ternary_batch_simulation_main(decoder, loadWords, id, n, log_p, log_q, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ResultsFolder)
 arguments
-    decoder (1,1) string {mustBeMember(decoder, ["generateWords", "2step", "joint", "joint-LC", "both"])} = "both"
-    loadWords (1,1) = 1;
+    decoder (1,1) string {mustBeMember(decoder, ["generateWords", "2step", "joint", "joint-LC", "both"])} = "generateWords"
+    loadWords (1,1) = 0;
     id (1,1) = 0;
     n (1,1) {mustBeInteger,mustBePositive} = 128
     log_p (1,1) {mustBeNegative} = -5
     log_q (1,1) {mustBeNegative} = -0.2
-    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.5
+    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.75
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.5
     num_iter_sim (1,1) {mustBeInteger, mustBeNonnegative} = 100; 
     sequenceInd = 2;
@@ -39,66 +39,86 @@ p = 10^(log_p);
 q  = 10^(log_q); % upward error probability, q/2
 Q   = 3;   % alphabet size
 ChannelType     = "random"; % "random" / "upto"
-maxIterNaive = 20;
-maxIterMsgPas = 20;
+maxIterNaive = 5;
+maxIterMsgPas = 5;
 
 %% Construct LDPC codes
 addpath(fullfile('.','gen_par_mats'));
 addpath(genpath(fullfile('.','LDPC')));
 
 % construct indicator code
-filenameLDPC = sprintf('n%d_R0%.0f.mat',n,100*rate_ind);
-filepathLDPC = fullfile('.','LDPCcode',filenameLDPC);
-if ~exist(filepathLDPC,'file')
-    try
-        dInd = 15;
-        [Lam, probInd] = GenerateDist(dInd,rate_ind); % Generate distributions with requested rate of r
-        LDPCWrapper('GenerateIrregular',n, Lam, probInd, filepathLDPC); % Generate parity matrix for code length of n
-        SavePartiyMat(filepathLDPC,dInd); % Save MAT file
-    catch err
-        disp(err.getReport);
-        return;
+NR5G = true;
+if ~NR5G
+    filenameLDPC = sprintf('n%d_R0%.0f.mat',n,100*rate_ind);
+    filepathLDPC = fullfile('.','LDPCcode',filenameLDPC);
+    if ~exist(filepathLDPC,'file')
+        try
+            dInd = 15;
+            [Lam, probInd] = GenerateDist(dInd,rate_ind); % Generate distributions with requested rate of r
+            LDPCWrapper('GenerateIrregular',n, Lam, probInd, filepathLDPC); % Generate parity matrix for code length of n
+            SavePartiyMat(filepathLDPC,dInd); % Save MAT file
+        catch err
+            disp(err.getReport);
+            return;
+        end
     end
-end
-load(filepathLDPC,"H","Hnonsys"); % H, Hnonsys are the parity-check matrices of the code
-H_nonsys_ind = full(Hnonsys);
-% enc_ind = comm.LDPCEncoder('ParityCheckMatrix',Hnonsys); 
-% dec_ind = comm.LDPCDecoder('ParityCheckMatrix',Hnonsys); % hard-decision message-passing decoder
-rate_ind_actual = (n-size(H_nonsys_ind,1)) / n;
-
-if ~loadWords
-    % construct indG_sys and parColsIdxs just one time!
-    indH_gf = gf(H_nonsys_ind,1);
-    rInd = size(indH_gf,1);
-    kInd = n-rInd;
-    [indH_rref, parColsIdxs] = gfrref(indH_gf,1);
-    parCols = false(1,n); parCols(parColsIdxs) = true; % parity columns
-    indH_sys = [indH_rref(:,~parCols) indH_rref(:,parCols)];
-    indG_sys = [gf(eye(kInd)) indH_sys(:,1:kInd).'];
-else
-    indG_sys = [];
-    parCols = [];
-end
-
-% construct residual code
-filenameLDPC = sprintf('n%d_R0%.0f.mat',n,100*rate_res);
-filepathLDPC = fullfile('.','LDPCcode',filenameLDPC);
-if ~exist(filepathLDPC,'file')
-    try
-        [Lam, probRes] = GenerateDist(15,rate_res); % Generate distributions with requested rate of r
-        LDPCWrapper('GenerateIrregular', n, Lam, probRes, filepathLDPC); % Generate parity matrix for code length of n
-        SavePartiyMat(filepathLDPC); % Save MAT file
-    catch err
-        disp(err.getReport);
-        return;
+    load(filepathLDPC,"H","Hnonsys"); % H, Hnonsys are the parity-check matrices of the code
+    H_nonsys_ind = full(Hnonsys);
+    % enc_ind = comm.LDPCEncoder('ParityCheckMatrix',Hnonsys); 
+    % dec_ind = comm.LDPCDecoder('ParityCheckMatrix',Hnonsys); % hard-decision message-passing decoder
+    rate_ind_actual = (n-size(H_nonsys_ind,1)) / n;
+    
+    if ~loadWords
+        % construct indG_sys and parColsIdxs just one time!
+        indH_gf = gf(H_nonsys_ind,1);
+        rInd = size(indH_gf,1);
+        kInd = n-rInd;
+        [indH_rref, parColsIdxs] = gfrref(indH_gf,1);
+        parCols = false(1,n); parCols(parColsIdxs) = true; % parity columns
+        indH_sys = [indH_rref(:,~parCols) indH_rref(:,parCols)];
+        indG_sys = [gf(eye(kInd)) indH_sys(:,1:kInd).'];
+    else
+        indG_sys = [];
+        parCols = [];
     end
+    
+    % construct residual code
+    filenameLDPC = sprintf('n%d_R0%.0f.mat',n,100*rate_res);
+    filepathLDPC = fullfile('.','LDPCcode',filenameLDPC);
+    if ~exist(filepathLDPC,'file')
+        try
+            [Lam, probRes] = GenerateDist(15,rate_res); % Generate distributions with requested rate of r
+            LDPCWrapper('GenerateIrregular', n, Lam, probRes, filepathLDPC); % Generate parity matrix for code length of n
+            SavePartiyMat(filepathLDPC); % Save MAT file
+        catch err
+            disp(err.getReport);
+            return;
+        end
+    end
+    load(filepathLDPC,"H","Hnonsys"); % H, Hnonsys are the parity-check matrices of the code
+    H_nonsys_res = full(Hnonsys);
+    % enc_res = comm.LDPCEncoder('ParityCheckMatrix',Hnonsys); 
+    % dec_res = comm.LDPCDecoder('ParityCheckMatrix',Hnonsys); % hard-decision message-passing decoder
+    rate_res_actual = (n-size(H_nonsys_res,1)) / n;
+else    %5G-NR mode
+    load("./LDPCcode/k96_n128_bg2_h.mat","H"); 
+    H_nonsys_ind = H;
+    if ~loadWords
+        % construct indG_sys and parColsIdxs just one time!
+        indH_gf = gf(H_nonsys_ind,1);
+        rInd = size(indH_gf,1);
+        kInd = size(indH_gf,2)-rInd;
+        [indH_rref, parColsIdxs] = gfrref(indH_gf,1);
+        parCols = false(1,size(indH_gf,2)); parCols(parColsIdxs) = true; % parity columns
+        indH_sys = [indH_rref(:,~parCols) indH_rref(:,parCols)];
+        indG_sys = [gf(eye(kInd)) indH_sys(:,1:kInd).'];
+    else
+        indG_sys = [];
+        parCols = [];
+    end
+    load("./LDPCcode/k64_n128_bg2_h.mat","H");
+    H_nonsys_res = H;
 end
-load(filepathLDPC,"H","Hnonsys"); % H, Hnonsys are the parity-check matrices of the code
-H_nonsys_res = full(Hnonsys);
-% enc_res = comm.LDPCEncoder('ParityCheckMatrix',Hnonsys); 
-% dec_res = comm.LDPCDecoder('ParityCheckMatrix',Hnonsys); % hard-decision message-passing decoder
-rate_res_actual = (n-size(H_nonsys_res,1)) / n;
-
 rmpath(fullfile('.','gen_par_mats'));
 fprintf("Loading Files is complete\n");
 
@@ -122,20 +142,20 @@ simStartTime = datetime;
 simStartTime.Format = 'yyyy-MM-dd_HH-mm-ss-SSS';
 
 NumWorkers = 1;
-% create parllel pool
-currentPool = gcp('nocreate');
-if isempty(currentPool)
-    % If no parallel pool exists, create one with max workers
-    poolSize = feature('numCores');
-    parpool(poolSize);
-    currentPool = gcp; % Get the current parallel pool
-    NumWorkers = currentPool.NumWorkers;
-    disp(['Parallel pool created with ', num2str(poolSize), ' workers.']);
-else
-    % If a parallel pool exists, display the number of workers
-    NumWorkers = currentPool.NumWorkers;
-    disp(['Using existing parallel pool with ', num2str(NumWorkers), ' workers.']);
-end
+% % create parllel pool
+% currentPool = gcp('nocreate');
+% if isempty(currentPool)
+%     % If no parallel pool exists, create one with max workers
+%     poolSize = feature('numCores');
+%     parpool(poolSize);
+%     currentPool = gcp; % Get the current parallel pool
+%     NumWorkers = currentPool.NumWorkers;
+%     disp(['Parallel pool created with ', num2str(poolSize), ' workers.']);
+% else
+%     % If a parallel pool exists, display the number of workers
+%     NumWorkers = currentPool.NumWorkers;
+%     disp(['Using existing parallel pool with ', num2str(NumWorkers), ' workers.']);
+% end
 
 % slices codewords between cells:
 if  loadWords && num_iter_sim > totalNumberCodewords
@@ -167,7 +187,7 @@ statsGeneral = repmat(statsGeneral,[1,NumWorkers]);
 
 
 % main run:
-parfor iter_thread = 1 : NumWorkers
+for iter_thread = 1 : NumWorkers
     % Calculate start and end indices for each worker's slice of the matrix
     if loadWords
         currCodewords = CodewordsCell{iter_thread};
