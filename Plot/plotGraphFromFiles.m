@@ -1,9 +1,10 @@
-function plotGraphFromFiles(matchedString, path, savePath, format)
+function plotGraphFromFiles(matchedString, path, savePath, format, target)
     arguments
-        matchedString string = "TriLDPC_d20021511_n128_si2_sr2_Ri05_Rr05"
+        matchedString string = "TriLDPC_d21041845_n192_si6_sr2_Ri08_Rr05"
         path string = "./Results/"
         savePath string = "./Figures/"
         format string = "fig"
+        target  = 1e-4
     end
     addpath(genpath("./"));
     files = dir(path);
@@ -14,14 +15,32 @@ function plotGraphFromFiles(matchedString, path, savePath, format)
     if ~strcmp(matchedString,"")
         subDirsNames = subDirsNames(contains(subDirsNames, matchedString));
     end
+    ps = []; qs_Naive = []; qs_MsgPas = [];
     for i=1:length(subDirsNames)
         subDir = subDirsNames{i};
-        plotGraphFromFilesAux(subDir, path, savePath, format);
+        [p, q_Naive, q_MsgPas] = plotGraphFromFilesAux(subDir, path, savePath, format, "BLER", target);
+        ps = [ps; p];
+        qs_Naive = [qs_Naive ; q_Naive];
+        qs_MsgPas = [qs_MsgPas ; q_MsgPas];
     end
+    % sort
+    [ps, I] = sort(ps);
+    qs_MsgPas = qs_MsgPas(I);
+    qs_Naive = qs_Naive(I);
+    %
+    fig = figure;
+    loglog(ps, qs_MsgPas, 'LineWidth', 2, 'Marker', '+');
+    hold on
+    loglog(ps, qs_Naive, 'LineWidth', 2, 'Marker', 'o');
+    legend("MsgPas (ours)", "2-step (prior)")
+    xlabel(sprintf("p(down) for BLER=%E",target));
+    ylabel("q");
+
+
 end
 
 
-function plotGraphFromFilesAux(subDir, path, savePath, format)
+function [p, q_Naive, q_MsgPas] = plotGraphFromFilesAux(subDir, path, savePath, format, mode, target)
     folderPath = fullfile(path,subDir);
     addpath(genpath(folderPath));
     
@@ -38,6 +57,9 @@ function plotGraphFromFilesAux(subDir, path, savePath, format)
     
     BEPind_Naive_Values = NaN(size(Q));
     BEPind_MsgPas_Values = NaN(size(Q));
+
+    SER_Naive_Values = NaN(size(Q));
+    SER_MsgPas_Values = NaN(size(Q));
     
     % Variables to extract from the struct in the file
     vars = {"decoder", "BEP_MsgPas", "BEP_Naive", "p", "q", "statsGeneral", "stats2step", "statsJoint", "n","rate_ind_actual","rate_res_actual"};
@@ -59,22 +81,26 @@ function plotGraphFromFilesAux(subDir, path, savePath, format)
         if any(strcmp(data.decoder, ["2step", "both"]))
             BEP_Naive = data.BEP_Naive;
             BEPind_Naive = mean([data.stats2step.BEPind_Naive]);
+            SER_Naive = mean([data.stats2step.SER_Naive]);
             maxTrueIterNaive = max([data.stats2step.maxTrueIterNaiveInd]);
             if isempty(maxTrueIterNaive)
                 maxTrueIterNaive = 0;
             end
             BEP_Naive_Values(r,c) = BEP_Naive;
             BEPind_Naive_Values(r,c) = BEPind_Naive;
+            SER_Naive_Values(r,c) = SER_Naive;
         end
         if any(strcmp(data.decoder, ["joint","joint-LC", "both"]))
             BEP_MsgPas = data.BEP_MsgPas;
             BEPind_MsgPas = mean([data.statsJoint.BEPind_MsgPas]);
+            SER_MsgPas = mean([data.statsJoint.SER_MsgPas]);
             maxTrueIterMsgPas = max([data.statsJoint.maxTrueIterMsgPas]);
             if isempty(maxTrueIterMsgPas)
                 maxTrueIterMsgPas = 0;
             end
             BEP_MsgPas_Values(r,c) = BEP_MsgPas;
-            BEPind_MsgPas_Values(r,c) = BEPind_MsgPas;            
+            BEPind_MsgPas_Values(r,c) = BEPind_MsgPas;
+            SER_MsgPas_Values(r,c) = SER_MsgPas;
         end
 
         
@@ -91,20 +117,32 @@ function plotGraphFromFilesAux(subDir, path, savePath, format)
     % sort:
     for k = 1:length(p)
         curr_p = p(k);
-        x_ax_vals = q + curr_p;
-        fig = figure;        
+        x_ax_vals = q;
+        fig = figure;
         if any(strcmp(data.decoder, ["2step", "both"]))
-            BEP_Naive = BEP_Naive_Values(:,k);
-            plot(x_ax_vals, max(eps,BEP_Naive,"includenan"),'LineWidth',2);    
+            if strcmp(mode,"BLER")
+                Naive = BEP_Naive_Values(:,k);
+            else
+                Naive = SER_Naive_Values(:,k);
+            end
+            loglog(x_ax_vals, max(eps,Naive,"includenan"),'LineWidth',2,'Marker','+');    
+            q_Naive = interp1(Naive, x_ax_vals, target);
         end
         hold on
         if any(strcmp(data.decoder, ["joint","joint-LC", "both"]))
-            BEP_MsgPas = BEP_MsgPas_Values(:,k);
-            plot(x_ax_vals, max(eps,BEP_MsgPas,"includenan"),'LineWidth',2);            
+            if strcmp(mode,"BLER")
+                MsgPas = BEP_MsgPas_Values(:,k);
+            else
+                MsgPas = SER_MsgPas_Values(:,k);
+            end
+            loglog(x_ax_vals, max(eps,MsgPas,"includenan"),'LineWidth',2,'Marker','+');            
+            q_MsgPas = interp1(MsgPas, x_ax_vals, target);
+
         end
                 
-        xlabel(sprintf("q+p (up+down) for p=%.2E",curr_p));
-        ylabel('BLER');
+        xlabel(sprintf("q(up) for p(down)=%.2E",curr_p));
+        ylabel(mode);
+        grid on
     
     
         [~,folderName,~] = fileparts(folderPath);
@@ -127,7 +165,7 @@ function plotGraphFromFilesAux(subDir, path, savePath, format)
         elseif strcmp(data.decoder, "joint-LC")
             legend('Joint-LC (ours)', 'Location', 'southeast');
         end
-
+        paperStyle(fig,len,curr_p,RateInd,RateRes);
         % saveas(fig,fullfile(savePath,subDir + "." + format));
 
     end

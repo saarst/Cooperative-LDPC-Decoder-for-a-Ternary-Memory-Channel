@@ -1,0 +1,14 @@
+{Error using parpool
+Parallel pool failed to start with the following error. For more detailed
+information, validate the profile 'Processes' in the Cluster Profile Manager.
+
+Error in ternary_batch_simulation_main (line 130)
+    parpool(poolSize);
+
+Caused by:
+    Error using
+    parallel.internal.pool.AbstractInteractiveClient>iThrowWithCause
+    Failed to start pool.
+        Error using parallel.Job/submit
+        Assertion failed.
+} 

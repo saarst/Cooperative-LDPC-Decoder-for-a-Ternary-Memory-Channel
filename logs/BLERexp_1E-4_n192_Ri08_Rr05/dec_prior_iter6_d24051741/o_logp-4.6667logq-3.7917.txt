@@ -1,0 +1,23 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2023 The MathWorks, Inc.
+             R2023b Update 1 (23.2.0.2380103) 64-bit (glnxa64)
+                             September 11, 2023
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+Ternary LDPC simulation begin
+Parameters:
+decoder = 2step, loadWords = 1, n = 192, log_p = -4.6667, log_q = -3.7917, rate_ind = 0.800000, rate_res = 0.500000, num_iter_sim = 1e+08, sequenceInd = 6, sequenceRes = 2, resultsFolder = './Results/BLERexp_1E-4_n192_Ri08_Rr05/dec_prior_iter6_d24051741/' 
+Loading Files is complete
+* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
+Starting parallel pool (parpool) using the 'Processes' profile ...
+Connected to parallel pool with 40 workers.
+Parallel pool created with 40 workers.
+	Naive BEP = 1.046100E-04, MsgPas BEP = NaN
+* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
+Time elapsed: 918.262353 seconds
+End of simulation
+Parallel pool using the 'Processes' profile is shutting down.

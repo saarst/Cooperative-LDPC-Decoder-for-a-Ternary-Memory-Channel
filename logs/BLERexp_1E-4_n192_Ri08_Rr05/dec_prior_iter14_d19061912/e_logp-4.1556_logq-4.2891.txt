@@ -1,0 +1,92 @@
+INFO: os::commit_memory(0x000014591937e000, 12288, 0) failed; error='Cannot allocate memory' (errno=12)
+MATLAB: javainit.cpp:1464: void {anonymous}::mwJavaAbort(): Assertion `Fatal Java Exception. See this file for details: /home/saar.stern/hs_error_pid58146.log' failed.
+
+--------------------------------------------------------------------------------
+                Assertion detected at 2024-06-19 19:19:00 +0300
+--------------------------------------------------------------------------------
+
+Configuration:
+  Crash Decoding           : Disabled - No sandbox or build area path
+  Crash Mode               : continue (default)
+  Default Encoding         : UTF-8
+  Deployed                 : false
+  GNU C Library            : 2.28 stable
+  Graphics Driver          : Uninitialized software 
+  Graphics card 1          : 0x102b ( 0x102b ) 0x522 Version 0.0.0.0 (0-0-0)
+  Interpreter 0            : Executing request: 64657461696C2F44656661756C744D564D2E637070
+  Java Version             : Java 1.8.0_202-b08 with Oracle Corporation Java HotSpot(TM) 64-Bit Server VM mixed mode
+  MATLAB Architecture      : glnxa64
+  MATLAB Entitlement ID    : 3913286
+  MATLAB Root              : /usr/local/matlab2023b
+  MATLAB Version           : 23.2.0.2380103 (R2023b) Update 1
+  OpenGL                   : software
+  Operating System         : Linux 4.18.0-425.3.1.el8.x86_64 #1 SMP Wed Nov 9 20:13:27 UTC 2022 x86_64
+  Process ID               : 2351906
+  Processor ID             : x86 Family 6 Model 85 Stepping 7, GenuineIntel
+  Session Key              : a9f419f3-199d-49fd-9b38-1784357e34ac
+  Window System            : No active display
+
+Fault Count: 1
+
+
+Additional Log Files:
+  Java Crash Report        : /home/saar.stern/hs_error_pid58146.log
+  Java Log                 : /home/saar.stern/java.log.58146
+
+
+Assertion in void {anonymous}::mwJavaAbort() at javainit.cpp line 1464:
+Fatal Java Exception. See this file for details: /home/saar.stern/hs_error_pid58146.log
+
+Current Thread: 'MCR 0 interpret' id 22372909831936
+
+Register State (captured):
+  RAX = 0000000000000000  RBX = 0000145ba445dea8
+  RCX = 0000000000000000  RDX = 0000145bc8e9eeb0
+  RSP = 000014591957afe0  RBP = 000014591957b3c0
+  RSI = 0000145bc8e85025  RDI = 000014591957aff0
+
+   R8 = 0000000000000000   R9 = 000014591957b2d0
+  R10 = 0000000000000000  R11 = 0000000000000000
+  R12 = 0000145bc8ea52c8  R13 = 0000145bc8eb5348
+  R14 = 0000145ba4460c67  R15 = 000014591957bca0
+
+  RIP = 0000145bc8e33d1f  EFL = 0000000000000000
+
+   CS = 0000   FS = 0000   GS = 0000
+
+Stack Trace (captured):
+[  0] 0x0000145bc8e2d063      /usr/local/matlab2023b/bin/glnxa64/libmwfl.so+00319587
+[  1] 0x0000145bc8e2d25c      /usr/local/matlab2023b/bin/glnxa64/libmwfl.so+00320092 _ZN10foundation4core4diag15stacktrace_base7captureEm+00000028
+[  2] 0x0000145bc8e32121      /usr/local/matlab2023b/bin/glnxa64/libmwfl.so+00340257
+[  3] 0x0000145bc8e321e0      /usr/local/matlab2023b/bin/glnxa64/libmwfl.so+00340448
+[  4] 0x0000145ba43e2668 /usr/local/matlab2023b/bin/glnxa64/matlab_startup_plugins/jmi/../../../../bin/glnxa64/libmwjmi.so+01529448
+[  5] 0x0000145a2a5bc700 /usr/local/matlab2023b/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+09496320
+[  6] 0x0000145a2a781683 /usr/local/matlab2023b/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+11351683
+[  7] 0x0000145a2a18e4c7 /usr/local/matlab2023b/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+05113031
+[  8] 0x0000145a2a5bde86 /usr/local/matlab2023b/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+09502342
+[  9] 0x0000145a2a5b574f /usr/local/matlab2023b/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+09467727
+[ 10] 0x0000145a2a5bf3c8 /usr/local/matlab2023b/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+09507784
+[ 11] 0x0000145a2a720896 /usr/local/matlab2023b/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+10954902
+[ 12] 0x0000145a2a3858d8 /usr/local/matlab2023b/sys/java/jre/glnxa64/jre/lib/amd64/server/libjvm.so+07174360
+[ 13] 0x000014591a2d2b33 /usr/local/matlab2023b/bin/glnxa64/libmwparalleljni.so+00068403 _ZN8parallel3jni14AttachedThreadC1EP7JavaVM_RKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESB_+00000051
+[ 14] 0x000014591a2ead52 /usr/local/matlab2023b/bin/glnxa64/libnativesession.so+00068946
+[ 15] 0x000014591a2eb4a6 /usr/local/matlab2023b/bin/glnxa64/libnativesession.so+00070822
+[ 16] 0x0000145baa57e91f     /usr/local/matlab2023b/bin/glnxa64/libmwmf0.so+03569951
+[ 17] 0x0000145baa57a76b     /usr/local/matlab2023b/bin/glnxa64/libmwmf0.so+03553131
+[ 18] 0x0000145baa57cfe6     /usr/local/matlab2023b/bin/glnxa64/libmwmf0.so+03563494
+[ 19] 0x0000145b9cb4f204 /usr/local/matlab2023b/bin/glnxa64/spf/serialisationproviders/parallel/plr_serialisation_provider/../../../../../../bin/glnxa64/libmwparallelplrsessioninfo.so+00205316 _ZN8parallel3plr11sessioninfo13MfSessionInfo4Impl16updateNumWorkersEii+00000180
+[ 20] 0x0000145b9d3b50b1 /usr/local/matlab2023b/bin/glnxa64/spf/serialisationproviders/parallel/plr_serialisation_provider/../../../../../../bin/glnxa64/libmwparallelplrsession.so+01286321 _ZN8parallel3plr7session11SessionInfo16updateNumWorkersEii+00000097
+[ 21] 0x0000145b9d322f3b /usr/local/matlab2023b/bin/glnxa64/spf/serialisationproviders/parallel/plr_serialisation_provider/../../../../../../bin/glnxa64/libmwparallelplrsession.so+00687931
+[ 22] 0x0000145b9d32301f /usr/local/matlab2023b/bin/glnxa64/spf/serialisationproviders/parallel/plr_serialisation_provider/../../../../../../bin/glnxa64/libmwparallelplrsession.so+00688159
+[ 23] 0x0000145b9d361808 /usr/local/matlab2023b/bin/glnxa64/spf/serialisationproviders/parallel/plr_serialisation_provider/../../../../../../bin/glnxa64/libmwparallelplrsession.so+00944136 _ZN8parallel3plr7session13PoolScheduler18updatePoolSnapshotEm+00000424
+[ 24] 0x0000145b9d362e92 /usr/local/matlab2023b/bin/glnxa64/spf/serialisationproviders/parallel/plr_serialisation_provider/../../../../../../bin/glnxa64/libmwparallelplrsession.so+00949906 _ZN8parallel3plr7session13PoolScheduler13schedulerProcEv+00004258
+[ 25] 0x0000145bc7ac2d10 /usr/local/matlab2023b/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6+00879888
+[ 26] 0x0000145bc7bca1ca                             /lib64/libpthread.so.0+00033226
+[ 27] 0x0000145bc7646e73                                   /lib64/libc.so.6+00237171 clone+00000067
+
+** This crash report has been saved to disk as /home/saar.stern/matlab_crash_dump.2351906-1 **
+
+
+
+MATLAB is exiting because of fatal error
+/var/spool/pbs/mom_priv/jobs/372468.zeus-master.SC: line 13: 2351906 Killed                  "/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main('${decoder}',${loadWords}, ${id}, ${n}, ${log_p}, ${log_q}, ${RateInd}, ${RateRes}, ${numIter}, ${sequenceInd}, ${sequenceRes}, './Results/${experimentName}' )"

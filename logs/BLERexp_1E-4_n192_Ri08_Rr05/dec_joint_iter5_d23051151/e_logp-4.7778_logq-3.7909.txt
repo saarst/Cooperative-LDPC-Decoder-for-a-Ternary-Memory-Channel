@@ -1,0 +1,1 @@
+-bash: line 1: 2875660 Terminated              /var/spool/pbs/mom_priv/jobs/342559.zeus-master.SC

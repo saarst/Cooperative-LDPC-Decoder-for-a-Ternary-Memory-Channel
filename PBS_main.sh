@@ -3,7 +3,7 @@
 #PBS -m abe
 #PBS -M saar.stern@campus.technion.ac.il
 #PBS -l select=4:ncpus=12
-#PBS -l select=mem=20GB
+#PBS -l select=mem=40GB
 #PBS -l walltime=24:00:00
 
 PBS_O_WORKDIR=$HOME/project_1/TriLDPC

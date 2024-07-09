@@ -1,0 +1,79 @@
+
+--------------------------------------------------------------------------------
+             std::terminate() detected at 2024-06-19 19:15:46 +0300
+--------------------------------------------------------------------------------
+
+Configuration:
+  Crash Decoding           : Disabled - No sandbox or build area path
+  Crash Mode               : continue (default)
+  Default Encoding         : UTF-8
+  Deployed                 : false
+  GNU C Library            : 2.28 stable
+  Graphics Driver          : Uninitialized software 
+  Graphics card 1          : 0x102b ( 0x102b ) 0x522 Version 0.0.0.0 (0-0-0)
+  Java Version             : Java 1.8.0_202-b08 with Oracle Corporation Java HotSpot(TM) 64-Bit Server VM mixed mode
+  MATLAB Architecture      : glnxa64
+  MATLAB Entitlement ID    : 3913286
+  MATLAB Root              : /usr/local/matlab2023b
+  MATLAB Version           : 23.2.0.2380103 (R2023b) Update 1
+  OpenGL                   : software
+  Operating System         : Linux 4.18.0-425.3.1.el8.x86_64 #1 SMP Wed Nov 9 20:13:27 UTC 2022 x86_64
+  Process ID               : 3515395
+  Processor ID             : x86 Family 6 Model 85 Stepping 7, GenuineIntel
+  Session Key              : ab9ad340-5b54-40e4-8329-aa53f630b4f3
+  Window System            : No active display
+
+Fault Count: 1
+
+
+Abnormal termination:
+std::terminate()
+
+Current Thread: 'GTP_1' id 23117383321344
+
+Register State (captured):
+  RAX = 0000000000000000  RBX = 00001506a8fb92c8
+  RCX = 0000000000000000  RDX = 00001506a8fb2eb0
+  RSP = 000015066f6b7440  RBP = 000015066f6b7820
+  RSI = 00001506a8f99025  RDI = 000015066f6b7450
+
+   R8 = 0000000000000000   R9 = 000015066f6b7730
+  R10 = 0000000000000000  R11 = 0000000000000000
+  R12 = 00001506a8fc9348  R13 = 000015066f6b7cf0
+  R14 = 000015066f6b7880  R15 = 0000000000000000
+
+  RIP = 00001506a8f47d1f  EFL = 0000000000000000
+
+   CS = 0000   FS = 0000   GS = 0000
+
+Stack Trace (captured):
+[  0] 0x00001506a8f41063      /usr/local/matlab2023b/bin/glnxa64/libmwfl.so+00319587
+[  1] 0x00001506a8f4125c      /usr/local/matlab2023b/bin/glnxa64/libmwfl.so+00320092 _ZN10foundation4core4diag15stacktrace_base7captureEm+00000028
+[  2] 0x00001506a8f439f8      /usr/local/matlab2023b/bin/glnxa64/libmwfl.so+00330232
+[  3] 0x00001506a8f43c93      /usr/local/matlab2023b/bin/glnxa64/libmwfl.so+00330899
+[  4] 0x000015069dcca542     /usr/local/matlab2023b/bin/glnxa64/libmwmcr.so+01094978
+[  5] 0x000015069dccde3f     /usr/local/matlab2023b/bin/glnxa64/libmwmcr.so+01109567
+[  6] 0x000015069dccdff8     /usr/local/matlab2023b/bin/glnxa64/libmwmcr.so+01110008
+[  7] 0x000015069dcce47d     /usr/local/matlab2023b/bin/glnxa64/libmwmcr.so+01111165
+[  8] 0x00001506a7bad7b6 /usr/local/matlab2023b/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6+00710582
+[  9] 0x00001506a7bad821 /usr/local/matlab2023b/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6+00710689
+[ 10] 0x00001506a7badab4 /usr/local/matlab2023b/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6+00711348
+[ 11] 0x00001506a7ba5400 /usr/local/matlab2023b/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6+00676864 _ZSt20__throw_system_errori+00000129
+[ 12] 0x00001506a7bd6f99 /usr/local/matlab2023b/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6+00880537
+[ 13] 0x000015067c559b6f /usr/local/matlab2023b/bin/glnxa64/spf/providers/agent/spf/invokable/../../../../../../../bin/glnxa64/libmwagentspfthreadpool.so+00146287
+[ 14] 0x000015067c566fcf /usr/local/matlab2023b/bin/glnxa64/spf/providers/agent/spf/invokable/../../../../../../../bin/glnxa64/libmwagentspfthreadpool.so+00200655
+[ 15] 0x000015067c5602ce /usr/local/matlab2023b/bin/glnxa64/spf/providers/agent/spf/invokable/../../../../../../../bin/glnxa64/libmwagentspfthreadpool.so+00172750 _ZN5agent3spf10threadpool10ThreadPool15tryToAddAThreadEv+00001598
+[ 16] 0x000015067c5613d8 /usr/local/matlab2023b/bin/glnxa64/spf/providers/agent/spf/invokable/../../../../../../../bin/glnxa64/libmwagentspfthreadpool.so+00177112 _ZN5agent3spf10threadpool10ThreadPool16internalPostWorkERKN7mwboost5uuids4uuidEOSt8functionIFvvEEOSt8optionalINS1_11stop_sourceEEb+00000856
+[ 17] 0x000015067c5614a0 /usr/local/matlab2023b/bin/glnxa64/spf/providers/agent/spf/invokable/../../../../../../../bin/glnxa64/libmwagentspfthreadpool.so+00177312 _ZN5agent3spf10threadpool10ThreadPool8postWorkERKN7mwboost5uuids4uuidEOSt8functionIFvvEEb+00000032
+[ 18] 0x000015067c5544eb /usr/local/matlab2023b/bin/glnxa64/spf/providers/agent/spf/invokable/../../../../../../../bin/glnxa64/libmwagentspfthreadpool.so+00124139 _ZN5agent3spf10threadpool22ScheduledTaskSubmitter13schedulerProcESt7promiseIvE+00001227
+[ 19] 0x000015067c5546e0 /usr/local/matlab2023b/bin/glnxa64/spf/providers/agent/spf/invokable/../../../../../../../bin/glnxa64/libmwagentspfthreadpool.so+00124640
+[ 20] 0x00001506a7bd6d10 /usr/local/matlab2023b/bin/glnxa64/../../sys/os/glnxa64/libstdc++.so.6+00879888
+[ 21] 0x00001506a7cde1ca                             /lib64/libpthread.so.0+00033226
+[ 22] 0x00001506a775ae73                                   /lib64/libc.so.6+00237171 clone+00000067
+
+** This crash report has been saved to disk as /home/saar.stern/matlab_crash_dump.3515395-1 **
+
+
+
+MATLAB is exiting because of fatal error
+/var/spool/pbs/mom_priv/jobs/372476.zeus-master.SC: line 13: 3515395 Killed                  "/usr/local/matlab/bin/matlab" -nodisplay -r "ternary_batch_simulation_main('${decoder}',${loadWords}, ${id}, ${n}, ${log_p}, ${log_q}, ${RateInd}, ${RateRes}, ${numIter}, ${sequenceInd}, ${sequenceRes}, './Results/${experimentName}' )"

@@ -1,16 +1,16 @@
 function ternary_batch_simulation_main(decoder, loadWords, id, n, log_p, log_q, rate_ind, rate_res, num_iter_sim, sequenceInd, sequenceRes, ResultsFolder)
 arguments
-    decoder (1,1) string {mustBeMember(decoder, ["generateWords", "2step", "joint", "joint-LC", "both"])} = "both"
-    loadWords (1,1) = 1;
+    decoder (1,1) string {mustBeMember(decoder, ["generateWords", "2step", "joint", "joint-LC", "both"])} = "generateWords"
+    loadWords (1,1) = 0;
     id (1,1) = 0;
-    n (1,1) {mustBeInteger,mustBePositive} = 128
-    log_p (1,1) {mustBeNegative} = -5
-    log_q (1,1) {mustBeNegative} = -0.2
-    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.5
+    n (1,1) {mustBeInteger,mustBePositive} = 192
+    log_p (1,1) {mustBeNegative} = log10(1.291549665014883e-05)
+    log_q (1,1) {mustBeNegative} = log10(4.210484750468435e-04)
+    rate_ind (1,1) {mustBeLessThanOrEqual(rate_ind,1), mustBeGreaterThanOrEqual(rate_ind,0)} = 0.8
     rate_res (1,1) {mustBeLessThanOrEqual(rate_res,1), mustBeGreaterThanOrEqual(rate_res,0)} = 0.5
-    num_iter_sim (1,1) {mustBeInteger, mustBeNonnegative} = 100; 
-    sequenceInd = 2;
-    sequenceRes = 1;    
+    num_iter_sim (1,1) {mustBeInteger, mustBeNonnegative} = 5; 
+    sequenceInd = 6;
+    sequenceRes = 2;    
     ResultsFolder = "./Results"
 end
 
@@ -24,6 +24,7 @@ rng('shuffle');
 seed = rng;
 rng(seed.Seed + id);
 seed = rng;
+seedNum = seed.Seed;
 filepath = cd(fileparts(mfilename('fullpath')));
 cd(filepath);
 if ~isfolder(fullfile(".","Results"))
@@ -39,8 +40,8 @@ p = 10^(log_p);
 q  = 10^(log_q); % upward error probability, q/2
 Q   = 3;   % alphabet size
 ChannelType     = "random"; % "random" / "upto"
-maxIterNaive = 20;
-maxIterMsgPas = 20;
+maxIterNaive = 30;
+maxIterMsgPas = 30;
 
 %% Construct LDPC codes
 addpath(fullfile('.','gen_par_mats'));
@@ -160,7 +161,7 @@ if loadWords && num_iter_sim > totalNumberCodewords
 else
     repeatFactor = 1;
 end
-[statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, [], [], [], [], [], [], [], 0, [], []);
+[statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, [], [], [], [], [], [], [], 0, [], [], [], [], [], [], [], [], 0);
 statsJoint = repmat(statsJoint,[1,NumWorkers]);
 stats2step = repmat(stats2step,[1,NumWorkers]);
 statsGeneral = repmat(statsGeneral,[1,NumWorkers]);
@@ -176,7 +177,7 @@ parfor iter_thread = 1 : NumWorkers
     end
     [statsJoint(iter_thread), stats2step(iter_thread), statsGeneral(iter_thread)] =  ...
         TernaryBatch(decoder, currCodewords, symbolsPrior, ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, ...
-        codeWordsPerCell, repeatFactor, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas, indG_sys, parCols);
+        codeWordsPerCell, repeatFactor, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas, indG_sys, parCols, seedNum + iter_thread);
 end
 
 % remove the codewords from the results file:
@@ -203,10 +204,10 @@ if strcmp(decoder, "generateWords")
     % concatenate codewords to single file
     totalCodewords = vertcat(statsGeneral(:).codewords);
     messageIndLen = mean([statsGeneral.messageIndLen]);
-    messageResLen = mean([statsGeneral.messageResLen]);
+    messageResLen = [statsGeneral.messageResLen];
     nameOfFile = sprintf('Codewords/len%d_Ri0%.0f_Rr0%.0f_%s.mat',...
             n,100*rate_ind_actual,100*rate_res_actual,string(simStartTime));
-    save(nameOfFile, 'totalCodewords', 'messageIndLen', 'messageResLen', 'id', 'seed');
+    save(nameOfFile, 'totalCodewords', 'messageIndLen', 'messageResLen', 'id', 'seed', 'TimeElapsed');
 else
 % Save data to .mat file
 save(sprintf('%s/len%d_logp%g_logq%g_LDPC_0%.0f_0%.0f_%s.mat',...
@@ -218,8 +219,9 @@ end
 % internal functions:
 
 function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codewords, symbolsPrior, ChannelType, H_nonsys_ind, H_nonsys_res, Q, p, q, codeWordsPerCell, ...
-          repeatFacor, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas, indG_sys, parCols)
+          repeatFacor, sequenceInd, sequenceRes, maxIterNaive, maxIterMsgPas, indG_sys, parCols, seed)
     % Initializatoins:
+    rng(seed);
     batchSize = codeWordsPerCell * repeatFacor;
     if strcmp(decoder,"generateWords")
         codewords = zeros(batchSize,size(H_nonsys_ind,2),'uint8');
@@ -227,6 +229,7 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
     statsJoint = struct;
     stats2step = struct;
     statsGeneral = struct;
+    statsGeneral.seed = rng;
     if any(strcmp(decoder, ["2step" , "both"]))
         BEP_Naive_vec = ones(1,batchSize);
         BEPind_Naive_vec = ones(1,batchSize);
@@ -325,8 +328,8 @@ function [statsJoint, stats2step, statsGeneral] = TernaryBatch(decoder, codeword
 
     % general stats
     % mean messageLength
-    statsGeneral.messageIndLen = mean(messageIndLength_vec);
-    statsGeneral.messageResLen = mean(messageResLength_vec);
+    statsGeneral.messageIndLen = messageIndLength_vec;
+    statsGeneral.messageResLen = messageResLength_vec;
     %tActual
     statsGeneral.tUpActual = mean(tUpActual_vec);
     statsGeneral.tDownActual = mean(tDownActual_vec);

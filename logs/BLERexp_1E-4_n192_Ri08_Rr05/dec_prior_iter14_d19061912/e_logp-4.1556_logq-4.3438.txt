@@ -1,0 +1,20 @@
+{Error using parallel.internal.parfor.ParforEngine/rebuildParforController
+The parallel pool that parfor was using has shut down. To start a new parallel
+pool, run your parfor code again or use parpool.
+
+Error in parallel.internal.parfor.ParforEngine/handleIntervalErrorResult (line 306)
+                obj.rebuildParforController();
+
+Error in parallel.internal.parfor.ParforEngine/getCompleteIntervals (line 230)
+                            [r, err] = obj.handleIntervalErrorResult(r);
+
+Error in ternary_batch_simulation_main (line 171)
+parfor iter_thread = 1 : NumWorkers
+} 
+{This parallel pool has been shut down.
+
+Caused by:
+    The parallel pool shut down because the client lost connection to worker
+    39. Check the network connection or restart the parallel pool with
+    'parpool'.
+} 

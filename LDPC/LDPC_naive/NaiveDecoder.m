@@ -14,9 +14,6 @@ function [decCodewordRM_Naive, success, indIter, resIter] = NaiveDecoder(Channel
     %% 3. build r_res
     r_res_tmp = ChannelOut;
     r_res_tmp(c_ind_estimate & ChannelOut==0) = NaN; % putting ? in down errors
-    if any(isnan(r_res_tmp))
-        disp("hey");
-    end
     r_res_tmp(c_ind_estimate==0) = 0; % removing UP errors
     r_res = r_res_tmp - c_ind_estimate;
 

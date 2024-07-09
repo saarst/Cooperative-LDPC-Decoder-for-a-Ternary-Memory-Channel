@@ -1,0 +1,84 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2023 The MathWorks, Inc.
+             R2023b Update 1 (23.2.0.2380103) 64-bit (glnxa64)
+                             September 11, 2023
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+Ternary LDPC simulation begin
+Parameters:
+decoder = 2step, loadWords = 1, n = 192, log_p = -4.2222, log_q = -4.2758, rate_ind = 0.800000, rate_res = 0.500000, num_iter_sim = 1e+11, sequenceInd = 6, sequenceRes = 2, resultsFolder = './Results/BLERexp_1E-4_n192_Ri08_Rr05/dec_prior_iter15_d06071748/' 
+Loading Files is complete
+* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
+Starting parallel pool (parpool) using the 'Processes' profile ...
+[Warning: The Cluster reported an error while destroying a job. The error was:
+Could not open file
+"/home/saar.stern/.matlab/local_cluster_jobs/R2023b/Job3733.in.mat", the error
+returned was: Unable to find file or directory
+'/home/saar.stern/.matlab/local_cluster_jobs/R2023b/Job3733.in.mat'...] 
+[> In parallel.internal.cluster.CJSJobMethods.destroyOneJob (line 79)
+In parallel.job.CJSConcurrentJob>@(job)CJSJobMethods.destroyOneJob(job.Parent,job,job.Support,job.SupportID) (line 52)
+In parallel.job/CJSConcurrentJob/destroyJob (line 52)
+In parallel.Job>iDeleteJobs (line 1664)
+In parallel.internal.cluster.hetfun (line 57)
+In parallel/Job/delete (line 1456)
+In parallel/Cluster/hDeleteOneJob (line 1040)
+In parallel.internal.pool.AbstractInteractiveClient>iDeleteJobs (line 479)
+In parallel.internal.pool/AbstractInteractiveClient/pRemoveOldJobs (line 203)
+In parallel.internal.pool/AbstractInteractiveClient/start (line 96)
+In parallel.internal.pool.AbstractClusterPool>iStartClient (line 831)
+In parallel.internal.pool.AbstractClusterPool.hBuildPool (line 626)
+In parallel.internal.pool.doParpool (line 22)
+In parpool (line 118)
+In ternary_batch_simulation_main (line 131)] 
+Connected to parallel pool with 40 workers.
+Parallel pool created with 40 workers.
+[Warning: A worker aborted during execution of the parfor loop. The parfor loop
+will now run again on the remaining workers.] 
+[> In parallel.internal.parfor/ParforEngine/handleIntervalErrorResult (line 287)
+In parallel.internal.parfor/ParforEngine/getCompleteIntervals (line 230)
+In parallel_function>distributed_execution (line 746)
+In parallel_function (line 578)
+In ternary_batch_simulation_main (line 171)] 
+[Warning: A worker aborted during execution of the parfor loop. The parfor loop
+will now run again on the remaining workers.] 
+[> In parallel.internal.parfor/ParforEngine/handleIntervalErrorResult (line 287)
+In parallel.internal.parfor/ParforEngine/getCompleteIntervals (line 230)
+In parallel_function>distributed_execution (line 746)
+In parallel_function (line 578)
+In ternary_batch_simulation_main (line 171)] 
+[Warning: A worker aborted during execution of the parfor loop. The parfor loop
+will now run again on the remaining workers.] 
+[> In parallel.internal.parfor/ParforEngine/handleIntervalErrorResult (line 287)
+In parallel.internal.parfor/ParforEngine/getCompleteIntervals (line 230)
+In parallel_function>distributed_execution (line 746)
+In parallel_function (line 578)
+In ternary_batch_simulation_main (line 171)] 
+[Warning: A worker aborted during execution of the parfor loop. The parfor loop
+will now run again on the remaining workers.] 
+[> In parallel.internal.parfor/ParforEngine/handleIntervalErrorResult (line 287)
+In parallel.internal.parfor/ParforEngine/getCompleteIntervals (line 230)
+In parallel_function>distributed_execution (line 746)
+In parallel_function (line 578)
+In ternary_batch_simulation_main (line 171)] 
+[Warning: A worker aborted during execution of the parfor loop. The parfor loop
+will now run again on the remaining workers.] 
+[> In parallel.internal.parfor/ParforEngine/handleIntervalErrorResult (line 287)
+In parallel.internal.parfor/ParforEngine/getCompleteIntervals (line 230)
+In parallel_function>distributed_execution (line 746)
+In parallel_function (line 578)
+In ternary_batch_simulation_main (line 171)] 
+[Warning: A worker aborted during execution of the parfor loop. The parfor loop
+will now run again on the remaining workers.] 
+[> In parallel.internal.parfor/ParforEngine/handleIntervalErrorResult (line 287)
+In parallel.internal.parfor/ParforEngine/getCompleteIntervals (line 230)
+In parallel_function>distributed_execution (line 746)
+In parallel_function (line 578)
+In ternary_batch_simulation_main (line 171)] 
+[Warning: A MATLAB error occurred during PathAssistant event listener:
+The parallel pool shut down because the client lost connection to worker 34.
+Check the network connection or restart the parallel pool with 'parpool'..] 
+Parallel pool using the 'Processes' profile is shutting down.

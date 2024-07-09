@@ -1,0 +1,43 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2023 The MathWorks, Inc.
+             R2023b Update 1 (23.2.0.2380103) 64-bit (glnxa64)
+                             September 11, 2023
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+Ternary LDPC simulation begin
+Parameters:
+decoder = joint, loadWords = 1, n = 192, log_p = -4.3333, log_q = -3.4414, rate_ind = 0.800000, rate_res = 0.500000, num_iter_sim = 1e+08, sequenceInd = 6, sequenceRes = 2, resultsFolder = './Results/BLERexp_1E-4_n192_Ri08_Rr05/dec_joint_iter2_d21051937/' 
+Loading Files is complete
+* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
+Starting parallel pool (parpool) using the 'Processes' profile ...
+[Warning: The Cluster reported an error while destroying a job. The error was:
+Could not open file
+"/home/saar.stern/.matlab/local_cluster_jobs/R2023b/Job3230.in.mat", the error
+returned was: Unable to find file or directory
+'/home/saar.stern/.matlab/local_cluster_jobs/R2023b/Job3230.in.mat'...] 
+[> In parallel.internal.cluster.CJSJobMethods.destroyOneJob (line 79)
+In parallel.job.CJSConcurrentJob>@(job)CJSJobMethods.destroyOneJob(job.Parent,job,job.Support,job.SupportID) (line 52)
+In parallel.job/CJSConcurrentJob/destroyJob (line 52)
+In parallel.Job>iDeleteJobs (line 1664)
+In parallel.internal.cluster.hetfun (line 57)
+In parallel/Job/delete (line 1456)
+In parallel/Cluster/hDeleteOneJob (line 1040)
+In parallel.internal.pool.AbstractInteractiveClient>iDeleteJobs (line 479)
+In parallel.internal.pool/AbstractInteractiveClient/pRemoveOldJobs (line 203)
+In parallel.internal.pool/AbstractInteractiveClient/start (line 96)
+In parallel.internal.pool.AbstractClusterPool>iStartClient (line 831)
+In parallel.internal.pool.AbstractClusterPool.hBuildPool (line 626)
+In parallel.internal.pool.doParpool (line 22)
+In parpool (line 118)
+In ternary_batch_simulation_main (line 130)] 
+Connected to parallel pool with 40 workers.
+Parallel pool created with 40 workers.
+	Naive BEP = NaN, MsgPas BEP = 1.063200E-04
+* - * - * - * - * - * - * - * - * - * - * - * - * - * - * - *
+Time elapsed: 1917.121338 seconds
+End of simulation
+Parallel pool using the 'Processes' profile is shutting down.

@@ -1,0 +1,16 @@
+{Error using parpool
+Parallel pool failed to start with the following error. For more detailed
+information, validate the profile 'Processes' in the Cluster Profile Manager.
+
+Error in ternary_batch_simulation_main (line 131)
+    parpool(poolSize);
+
+Caused by:
+    Error using
+    parallel.internal.pool.AbstractInteractiveClient>iThrowWithCause
+    Failed to start pool.
+        Error using parallel.Cluster/createConcurrentJob
+        Unable to write file
+        /home/saar.stern/.matlab/local_cluster_jobs/R2023b/Job3732.in.mat: No
+        such file or directory.
+} 

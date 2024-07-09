@@ -1,0 +1,6 @@
+{Error using parallel.internal.parfor.ParforEngine/getCompleteIntervals
+Unexpectedly received the incorrect number of outputs.
+
+Error in ternary_batch_simulation_main (line 171)
+parfor iter_thread = 1 : NumWorkers
+} 

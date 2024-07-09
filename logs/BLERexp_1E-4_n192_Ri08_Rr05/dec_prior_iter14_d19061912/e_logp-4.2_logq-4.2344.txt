@@ -1,0 +1,6 @@
+{Error using ternary_batch_simulation_main>TernaryBatch
+Out of memory.
+
+Error in ternary_batch_simulation_main (line 171)
+parfor iter_thread = 1 : NumWorkers
+} 
