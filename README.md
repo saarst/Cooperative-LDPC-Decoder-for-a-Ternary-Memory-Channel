@@ -34,10 +34,8 @@ Further details in the project book (hebrew) or presentation.
 
 ## Results
 Simulation of the prior decoder and the joint (ours) decoder with Matlab (needs parallel computing toolbox), executed on Technion's HPC.
+see Yuval Ben-Hur*, Saar Stern*, Yoav Cohen and Yuval Cassuto “Graph Codes for Dual-Parameter Barrier Channels”, Allerton 2024 for results
 
-![alt](https://github.com/saarst/TriLDPC/blob/main/Figures/svg256_sep/TriLDPC_n256_Ri075_Rr05.svg)
-
-More results are in /Results,/Figures, the project book or the presentation.
 
 ## Files in the repository
 
